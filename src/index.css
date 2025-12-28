@@ -6,7 +6,6 @@
   body {
     @apply antialiased bg-base-50 text-base-900 transition-colors duration-300;
   }
-
   .dark body {
     @apply bg-base-900 text-base-100;
   }
@@ -16,19 +15,7 @@
   .glass-card {
     @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl rounded-3xl dark:bg-base-800/50;
   }
-
   .game-button {
     @apply px-6 py-3 font-bold rounded-2xl transition-all active:scale-95 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-misty/30;
   }
-}
-
-/* Custom Scrollbar for Game-like feel */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-::-webkit-scrollbar-thumb {
-  @apply bg-misty/50 rounded-full hover:bg-misty;
 }
