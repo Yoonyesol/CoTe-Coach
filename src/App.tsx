@@ -1,7 +1,10 @@
 import MainLayout from './components/layout/MainLayout'
 import UserTest from './components/UserTest'
+import { useUserStore } from './store/useUserStore'
 
 function App() {
+  const { tier, points } = useUserStore();
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -14,10 +17,15 @@ function App() {
 
         <UserTest />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {['오늘의 목표', '연속 스트라이크', '현재 티어', '누적 포인트'].map((l, i) => (
+          {[
+            { label: '오늘의 목표', val: '1 / 3' },
+            { label: '연속 스트라이크', val: '12일' },
+            { label: '현재 티어', val: tier },
+            { label: '누적 포인트', val: `${points.toLocaleString()}G` }
+          ].map((l, i) => (
             <div key={i} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer">
-              <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase">{l}</p>
-              <p className="text-2xl font-black text-base-800">{i === 0 ? '1 / 3' : i === 1 ? '12일' : i === 2 ? 'Solver II' : '1,200G'}</p>
+              <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase">{l.label}</p>
+              <p className="text-2xl font-black text-base-800">{l.val}</p>
             </div>
           ))}
         </div>
