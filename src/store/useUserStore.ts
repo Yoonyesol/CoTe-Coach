@@ -3,17 +3,26 @@ import { persist } from 'zustand/middleware';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
 
+export interface StudyPlan {
+    targetTier: string;
+    targetDate: string; // ISO String
+    dailyIntensity: 'LOW' | 'NORMAL' | 'HIGH';
+    problemCount: number;
+}
+
 interface UserState {
     xp: number;
     level: number;
     points: number;
     tier: string;
     bojHandle: string;
+    studyPlan: StudyPlan;
 
     // Actions
     addXp: (amount: number) => void;
     addPoints: (amount: number) => void;
     setBojHandle: (handle: string) => void;
+    setStudyPlan: (plan: Partial<StudyPlan>) => void;
     calculateTier: (level: number) => string;
 }
 
@@ -58,6 +67,12 @@ export const useUserStore = create<UserState>()(
             points: 0,
             tier: 'Novice I',
             bojHandle: '',
+            studyPlan: {
+                targetTier: 'Gold 1',
+                targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), // 30일 뒤
+                dailyIntensity: 'NORMAL',
+                problemCount: 4,
+            },
 
             addXp: (amount) => {
                 const nextXp = get().xp + amount;
@@ -74,6 +89,10 @@ export const useUserStore = create<UserState>()(
             addPoints: (amount) => set((state) => ({ points: state.points + amount })),
 
             setBojHandle: (handle) => set({ bojHandle: handle }),
+
+            setStudyPlan: (plan) => set((state) => ({
+                studyPlan: { ...state.studyPlan, ...plan }
+            })),
 
             calculateTier: (level) => {
                 if (level <= 10) return `Novice ${level}`;
