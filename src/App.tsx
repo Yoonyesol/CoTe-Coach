@@ -4,6 +4,7 @@ import UserTest from './components/UserTest'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
 import StudySettingsModal from './components/StudySettingsModal'
+import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import { useUserStore } from './store/useUserStore'
 import { useRecommendations } from './hooks/useRecommendations'
@@ -14,6 +15,13 @@ function App() {
   const { data: recommendations, isLoading, refetch } = useRecommendations();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
+
+  const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
+    setSelectedProblem(problem);
+    setIsReviewModalOpen(true);
+  };
 
   return (
     <MainLayout>
@@ -43,6 +51,13 @@ function App() {
 
         <AddProblemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
         <StudySettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+        {selectedProblem && (
+          <ReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
+            problem={selectedProblem}
+          />
+        )}
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md::grid-cols-2 lg:grid-cols-4 gap-4">
@@ -100,6 +115,7 @@ function App() {
                   difficulty={p.difficulty}
                   tags={p.tags}
                   problemUrl={p.problemUrl}
+                  onReview={handleReviewOpen}
                 />
               ))}
               {recommendations?.length === 0 && (

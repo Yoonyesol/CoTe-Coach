@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Zap, Flame, Trophy, Play, Pause, Timer as TimerIcon } from 'lucide-react';
+import { ExternalLink, Zap, Flame, Trophy, Play, Pause, Timer as TimerIcon, Brain, CheckCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useUserStore } from '../store/useUserStore';
@@ -17,6 +17,7 @@ interface ProblemCardProps {
   difficulty: string;
   tags: string[];
   problemUrl: string;
+  onReview: (problem: { title: string; platform: string; difficulty: string }) => void;
 }
 
 const typeStyles = {
@@ -43,13 +44,14 @@ const typeStyles = {
   }
 };
 
-const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, difficulty, tags, problemUrl }) => {
+const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, difficulty, tags, problemUrl, onReview }) => {
   const style = typeStyles[type];
-  const { timer, startTimer, stopTimer, getTotalElapsed } = useUserStore();
+  const { timer, startTimer, stopTimer, getTotalElapsed, studyLogs } = useUserStore();
 
   const isCurrent = timer.currentProblemId === title;
   const isOtherRunning = timer.isRunning && !isCurrent;
   const elapsed = getTotalElapsed(title);
+  const isCompleted = studyLogs.some(log => log.problemId === title);
 
   const formatTime = (ms: number) => {
     if (ms === 0) return null;
@@ -80,14 +82,18 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
       "glass-card p-6 border transition-all duration-300 hover:translate-y-[-4px] hover:shadow-2xl flex flex-col justify-between h-full group",
       style.border,
       isCurrent && "ring-4 ring-misty shadow-2xl scale-[1.02]",
-      isOtherRunning && "opacity-60 saturate-50"
+      isOtherRunning && "opacity-60 saturate-50",
+      isCompleted && "opacity-80 grayscale-[0.3]"
     )}>
       <div className="space-y-4">
         {/* Card Header: Type Label */}
         <div className="flex justify-between items-center">
-          <div className={cn("flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black", style.bg, style.textColor)}>
-            {isCurrent && timer.isRunning ? <Flame className="w-4 h-4 animate-pulse" /> : style.icon}
-            {isCurrent && timer.isRunning ? '문제 풀이 중...' : style.label}
+          <div className={cn("flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black",
+            isCompleted ? "bg-sage-light text-sage-dark" : style.bg,
+            isCompleted ? "text-sage-dark" : style.textColor
+          )}>
+            {isCompleted ? <CheckCircle className="w-4 h-4" /> : (isCurrent && timer.isRunning ? <Flame className="w-4 h-4 animate-pulse" /> : style.icon)}
+            {isCompleted ? '풀이 완료' : (isCurrent && timer.isRunning ? '문제 풀이 중...' : style.label)}
           </div>
           <div className="flex items-center gap-2">
             {elapsed > 0 && (
@@ -121,31 +127,47 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
       </div>
 
       {/* Card Footer: Action */}
-      <div className="mt-6 pt-4 border-t border-white/30 flex items-center justify-between gap-3">
-        <button
-          onClick={handleStart}
-          disabled={isOtherRunning}
-          className={cn(
-            "flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 font-sans",
-            isCurrent && timer.isRunning ? "bg-coral text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
-            isOtherRunning && "cursor-not-allowed opacity-50"
-          )}
-        >
-          {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          {isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '이어서 풀기' : '풀이 시작')}
-        </button>
-        <a
-          href={problemUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm font-sans shrink-0",
-            type === 'CHALLENGE' ? 'bg-base-900 text-white' : 'bg-white border border-base-200 text-base-800 hover:bg-base-50'
-          )}
-        >
-          문제 열기
-          <ExternalLink className="w-4 h-4" />
-        </a>
+      <div className="mt-6 pt-4 border-t border-white/30 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onClick={handleStart}
+            disabled={isOtherRunning || isCompleted}
+            className={cn(
+              "flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 font-sans",
+              isCurrent && timer.isRunning ? "bg-coral text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
+              (isOtherRunning || isCompleted) && "cursor-not-allowed opacity-50"
+            )}
+          >
+            {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '이어서 풀기' : '풀이 시작')}
+          </button>
+
+          <a
+            href={isCompleted ? '#' : problemUrl}
+            target={isCompleted ? undefined : "_blank"}
+            rel="noopener noreferrer"
+            onClick={(e) => isCompleted && e.preventDefault()}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm font-sans shrink-0",
+              type === 'CHALLENGE' ? 'bg-base-900 text-white' : 'bg-white border border-base-200 text-base-800 hover:bg-base-50',
+              isCompleted && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {isCompleted ? '제출 완료' : '문제 열기'}
+            {!isCompleted && <ExternalLink className="w-4 h-4" />}
+          </a>
+        </div>
+
+        {/* Review Submission Button: Only shown when time is recorded and not currently running */}
+        {elapsed > 0 && !timer.isRunning && !isCompleted && (
+          <button
+            onClick={() => onReview({ title, platform, difficulty })}
+            className="w-full py-2.5 bg-misty-light text-misty-dark border-2 border-misty/30 rounded-xl text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2"
+          >
+            <Brain className="w-4 h-4" />
+            복습 로그 작성하고 기록 완료하기
+          </button>
+        )}
       </div>
     </div>
   );

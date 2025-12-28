@@ -10,6 +10,18 @@ export interface StudyPlan {
     problemCount: number;
 }
 
+export interface StudyLog {
+    id: string;
+    problemId: string;
+    platform: Platform;
+    difficulty: string;
+    perceivedDifficulty: 'EASY' | 'NORMAL' | 'HARD';
+    elapsedTime: number; // ms
+    feeling: string;
+    concepts: string[];
+    completedAt: string; // ISO String
+}
+
 interface TimerState {
     isRunning: boolean;
     startTime: number | null;
@@ -25,6 +37,7 @@ interface UserState {
     bojHandle: string;
     studyPlan: StudyPlan;
     timer: TimerState;
+    studyLogs: StudyLog[];
 
     // Actions
     addXp: (amount: number) => void;
@@ -32,6 +45,9 @@ interface UserState {
     setBojHandle: (handle: string) => void;
     setStudyPlan: (plan: Partial<StudyPlan>) => void;
     calculateTier: (level: number) => string;
+
+    // Study Log Actions
+    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => void;
 
     // Timer Actions
     startTimer: (problemId: string) => boolean; // Returns false if another is running
@@ -93,6 +109,7 @@ export const useUserStore = create<UserState>()(
                 currentProblemId: null,
                 problemTimers: {},
             },
+            studyLogs: [],
 
             addXp: (amount) => {
                 const nextXp = get().xp + amount;
@@ -120,6 +137,34 @@ export const useUserStore = create<UserState>()(
                 if (level <= 30) return `Solver ${level - 20}`;
                 if (level <= 40) return `Master ${level - 30}`;
                 return `Legend ${level - 40}`;
+            },
+
+            addStudyLog: (logData) => {
+                const newLog: StudyLog = {
+                    ...logData,
+                    id: Math.random().toString(36).substr(2, 9),
+                    completedAt: new Date().toISOString(),
+                };
+
+                // XP 보너스 계산: 기본 XP + 복습 로그 작성 보너스 (+10)
+                const baseXP = calculateEarnedXp(logData.platform, logData.difficulty);
+                const bonusXP = 10;
+
+                get().addXp(baseXP + bonusXP);
+                get().addPoints(baseXP * 10); // 포인트 지급 로직 (XP의 10배 예시)
+
+                set((state) => {
+                    const nextTimers = { ...state.timer.problemTimers };
+                    delete nextTimers[logData.problemId]; // 로그 제출 후 해당 문제 타이머 초기화
+
+                    return {
+                        studyLogs: [newLog, ...state.studyLogs],
+                        timer: {
+                            ...state.timer,
+                            problemTimers: nextTimers
+                        }
+                    };
+                });
             },
 
             startTimer: (problemId) => {
@@ -194,17 +239,23 @@ export const useUserStore = create<UserState>()(
         }),
         {
             name: 'cote-coach-user-storage',
-            version: 2, // 스톱워치 시스템 고도화로 인한 버전 업
+            version: 3, // 스톱워치 고도화 및 복습 로그 추가
             migrate: (persistedState: unknown, version: number) => {
+                const state = persistedState as UserState;
+
                 if (version < 2) {
-                    // 이전 버전 데이터에서 새로운 구조로 마이그레이션
-                    const state = persistedState as UserState;
                     if (state.timer && !state.timer.problemTimers) {
                         state.timer.problemTimers = {};
                     }
-                    return state;
                 }
-                return persistedState as UserState;
+
+                if (version < 3) {
+                    if (!state.studyLogs) {
+                        state.studyLogs = [];
+                    }
+                }
+
+                return state;
             }
         }
     )
