@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import UserTest from './components/UserTest'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
 import StudySettingsModal from './components/StudySettingsModal'
+import Stopwatch from './components/Stopwatch'
 import { useUserStore } from './store/useUserStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2 } from 'lucide-react'
@@ -115,6 +116,7 @@ function App() {
           <UserTest />
         </div>
       </div>
+      <Stopwatch />
     </MainLayout>
   )
 }
