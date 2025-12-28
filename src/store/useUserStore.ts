@@ -54,6 +54,10 @@ interface UserState {
     stopTimer: () => void;
     resetTimer: (problemId?: string) => void;
     getTotalElapsed: (problemId: string) => number;
+
+    // Daily Planner Helpers (Derived State)
+    getDailyProgress: () => { solved: number; goal: number };
+    getDaysRemaining: () => number;
 }
 
 // XP Mapping Constants
@@ -235,6 +239,29 @@ export const useUserStore = create<UserState>()(
                     return stored + (Date.now() - timer.startTime);
                 }
                 return stored;
+            },
+
+            getDailyProgress: () => {
+                const { studyLogs, studyPlan } = get();
+                const today = new Date().toISOString().split('T')[0];
+
+                const solvedToday = studyLogs.filter(log =>
+                    log.completedAt.startsWith(today)
+                ).length;
+
+                return {
+                    solved: solvedToday,
+                    goal: studyPlan.problemCount
+                };
+            },
+
+            getDaysRemaining: () => {
+                const { studyPlan } = get();
+                const target = new Date(studyPlan.targetDate).getTime();
+                const today = new Date().setHours(0, 0, 0, 0);
+
+                const diffTime = target - today;
+                return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
             }
         }),
         {
@@ -265,16 +292,26 @@ export const useUserStore = create<UserState>()(
  * 문제 난이도와 플랫폼을 받아 획득할 XP를 계산합니다.
  */
 export const calculateEarnedXp = (platform: Platform, difficulty: string): number => {
+    // 플랫폼이 매핑에 없는 경우 방어 (런타임 에러 방지)
+    const platformMap = XP_MAP[platform];
+    if (!platformMap) return 10; // 기본 XP 반환
+
     // 백준의 경우 숫자로 들어올 수 있으므로 매핑 필요 (1-5: Bronze, 6-10: Silver, 11-15: Gold ...)
     if (platform === 'BOJ') {
         const lv = parseInt(difficulty);
-        if (lv <= 5) return XP_MAP.BOJ.Bronze;
-        if (lv <= 10) return XP_MAP.BOJ.Silver;
-        if (lv <= 15) return XP_MAP.BOJ.Gold;
-        if (lv <= 20) return XP_MAP.BOJ.Platinum;
-        if (lv <= 25) return XP_MAP.BOJ.Diamond;
-        return XP_MAP.BOJ.Ruby;
+        if (!isNaN(lv)) {
+            if (lv <= 5) return XP_MAP.BOJ.Bronze;
+            if (lv <= 10) return XP_MAP.BOJ.Silver;
+            if (lv <= 15) return XP_MAP.BOJ.Gold;
+            if (lv <= 20) return XP_MAP.BOJ.Platinum;
+            if (lv <= 25) return XP_MAP.BOJ.Diamond;
+            return XP_MAP.BOJ.Ruby;
+        }
+
+        // Tier Name으로 들어온 경우 (예: "Gold 3")
+        const tierBase = difficulty.split(' ')[0];
+        return XP_MAP.BOJ[tierBase] || 10;
     }
 
-    return XP_MAP[platform][difficulty] || 0;
+    return platformMap[difficulty] || 10;
 };

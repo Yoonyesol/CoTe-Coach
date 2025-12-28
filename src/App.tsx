@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import MainLayout from './components/layout/MainLayout'
+import DailyPlanner from './components/DailyPlanner'
 import UserTest from './components/UserTest'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
@@ -11,8 +12,12 @@ import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2 } from 'lucide-react'
 
 function App() {
-  const { tier, points } = useUserStore();
+  const { tier, points, getDailyProgress, getDaysRemaining } = useUserStore();
   const { data: recommendations, isLoading, refetch } = useRecommendations();
+
+  const dailyProgress = getDailyProgress();
+  const daysRemaining = getDaysRemaining();
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -29,7 +34,9 @@ function App() {
         <header className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">윤님!</span></h1>
-            <p className="text-base-500 font-medium font-sans">오늘은 3개의 문제를 뿌셔볼까요? 🔥</p>
+            <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+              오늘의 목표인 <span className="text-base-800 font-bold">{dailyProgress.goal}문제</span> 중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}
+            </p>
           </div>
           <div className="flex gap-3">
             <button
@@ -53,6 +60,7 @@ function App() {
         <StudySettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
         {selectedProblem && (
           <ReviewModal
+            key={`${selectedProblem.title}-${isReviewModalOpen}`}
             isOpen={isReviewModalOpen}
             onClose={() => setIsReviewModalOpen(false)}
             problem={selectedProblem}
@@ -62,8 +70,8 @@ function App() {
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md::grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: '오늘의 목표', val: '1 / 3', icon: '🎯' },
-            { label: '연속 스트라이크', val: '12일', icon: '🔥' },
+            { label: '오늘의 목표', val: `${dailyProgress.solved} / ${dailyProgress.goal}`, icon: '🎯' },
+            { label: '목표 달성 D-Day', val: `D-${daysRemaining}`, icon: '📆' },
             { label: '현재 티어', val: tier, icon: '🏆' },
             { label: '누적 포인트', val: `${points.toLocaleString()}G`, icon: '💰' }
           ].map((l, i) => (
@@ -76,6 +84,13 @@ function App() {
             </div>
           ))}
         </div>
+
+        {/* Daily Planner Section */}
+        <DailyPlanner
+          solvedCount={dailyProgress.solved}
+          goalCount={dailyProgress.goal}
+          daysRemaining={daysRemaining}
+        />
 
         {/* Recommendation Section */}
         <section className="space-y-6">

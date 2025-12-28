@@ -69,7 +69,7 @@ export const getRecommendations = async (
         results.push({
             type: 'WARM_UP',
             title: p.titleKo,
-            platform: '백준 (BOJ)',
+            platform: 'BOJ',
             difficulty: levelToTierName(p.level),
             tags: p.tags.slice(0, 2).map(t => t.name),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
@@ -81,7 +81,7 @@ export const getRecommendations = async (
         results.push({
             type: 'MAIN',
             title: p.titleKo,
-            platform: '백준 (BOJ)',
+            platform: 'BOJ',
             difficulty: levelToTierName(p.level),
             tags: p.tags.slice(0, 2).map(t => t.name),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
@@ -93,7 +93,7 @@ export const getRecommendations = async (
         results.push({
             type: 'CHALLENGE',
             title: p.titleKo,
-            platform: '백준 (BOJ)',
+            platform: 'BOJ',
             difficulty: levelToTierName(p.level),
             tags: p.tags.slice(0, 2).map(t => t.name),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
