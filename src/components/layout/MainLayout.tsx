@@ -1,84 +1,135 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import ShopModal from '../ShopModal';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings } from 'lucide-react';
+import { clsx } from 'clsx';
 
-// 아이템 목록은 상점과 공유하거나 중앙 관리가 좋지만, 여기서는 시각화를 위해 매핑만 사용
 const ITEM_EMOJIS: Record<string, string> = {
     'item_1': '🕶️', 'item_2': '🧢', 'item_3': '👑',
     'item_4': '🛋️', 'item_5': '🖥️', 'item_6': '💰', 'item_7': '✨'
 };
 
-const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface MainLayoutProps {
+    children: React.ReactNode;
+    activeTab: 'HOME' | 'STATS';
+    onTabChange: (tab: 'HOME' | 'STATS') => void;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange }) => {
     const { tier, level, xp, points, equippedItems } = useUserStore();
     const [isShopOpen, setIsShopOpen] = useState(false);
     const progress = xp % 100;
 
+    const navItems = [
+        { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },
+        { id: 'STATS', icon: <BarChart3 className="w-6 h-6" />, label: '상세 통계' },
+    ] as const;
+
     return (
         <div className="min-h-screen flex flex-col md:flex-row bg-base-100 overflow-hidden font-sans">
-            <aside className="w-full md:w-[400px] lg:w-[500px] h-[400px] md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col">
-                <div className="p-6 flex justify-between items-center z-10">
-                    <span className="text-2xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
-                    <div className="glass-card px-3 py-1 text-sm font-bold text-wheat-dark">💰 {points.toLocaleString()}G</div>
+            {/* 1. Navigation Rail (Leftmost) */}
+            <nav className="w-20 bg-base-900 flex flex-col items-center py-8 gap-6 z-30 shrink-0">
+                <div className="w-10 h-10 bg-misty rounded-xl flex items-center justify-center mb-4">
+                    <span className="text-xl font-black text-base-900">C</span>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center justify-center relative">
-                    {/* Equipped Decoration (Aura) */}
-                    {equippedItems.includes('item_7') && (
-                        <div className="absolute w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-pulse" />
-                    )}
+                {navItems.map((item) => (
+                    <button
+                        key={item.id}
+                        onClick={() => onTabChange(item.id)}
+                        className={clsx(
+                            "group relative p-3 rounded-2xl transition-all duration-300",
+                            activeTab === item.id
+                                ? "bg-white text-base-900 shadow-lg shadow-white/10 scale-110"
+                                : "text-white/40 hover:text-white hover:bg-white/5"
+                        )}
+                        title={item.label}
+                    >
+                        {item.icon}
+                    </button>
+                ))}
 
-                    {/* Character Container */}
-                    <div className="relative">
-                        {/* Hat/Crown */}
-                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20 transition-all duration-500">
-                            {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
-                                equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
-                        </div>
-
-                        {/* Sunglasses */}
-                        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xl z-20 transition-all duration-500 ml-1">
-                            {equippedItems.includes('item_1') ? ITEM_EMOJIS['item_1'] : ''}
-                        </div>
-
-                        <div className="text-8xl mb-4 animate-bounce-soft relative z-10">🐧</div>
-
-                        {/* Furniture/Deco around */}
-                        <div className="absolute -right-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                            {equippedItems.includes('item_5') ? ITEM_EMOJIS['item_5'] : ''}
-                        </div>
-                        <div className="absolute -left-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                            {equippedItems.includes('item_4') ? ITEM_EMOJIS['item_4'] : ''}
-                        </div>
-                        <div className="absolute -bottom-8 left-12 text-3xl animate-in zoom-in duration-500">
-                            {equippedItems.includes('item_6') ? ITEM_EMOJIS['item_6'] : ''}
-                        </div>
-                    </div>
-
-                    <p className="text-lg font-black text-base-800 mt-6 font-sans">코딩 초보 펭군</p>
-                    <div className="w-48 h-3 bg-base-200 rounded-full mt-2 overflow-hidden border border-white">
-                        <div
-                            className="h-full bg-misty transition-all duration-500"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
-                    <p className="text-xs mt-1 text-base-500 font-black">Lv. {level} ({progress}%)</p>
-                    <p className="text-sm font-black text-misty-dark mt-1 uppercase tracking-tighter">{tier}</p>
-                </div>
-
-                <div className="p-6 grid grid-cols-3 gap-2 z-10">
+                <div className="mt-auto flex flex-col gap-6">
                     <button
                         onClick={() => setIsShopOpen(true)}
-                        className="game-button bg-white text-base-700 text-xs shadow-sm font-black active:scale-95 transition-transform"
+                        className="p-3 rounded-2xl text-white/40 hover:text-wheat hover:bg-white/5 transition-all outline-none"
+                        title="상점"
                     >
-                        상점
+                        <ShoppingBag className="w-6 h-6" />
                     </button>
-                    <button className="game-button bg-white text-base-700 text-xs shadow-sm font-black active:scale-95 transition-transform">가방</button>
-                    <button className="game-button bg-white text-base-700 text-xs shadow-sm font-black active:scale-95 transition-transform">랭킹</button>
+                    <button className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none">
+                        <Trophy className="w-6 h-6" />
+                    </button>
+                    <button className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none" title="설정">
+                        <Settings className="w-6 h-6" />
+                    </button>
+                </div>
+            </nav>
+
+            {/* 2. Character Sidebar */}
+            <aside className="w-full md:w-[320px] lg:w-[360px] h-[400px] md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0">
+                <div className="p-8 flex flex-col h-full">
+                    <div className="flex justify-between items-center mb-12">
+                        <span className="text-xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
+                        <div className="glass-card px-3 py-1.5 text-xs font-black text-wheat-dark border-none shadow-sm flex items-center gap-1.5">
+                            <span className="text-sm">💰</span> {points.toLocaleString()}G
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col items-center justify-center relative">
+                        {/* Equipped Decoration (Aura) */}
+                        {equippedItems.includes('item_7') && (
+                            <div className="absolute w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-pulse" />
+                        )}
+
+                        {/* Character Container */}
+                        <div className="relative">
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20">
+                                {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
+                                    equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
+                            </div>
+                            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xl z-20 ml-1">
+                                {equippedItems.includes('item_1') ? ITEM_EMOJIS['item_1'] : ''}
+                            </div>
+                            <div className="text-9xl mb-4 animate-bounce-soft relative z-10 drop-shadow-2xl">🐧</div>
+
+                            <div className="absolute -right-16 bottom-4 text-4xl animate-in zoom-in duration-500">
+                                {equippedItems.includes('item_5') ? ITEM_EMOJIS['item_5'] : ''}
+                            </div>
+                            <div className="absolute -left-16 bottom-4 text-4xl animate-in zoom-in duration-500">
+                                {equippedItems.includes('item_4') ? ITEM_EMOJIS['item_4'] : ''}
+                            </div>
+                            <div className="absolute -bottom-8 left-12 text-3xl animate-in zoom-in duration-500">
+                                {equippedItems.includes('item_6') ? ITEM_EMOJIS['item_6'] : ''}
+                            </div>
+                        </div>
+
+                        <div className="mt-12 text-center space-y-2">
+                            <p className="text-xl font-black text-base-900 font-sans">코딩 초보 펭군</p>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-white shadow-sm">
+                                <span className="text-[10px] font-black text-misty-dark uppercase tracking-tighter shrink-0">Lv. {level}</span>
+                                <div className="w-24 h-2 bg-base-100 rounded-full overflow-hidden">
+                                    <div className="h-full bg-misty" style={{ width: `${progress}%` }} />
+                                </div>
+                                <span className="text-[10px] font-black text-base-400 shrink-0">{progress}%</span>
+                            </div>
+                            <p className="text-xs font-black text-misty-dark uppercase tracking-widest">{tier}</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-auto grid grid-cols-2 gap-3">
+                        <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors">가방 확인</button>
+                        <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors">프로필 설정</button>
+                    </div>
                 </div>
 
                 <ShopModal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} />
             </aside>
-            <main className="flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-8 bg-white/30 backdrop-blur-sm">{children}</main>
+
+            {/* 3. Main Content */}
+            <main className="flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-8 bg-white/30 backdrop-blur-sm z-10 scrollbar-hide">
+                {children}
+            </main>
         </div>
     );
 };
