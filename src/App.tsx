@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import DailyPlanner from './components/DailyPlanner'
+import StatsDashboard from './components/StatsDashboard'
+import Heatmap from './components/Heatmap'
+import { motion } from 'framer-motion'
 import UserTest from './components/UserTest'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
@@ -30,7 +33,12 @@ function App() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="space-y-6"
+      >
         <header className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">윤님!</span></h1>
@@ -92,6 +100,12 @@ function App() {
           daysRemaining={daysRemaining}
         />
 
+        {/* Stats Dashboard Section */}
+        <StatsDashboard />
+
+        {/* Learning Heatmap */}
+        <Heatmap />
+
         {/* Recommendation Section */}
         <section className="space-y-6">
           <div className="flex justify-between items-end">
@@ -146,7 +160,7 @@ function App() {
         <div className="opacity-30 hover:opacity-100 transition-opacity pt-12">
           <UserTest />
         </div>
-      </div>
+      </motion.div>
       <Stopwatch />
     </MainLayout>
   )

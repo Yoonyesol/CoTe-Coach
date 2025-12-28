@@ -10,6 +10,8 @@ function cn(...inputs: ClassValue[]) {
 
 export type RecommendationType = 'WARM_UP' | 'MAIN' | 'CHALLENGE';
 
+import { motion } from 'framer-motion';
+
 interface ProblemCardProps {
   type: RecommendationType;
   title: string;
@@ -78,13 +80,19 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
   };
 
   return (
-    <div className={cn(
-      "glass-card p-6 border transition-all duration-300 hover:translate-y-[-4px] hover:shadow-2xl flex flex-col justify-between h-full group",
-      style.border,
-      isCurrent && "ring-4 ring-misty shadow-2xl scale-[1.02]",
-      isOtherRunning && "opacity-60 saturate-50",
-      isCompleted && "opacity-80 grayscale-[0.3]"
-    )}>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5 }}
+      className={cn(
+        "glass-card p-6 border transition-all duration-300 hover:shadow-2xl flex flex-col justify-between h-full group",
+        style.border,
+        isCurrent && "ring-4 ring-misty shadow-2xl scale-[1.02]",
+        isOtherRunning && "opacity-60 saturate-50",
+        isCompleted && "opacity-80 grayscale-[0.3]"
+      )}
+    >
       <div className="space-y-4">
         {/* Card Header: Type Label */}
         <div className="flex justify-between items-center">
@@ -169,7 +177,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

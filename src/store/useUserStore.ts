@@ -22,6 +22,14 @@ export interface StudyLog {
     completedAt: string; // ISO String
 }
 
+export interface ShopItem {
+    id: string;
+    name: string;
+    price: number;
+    category: 'CLOTHES' | 'FURNITURE' | 'DECO';
+    emoji: string;
+}
+
 interface TimerState {
     isRunning: boolean;
     startTime: number | null;
@@ -38,6 +46,8 @@ interface UserState {
     studyPlan: StudyPlan;
     timer: TimerState;
     studyLogs: StudyLog[];
+    inventory: string[]; // Item IDs
+    equippedItems: string[]; // Item IDs
 
     // Actions
     addXp: (amount: number) => void;
@@ -58,6 +68,10 @@ interface UserState {
     // Daily Planner Helpers (Derived State)
     getDailyProgress: () => { solved: number; goal: number };
     getDaysRemaining: () => number;
+
+    // Shop Actions
+    buyItem: (item: ShopItem) => boolean;
+    toggleEquip: (itemId: string) => void;
 }
 
 // XP Mapping Constants
@@ -114,6 +128,8 @@ export const useUserStore = create<UserState>()(
                 problemTimers: {},
             },
             studyLogs: [],
+            inventory: [],
+            equippedItems: [],
 
             addXp: (amount) => {
                 const nextXp = get().xp + amount;
@@ -262,11 +278,33 @@ export const useUserStore = create<UserState>()(
 
                 const diffTime = target - today;
                 return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+            },
+
+            buyItem: (item) => {
+                const { points, inventory } = get();
+                if (points < item.price || inventory.includes(item.id)) return false;
+
+                set((state) => ({
+                    points: state.points - item.price,
+                    inventory: [...state.inventory, item.id]
+                }));
+                return true;
+            },
+
+            toggleEquip: (itemId) => {
+                set((state) => {
+                    const isEquipped = state.equippedItems.includes(itemId);
+                    return {
+                        equippedItems: isEquipped
+                            ? state.equippedItems.filter(id => id !== itemId)
+                            : [...state.equippedItems, itemId]
+                    };
+                });
             }
         }),
         {
             name: 'cote-coach-user-storage',
-            version: 3, // 스톱워치 고도화 및 복습 로그 추가
+            version: 4, // 상점 및 인벤토리 추가
             migrate: (persistedState: unknown, version: number) => {
                 const state = persistedState as UserState;
 
@@ -280,6 +318,11 @@ export const useUserStore = create<UserState>()(
                     if (!state.studyLogs) {
                         state.studyLogs = [];
                     }
+                }
+
+                if (version < 4) {
+                    if (!state.inventory) state.inventory = [];
+                    if (!state.equippedItems) state.equippedItems = [];
                 }
 
                 return state;
