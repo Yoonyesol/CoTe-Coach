@@ -4,7 +4,6 @@ import DailyPlanner from './components/DailyPlanner'
 import StatsDashboard from './components/StatsDashboard'
 import Heatmap from './components/Heatmap'
 import { motion } from 'framer-motion'
-import UserTest from './components/UserTest'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
 import StudySettingsModal from './components/StudySettingsModal'
@@ -185,10 +184,6 @@ function App() {
             </div>
           )}
 
-          {/* Test Tool */}
-          <div className="opacity-10 hover:opacity-100 transition-opacity pt-12">
-            <UserTest />
-          </div>
         </motion.div>
       </MainLayout>
 
