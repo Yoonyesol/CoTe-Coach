@@ -29,7 +29,6 @@ export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> =
   const { data } = await axios.get(`${BASE_URL}/user/show`, {
     params: { handle }
   });
-  console.log('Solved.ac User Data:', data);
   return data;
 };
 
