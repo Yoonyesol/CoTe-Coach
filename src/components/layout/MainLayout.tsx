@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import ShopModal from '../ShopModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const ITEM_EMOJIS: Record<string, string> = {
@@ -40,7 +40,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         key={item.id}
                         onClick={() => onTabChange(item.id)}
                         className={clsx(
-                            "group relative p-3 rounded-2xl transition-all duration-300",
+                            "group relative p-3 rounded-2xl transition-all duration-300 cursor-pointer",
                             activeTab === item.id
                                 ? "bg-white text-base-900 shadow-lg shadow-white/10 scale-110"
                                 : "text-white/40 hover:text-white hover:bg-white/5"
@@ -54,22 +54,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                 <div className="mt-auto flex flex-col gap-6">
                     <button
                         onClick={() => setIsShopOpen(true)}
-                        className="p-3 rounded-2xl text-white/40 hover:text-wheat hover:bg-white/5 transition-all outline-none"
+                        className="p-3 rounded-2xl text-white/40 hover:text-wheat hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="상점"
                     >
                         <ShoppingBag className="w-6 h-6" />
                     </button>
-                    <button className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none">
+                    <button className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer">
                         <Trophy className="w-6 h-6" />
+                    </button>
+                    <button
+                        className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer"
+                        title="설정"
+                    >
+                        <Settings className="w-6 h-6" />
                     </button>
                     <button
                         onClick={() => {
                             if (window.confirm('로그아웃 하시겠습니까?')) signOut();
                         }}
-                        className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none"
+                        className="p-3 rounded-2xl text-white/40 hover:text-coral hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="로그아웃"
                     >
-                        <Settings className="w-6 h-6" />
+                        <LogOut className="w-6 h-6" />
                     </button>
                 </div>
             </nav>
