@@ -87,7 +87,7 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
             >
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-base-100 shrink-0">
-                    <h2 className="text-xl font-black text-base-900 font-sans">계정 및 프로필 설정</h2>
+                    <h2 className="text-xl font-black text-base-900 font-sans">계정 연동</h2>
                     <button onClick={onClose} className="p-1 hover:bg-base-100 rounded-lg transition-colors cursor-pointer">
                         <X className="w-5 h-5 text-base-400" />
                     </button>

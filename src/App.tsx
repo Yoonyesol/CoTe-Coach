@@ -9,6 +9,7 @@ import AddProblemModal from './components/AddProblemModal'
 import AccountSettingsModal from './components/AccountSettingsModal'
 import StudyPlanModal from './components/StudyPlanModal'
 import StudyPlanDetailModal from './components/StudyPlanDetailModal'
+import TierGuideModal from './components/TierGuideModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
@@ -34,6 +35,7 @@ function App() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isPlanDetailModalOpen, setIsPlanDetailModalOpen] = useState(false);
+  const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS'>('HOME');
@@ -61,6 +63,7 @@ function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAccountSettingsOpen={() => setIsAccountModalOpen(true)}
+        onTierClick={() => setIsTierGuideModalOpen(true)}
       >
         <motion.div
           key={activeTab}
@@ -98,20 +101,30 @@ function App() {
 
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { label: '오늘의 목표', val: `${dailyProgress.solved} / ${dailyProgress.goal}`, icon: '🎯' },
-                  { label: '목표 달성 D-Day', val: `D-${daysRemaining}`, icon: '📆' },
-                  { label: '현재 티어', val: tier, icon: '🏆' },
-                  { label: '누적 포인트', val: `${points.toLocaleString()}G`, icon: '💰' }
-                ].map((l, i) => (
-                  <div key={i} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                    <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">
-                      {l.icon}
-                    </div>
-                    <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">{l.label}</p>
-                    <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{l.val}</p>
-                  </div>
-                ))}
+                {/* Custom rendering for Current Tier to use Badge */}
+                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🎯</div>
+                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">오늘의 목표</p>
+                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{dailyProgress.solved} / {dailyProgress.goal}</p>
+                </div>
+
+                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">📆</div>
+                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">목표 달성 D-Day</p>
+                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">D-{daysRemaining}</p>
+                </div>
+
+                <div onClick={() => setIsTierGuideModalOpen(true)} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group flex flex-col justify-center">
+                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🏆</div>
+                  <p className="text-xs font-bold text-base-400 mb-0.5 tracking-wider uppercase font-sans">현재 티어</p>
+                  <p className="text-xl font-black text-base-800 font-sans leading-none">{tier}</p>
+                </div>
+
+                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
+                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">누적 포인트</p>
+                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{points.toLocaleString()}G</p>
+                </div>
               </div>
 
               {/* Daily Planner Section */}
@@ -205,6 +218,10 @@ function App() {
         isOpen={isPlanDetailModalOpen}
         onClose={() => setIsPlanDetailModalOpen(false)}
         onEditPlan={() => setIsPlanModalOpen(true)}
+      />
+      <TierGuideModal
+        isOpen={isTierGuideModalOpen}
+        onClose={() => setIsTierGuideModalOpen(false)}
       />
       {selectedProblem && (
         <ReviewModal

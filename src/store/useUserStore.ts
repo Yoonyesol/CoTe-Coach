@@ -155,18 +155,30 @@ export const useUserStore = create<UserState>()(
             })),
 
             calculateTier: (level) => {
+                // Lv 1-10: Novice (Bronze/Silver)
                 if (level <= 10) return `Novice ${level}`;
-                if (level <= 20) return `Challenger ${level - 10}`;
-                if (level <= 30) return `Solver ${level - 20}`;
-                if (level <= 40) return `Master ${level - 30}`;
-                return `Legend ${level - 40}`;
+
+                // Lv 11-15: Challenger (Gold)
+                if (level <= 15) return `Challenger ${level - 10}`;
+
+                // Lv 16-20: Expert (Platinum) - New!
+                if (level <= 20) return `Expert ${level - 15}`;
+
+                // Lv 21-25: Solver (Diamond)
+                if (level <= 25) return `Solver ${level - 20}`;
+
+                // Lv 26-30: Master (Ruby)
+                if (level <= 30) return `Master ${level - 25}`;
+
+                // Lv 31+: Legend (Master+)
+                return `Legend ${level - 30}`;
             },
 
             syncSolvedAcTier: (tier) => {
                 const currentLevel = get().level;
                 // solved.ac tier mapping: 1 (Bronze 5) ~ 31 (Master)
-                // We map tier T to level T + 1 (because our level starts from 1)
-                const targetLevel = tier + 1;
+                // We map tier T to level T (1-based), ensuring minimum level is 1
+                const targetLevel = Math.max(1, tier);
 
                 if (targetLevel > currentLevel) {
                     const targetXp = (targetLevel - 1) * 100;
@@ -181,7 +193,14 @@ export const useUserStore = create<UserState>()(
             },
 
             linkBojAccount: (handle, tier) => {
-                const targetLevel = (Number(tier) || 0) + 1;
+                const currentLevel = get().level;
+                const bojLevel = Math.max(1, Number(tier) || 0);
+
+                // 합산 로직: (현재 앱 레벨 - 1)은 순수 활동량(Delta)
+                // 최종 레벨 = 백준 베이스 + 활동량
+                const activityDelta = Math.max(0, currentLevel - 1);
+                const targetLevel = bojLevel + activityDelta;
+
                 const nextTierName = get().calculateTier(targetLevel);
                 const targetXp = (targetLevel - 1) * 100;
 

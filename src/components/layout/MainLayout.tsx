@@ -4,7 +4,9 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../ShopModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info } from 'lucide-react';
+import TierBadge from '../TierBadge';
+import BojTierBadge from '../BojTierBadge';
 import { clsx } from 'clsx';
 
 const ITEM_EMOJIS: Record<string, string> = {
@@ -17,9 +19,10 @@ interface MainLayoutProps {
     activeTab: 'HOME' | 'STATS';
     onTabChange: (tab: 'HOME' | 'STATS') => void;
     onAccountSettingsOpen: () => void;
+    onTierClick?: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen, onTierClick }) => {
     const level = useUserStore((state) => state.level);
     const xp = useUserStore((state) => state.xp);
     const tier = useUserStore((state) => state.tier);
@@ -81,7 +84,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         <Trophy className="w-6 h-6" />
                     </button>
                     <button
-                        onClick={onAccountSettingsOpen}
                         className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="설정"
                     >
@@ -155,27 +157,49 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                                 </div>
                                 <span className="text-[10px] font-black text-base-400 shrink-0">{progress}%</span>
                             </div>
-                            <p className="text-xs font-black text-misty-dark uppercase tracking-widest">{tier}</p>
+                            <button
+                                onClick={onTierClick}
+                                className="group relative flex items-center justify-center gap-2 px-4 py-2 hover:bg-white/40 rounded-xl transition-all cursor-pointer"
+                            >
+                                <TierBadge tier={tier} size="sm" />
+                                <span className="text-sm font-black text-base-700 group-hover:text-misty-dark transition-colors">{tier}</span>
+                                <Info className="w-3 h-3 text-base-300 group-hover:text-misty transition-colors opacity-0 group-hover:opacity-100" />
+                            </button>
                         </div>
                     </div>
 
                     <div className="mt-8 space-y-4">
                         {/* Solved.ac Integration Badge */}
-                        <div className="p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm">
+                        <div
+                            onClick={onAccountSettingsOpen}
+                            className="p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/60 transition-colors group"
+                        >
                             {bojHandle ? (
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm shadow-sm border border-base-100">
-                                            🏅
-                                        </div>
+                                    <div className="flex items-center gap-3">
+                                        <BojTierBadge
+                                            level={solvedAcData?.tier || 0}
+                                            size="md"
+                                            className="transform scale-95 origin-left"
+                                        />
                                         <div>
-                                            <p className="text-[9px] font-black text-base-400 uppercase tracking-tighter">Solved.ac</p>
-                                            <p className="text-xs font-black text-base-800">{bojHandle}</p>
+                                            <p className="text-[9px] font-black text-misty-dark uppercase tracking-tighter mb-0.5">Solved.ac</p>
+                                            <p className="text-sm font-black text-base-800">{bojHandle}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[9px] font-black text-base-400 uppercase">Tier</p>
-                                        <p className="text-xs font-black text-misty-dark">Lv.{solvedAcData?.tier || '?'}</p>
+                                        <p className="text-xs font-black text-misty-dark">
+                                            {(() => {
+                                                const lv = solvedAcData?.tier || 0;
+                                                const tiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'];
+                                                const tierIdx = Math.floor((lv - 1) / 5);
+                                                const subTier = 5 - ((lv - 1) % 5);
+                                                const tierName = tierIdx >= tiers.length ? 'Master' : tiers[tierIdx];
+                                                return `${tierName} ${subTier}`;
+                                            })()}
+                                            <span className="text-[9px] text-base-400 ml-1">(Lv.{solvedAcData?.tier || '?'})</span>
+                                        </p>
                                     </div>
                                 </div>
                             ) : (
