@@ -17,6 +17,7 @@ interface ProblemCardProps {
   title: string;
   platform: string;
   difficulty: string;
+  level: number; // Added: Raw Solved.ac level for UI clarity
   tags: string[];
   problemUrl: string;
   onReview: (problem: { title: string; platform: string; difficulty: string }) => void;
@@ -46,7 +47,7 @@ const typeStyles = {
   }
 };
 
-const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, difficulty, tags, problemUrl, onReview }) => {
+const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, difficulty, level, tags, problemUrl, onReview }) => {
   const style = typeStyles[type];
   const { timer, startTimer, stopTimer, getTotalElapsed, studyLogs } = useUserStore();
   const { showAlert } = useModalStore();
@@ -125,7 +126,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
               {title}
             </h3>
           </div>
-          <p className="text-sm font-bold text-base-500">{difficulty}</p>
+          <p className="text-sm font-bold text-base-500">{difficulty} (Lv.{level})</p>
         </div>
 
         {/* Tags */}

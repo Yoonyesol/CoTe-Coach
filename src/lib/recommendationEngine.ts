@@ -7,6 +7,7 @@ export interface RecommendedProblem {
     title: string;
     platform: string;
     difficulty: string;
+    level: number; // Added: Raw Solved.ac level for UI clarity
     tags: string[];
     problemUrl: string;
 }
@@ -33,8 +34,8 @@ export const getRecommendations = async (
     const { handle, problemCount = 4 } = options;
     const baseLevel = Math.min(userLevel, 30);
 
-    const warmUpLevel = Math.max(baseLevel - 1, 1);
-    const mainLevel = baseLevel;
+    const warmUpLevel = Math.max(baseLevel - 2, 1);
+    const mainQuery = `tier:${Math.max(baseLevel - 1, 1)}..${Math.min(baseLevel + 1, 30)}`;
     const challengeLevel = Math.min(baseLevel + 2, 30);
 
     const handleFilter = handle ? ` -solved_by:${handle}` : '';
@@ -53,9 +54,9 @@ export const getRecommendations = async (
 
     // API 호출 병렬화로 속도 개선
     const [warmUpRes, mainRes, challengeRes] = await Promise.all([
-        counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, counts.warmUp) : { items: [] },
-        counts.main > 0 ? searchSolvedAcProblems(`tier:${mainLevel}${handleFilter}`, counts.main) : { items: [] },
-        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, counts.challenge) : { items: [] },
+        counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, counts.warmUp * 2) : { items: [] },
+        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}`, counts.main * 2) : { items: [] },
+        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, counts.challenge * 2) : { items: [] },
     ]);
 
     const selectRandom = (items: SolvedAcProblem[], count: number) => {
@@ -71,6 +72,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
+            level: p.level,
             tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });
@@ -83,6 +85,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
+            level: p.level,
             tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });
@@ -95,6 +98,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
+            level: p.level,
             tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });

@@ -203,6 +203,7 @@ function App() {
                         title={p.title}
                         platform={p.platform}
                         difficulty={p.difficulty}
+                        level={p.level}
                         tags={p.tags}
                         problemUrl={p.problemUrl}
                         onReview={handleReviewOpen}
