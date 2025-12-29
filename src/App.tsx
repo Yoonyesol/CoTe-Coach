@@ -17,14 +17,21 @@ import GlobalModal from './components/GlobalModal'
 import { useUserStore } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
-import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react'
+import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
+import {
+  ProblemCardSkeleton,
+  StatSkeleton,
+  ProfileHeaderSkeleton,
+  DailyPlannerSkeleton
+} from './components/common/Skeleton';
 
 function App() {
   const { tier, points, getDailyProgress, getDaysRemaining, refreshRating, fetchUserData } = useUserStore();
-  const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
+  const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, refetch } = useRecommendations();
 
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(false);
 
   useEffect(() => {
     initialize();
@@ -46,9 +53,10 @@ function App() {
 
   // 1. Initial Data Sync: Local Storage Hydration & Supabase Fetch
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !authInitialized) return;
 
     const syncData = async () => {
+      setIsDataLoading(true);
       // If user is logged in, prioritize Supabase data
       if (user) {
         await fetchUserData(user.id);
@@ -63,10 +71,11 @@ function App() {
       if (currentState.tier !== correctTier) {
         useUserStore.setState({ tier: correctTier });
       }
+      setIsDataLoading(false);
     };
 
     syncData();
-  }, [isHydrated, user, fetchUserData, refreshRating]);
+  }, [isHydrated, authInitialized, user, fetchUserData, refreshRating]);
 
   const dailyProgress = getDailyProgress();
   const daysRemaining = getDaysRemaining();
@@ -114,66 +123,84 @@ function App() {
         >
           {activeTab === 'HOME' ? (
             <>
-              <header className="flex justify-between items-center">
-                <div>
-                  <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{user.email?.split('@')[0]}님!</span></h1>
-                  <p className="text-sm font-medium text-base-400 mt-1 font-sans">
-                    오늘의 목표인 <span className="text-base-800 font-bold">{dailyProgress.goal}문제</span> 중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setIsPlanModalOpen(true)}
-                    className="p-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm outline-none"
-                    title="학습 플랜 설정"
-                  >
-                    <Settings2 className="w-6 h-6" />
-                  </button>
-                  <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans"
-                  >
-                    <Plus className="w-5 h-5" />
-                    문제 추가
-                  </button>
-                </div>
-              </header>
+              {isDataLoading ? (
+                <ProfileHeaderSkeleton />
+              ) : (
+                <header className="flex justify-between items-center">
+                  <div>
+                    <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{user.email?.split('@')[0]}님!</span></h1>
+                    <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+                      오늘의 목표인 <span className="text-base-800 font-bold">{dailyProgress.goal}문제</span> 중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setIsPlanModalOpen(true)}
+                      className="p-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm outline-none"
+                      title="학습 플랜 설정"
+                    >
+                      <Settings2 className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={() => setIsAddModalOpen(true)}
+                      className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans"
+                    >
+                      <Plus className="w-5 h-5" />
+                      문제 추가
+                    </button>
+                  </div>
+                </header>
+              )}
 
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Custom rendering for Current Tier to use Badge */}
-                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🎯</div>
-                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">오늘의 목표</p>
-                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{dailyProgress.solved} / {dailyProgress.goal}</p>
-                </div>
+                {isDataLoading ? (
+                  <>
+                    <StatSkeleton />
+                    <StatSkeleton />
+                    <StatSkeleton />
+                    <StatSkeleton />
+                  </>
+                ) : (
+                  <>
+                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🎯</div>
+                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">오늘의 목표</p>
+                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{dailyProgress.solved} / {dailyProgress.goal}</p>
+                    </div>
 
-                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">📆</div>
-                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">목표 달성 D-Day</p>
-                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">D-{daysRemaining}</p>
-                </div>
+                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">📆</div>
+                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">목표 달성 D-Day</p>
+                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">D-{daysRemaining}</p>
+                    </div>
 
-                <div onClick={() => setIsTierGuideModalOpen(true)} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group flex flex-col justify-center">
-                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🏆</div>
-                  <p className="text-xs font-bold text-base-400 mb-0.5 tracking-wider uppercase font-sans">현재 티어</p>
-                  <p className="text-xl font-black text-base-800 font-sans leading-none">{tier}</p>
-                </div>
+                    <div onClick={() => setIsTierGuideModalOpen(true)} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group flex flex-col justify-center">
+                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🏆</div>
+                      <p className="text-xs font-bold text-base-400 mb-0.5 tracking-wider uppercase font-sans">현재 티어</p>
+                      <p className="text-xl font-black text-base-800 font-sans leading-none">{tier}</p>
+                    </div>
 
-                <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                  <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
-                  <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">누적 포인트</p>
-                  <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{points.toLocaleString()}G</p>
-                </div>
+                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
+                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
+                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">누적 포인트</p>
+                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{points.toLocaleString()}G</p>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Daily Planner Section */}
-              <DailyPlanner
-                solvedCount={dailyProgress.solved}
-                goalCount={dailyProgress.goal}
-                daysRemaining={daysRemaining}
-                onPlanDetailClick={() => setIsPlanDetailModalOpen(true)}
-              />
+              {isDataLoading ? (
+                <DailyPlannerSkeleton />
+              ) : (
+                <DailyPlanner
+                  solvedCount={dailyProgress.solved}
+                  goalCount={dailyProgress.goal}
+                  daysRemaining={daysRemaining}
+                  onPlanDetailClick={() => setIsPlanDetailModalOpen(true)}
+                />
+              )}
 
               {/* Recommendation Section */}
               <section className="space-y-6">
@@ -200,7 +227,7 @@ function App() {
                 {isRecsLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="glass-card h-64 animate-pulse bg-base-100" />
+                      <ProblemCardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
@@ -247,7 +274,6 @@ function App() {
               </div>
             </div>
           )}
-
         </motion.div>
       </MainLayout>
 

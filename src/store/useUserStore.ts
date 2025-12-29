@@ -301,14 +301,21 @@ export const useUserStore = create<UserState>()(
                     .single();
 
                 if (profile) {
+                    const currentState = get();
                     set({
-                        bojHandle: profile.boj_handle || '',
-                        bojRating: profile.boj_rating || 0,
-                        level: profile.level || 1,
-                        xp: profile.xp || 0,
-                        tier: profile.tier || 'Bronze 5',
-                        points: profile.points || 0
+                        bojHandle: profile.boj_handle || currentState.bojHandle,
+                        bojRating: profile.boj_rating || currentState.bojRating,
+                        level: profile.level || currentState.level,
+                        xp: profile.xp || currentState.xp,
+                        tier: profile.tier || currentState.tier,
+                        points: profile.points || currentState.points,
+                        studyPlan: profile.study_plan || currentState.studyPlan
                     });
+
+                    // If we had local data but server was empty, push local data to server
+                    if (!profile.boj_handle && currentState.bojHandle) {
+                        get().saveProfile(userId);
+                    }
                 }
 
                 // 2. Fetch Study Logs
@@ -366,6 +373,7 @@ export const useUserStore = create<UserState>()(
                         tier: state.tier,
                         points: state.points,
                         xp: state.xp,
+                        study_plan: state.studyPlan,
                         updated_at: new Date().toISOString()
                     });
 
@@ -621,6 +629,7 @@ export const useUserStore = create<UserState>()(
         {
             name: 'cote-coach-user-storage',
             version: 6, // AC 레이팅 시스템 & 자동 동기화 보정
+            partialize: (state) => ({ timer: state.timer }), // Only keep timer in localStorage
             migrate: (persistedState: unknown, version: number) => {
                 const state = persistedState as UserState;
 
