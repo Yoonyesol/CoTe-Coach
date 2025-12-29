@@ -116,7 +116,7 @@ export const useUserStore = create<UserState>()(
             xp: 0,
             level: 1,
             points: 0,
-            tier: 'Novice 1',
+            tier: 'Iron 1',
             bojHandle: '',
             studyPlan: {
                 targetTier: 'Gold 1',
@@ -155,23 +155,34 @@ export const useUserStore = create<UserState>()(
             })),
 
             calculateTier: (level) => {
-                // Lv 1-10: Novice (Bronze/Silver)
-                if (level <= 10) return `Novice ${level}`;
+                // Eased Tier Distribution (User-Friendly)
 
-                // Lv 11-15: Challenger (Gold)
-                if (level <= 15) return `Challenger ${level - 10}`;
+                // Lv 1-3: Iron (입문 구간 확대)
+                if (level <= 3) return `Iron ${level}`;
 
-                // Lv 16-20: Expert (Platinum) - New!
-                if (level <= 20) return `Expert ${level - 15}`;
+                // Lv 4-8: Bronze (5레벨)
+                if (level <= 8) return `Bronze ${level - 3}`;
 
-                // Lv 21-25: Solver (Diamond)
-                if (level <= 25) return `Solver ${level - 20}`;
+                // Lv 9-18: Silver (10레벨 - 더 쉽게!)
+                if (level <= 18) return `Silver ${level - 8}`;
 
-                // Lv 26-30: Master (Ruby)
-                if (level <= 30) return `Master ${level - 25}`;
+                // Lv 19-28: Gold (10레벨 - 더 쉽게!)
+                if (level <= 28) return `Gold ${level - 18}`;
 
-                // Lv 31+: Legend (Master+)
-                return `Legend ${level - 30}`;
+                // Lv 29-35: Platinum (7레벨 - 완화)
+                if (level <= 35) return `Platinum ${level - 28}`;
+
+                // Lv 36-38: Diamond (3레벨)
+                if (level <= 38) return `Diamond ${level - 35}`;
+
+                // Lv 39-40: Master (2레벨)
+                if (level <= 40) return `Master ${level - 38}`;
+
+                // Lv 41: Grandmaster (1레벨)
+                if (level <= 41) return `Grandmaster ${level - 40}`;
+
+                // Lv 42+: Challenger (전설)
+                return `Challenger ${level - 41}`;
             },
 
             syncSolvedAcTier: (tier) => {
@@ -217,7 +228,7 @@ export const useUserStore = create<UserState>()(
                     bojHandle: '',
                     level: 1,
                     xp: 0,
-                    tier: 'Novice 1'
+                    tier: get().calculateTier(1), // Reset to Iron 1
                 });
             },
 

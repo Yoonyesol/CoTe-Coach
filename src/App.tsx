@@ -28,6 +28,15 @@ function App() {
     initialize();
   }, [initialize]);
 
+  // Force sync tier with level to fix potential mismatch from logic updates
+  useEffect(() => {
+    const currentState = useUserStore.getState();
+    const correctTier = currentState.calculateTier(currentState.level);
+    if (currentState.tier !== correctTier) {
+      useUserStore.setState({ tier: correctTier });
+    }
+  }, []);
+
   const dailyProgress = getDailyProgress();
   const daysRemaining = getDaysRemaining();
 

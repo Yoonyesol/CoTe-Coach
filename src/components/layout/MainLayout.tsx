@@ -145,10 +145,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
                         <div className="mt-12 text-center space-y-2">
                             <p className="text-xl font-black text-base-900 font-sans">
-                                {level >= 41 ? '전설의' :
-                                    level >= 31 ? '코딩 마스터' :
-                                        level >= 21 ? '코딩 해결사' :
-                                            level >= 11 ? '코딩 도전자' : '코딩 초보'} 펭군
+                                {
+                                    level >= 42 ? '전설의' :
+                                        level >= 41 ? '초월적인' :
+                                            level >= 39 ? '알고리즘 마스터' :
+                                                level >= 36 ? '코딩 챔피언' :
+                                                    level >= 29 ? '코딩 전문가' :
+                                                        level >= 19 ? '코딩 해결사' :
+                                                            level >= 9 ? '코딩 유망주' :
+                                                                level >= 4 ? '코딩 새싹' : '코딩 입문자'
+                                } 펭군
                             </p>
                             <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-white shadow-sm">
                                 <span className="text-[10px] font-black text-misty-dark uppercase tracking-tighter shrink-0">Lv. {level}</span>
@@ -157,14 +163,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                                 </div>
                                 <span className="text-[10px] font-black text-base-400 shrink-0">{progress}%</span>
                             </div>
-                            <button
-                                onClick={onTierClick}
-                                className="group relative flex items-center justify-center gap-2 px-4 py-2 hover:bg-white/40 rounded-xl transition-all cursor-pointer"
-                            >
-                                <TierBadge tier={tier} size="sm" />
-                                <span className="text-sm font-black text-base-700 group-hover:text-misty-dark transition-colors">{tier}</span>
-                                <Info className="w-3 h-3 text-base-300 group-hover:text-misty transition-colors opacity-0 group-hover:opacity-100" />
-                            </button>
+                            <div className="flex justify-center w-full">
+                                <button
+                                    onClick={onTierClick}
+                                    className="group relative flex items-center justify-center gap-2 px-4 py-2 hover:bg-white/40 rounded-xl transition-all cursor-pointer"
+                                >
+                                    <TierBadge tier={tier} size="sm" />
+                                    <span className="text-sm font-black text-base-700 group-hover:text-misty-dark transition-colors">{tier}</span>
+                                    <Info className="w-3 h-3 text-base-300 group-hover:text-misty transition-colors opacity-0 group-hover:opacity-100" />
+                                </button></div>
                         </div>
                     </div>
 

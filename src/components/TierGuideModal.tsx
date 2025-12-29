@@ -12,12 +12,15 @@ const TierGuideModal: React.FC<TierGuideModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
 
     const tiers = [
-        { name: 'Novice', range: 'Lv 1-10', boj: 'Bronze ~ Silver', color: 'text-zinc-500', desc: '코딩 테스트 입문자' },
-        { name: 'Challenger', range: 'Lv 11-15', boj: 'Gold', color: 'text-yellow-500', desc: '본격적인 알고리즘 해결사' },
-        { name: 'Expert', range: 'Lv 16-20', boj: 'Platinum', color: 'text-emerald-500', desc: '효율적인 해법을 찾는 전문가' },
-        { name: 'Solver', range: 'Lv 21-25', boj: 'Diamond', color: 'text-blue-500', desc: '복잡한 난제 해결사' },
-        { name: 'Master', range: 'Lv 26-30', boj: 'Ruby', color: 'text-red-500', desc: '알고리즘 마스터' },
-        { name: 'Legend', range: 'Lv 31+', boj: 'Master', color: 'text-purple-500', desc: '전설적인 경지' },
+        { name: 'Iron', range: 'Lv 1-3', boj: 'Bronze 5~4', color: 'text-zinc-600', desc: '코딩테스트 입문자' },
+        { name: 'Bronze', range: 'Lv 4-8', boj: 'Bronze 3 ~ Silver 3', color: 'text-amber-700', desc: '기초를 다지는 단계' },
+        { name: 'Silver', range: 'Lv 9-18', boj: 'Silver 2 ~ Gold 5', color: 'text-gray-400', desc: '중급자로 성장하는 단계' },
+        { name: 'Gold', range: 'Lv 19-28', boj: 'Gold 4 ~ Platinum 5', color: 'text-yellow-500', desc: '본격적인 알고리즘 해결사' },
+        { name: 'Platinum', range: 'Lv 29-35', boj: 'Platinum 4 ~ Diamond 4', color: 'text-cyan-500', desc: '효율적인 해법을 찾는 전문가' },
+        { name: 'Diamond', range: 'Lv 36-38', boj: 'Diamond 3~1', color: 'text-blue-600', desc: '복잡한 난제 해결사' },
+        { name: 'Master', range: 'Lv 39-40', boj: 'Ruby 5~4', color: 'text-purple-500', desc: '알고리즘 마스터' },
+        { name: 'Grandmaster', range: 'Lv 41', boj: 'Ruby 3~2', color: 'text-red-600', desc: '초월적인 경지 ⭐' },
+        { name: 'Challenger', range: 'Lv 42+', boj: 'Ruby 1, Master+', color: 'text-gradient', desc: '전설적인 경지 🔥' },
     ];
 
     return (
