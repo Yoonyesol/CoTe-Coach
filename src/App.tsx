@@ -6,7 +6,8 @@ import Heatmap from './components/Heatmap'
 import { motion } from 'framer-motion'
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
-import StudySettingsModal from './components/StudySettingsModal'
+import AccountSettingsModal from './components/AccountSettingsModal'
+import StudyPlanModal from './components/StudyPlanModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
@@ -29,7 +30,8 @@ function App() {
   const daysRemaining = getDaysRemaining();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS'>('HOME');
@@ -53,7 +55,11 @@ function App() {
 
   return (
     <>
-      <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
+      <MainLayout
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onAccountSettingsOpen={() => setIsAccountModalOpen(true)}
+      >
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 10 }}
@@ -72,7 +78,7 @@ function App() {
                 </div>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => setIsSettingsModalOpen(true)}
+                    onClick={() => setIsPlanModalOpen(true)}
                     className="p-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm outline-none"
                     title="학습 플랜 설정"
                   >
@@ -189,7 +195,8 @@ function App() {
 
       {/* Global Modals & Overlays (Outside for true 100% viewport coverage) */}
       <AddProblemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-      <StudySettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+      <AccountSettingsModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
+      <StudyPlanModal isOpen={isPlanModalOpen} onClose={() => setIsPlanModalOpen(false)} />
       {selectedProblem && (
         <ReviewModal
           key={`${selectedProblem.title}-${isReviewModalOpen}`}

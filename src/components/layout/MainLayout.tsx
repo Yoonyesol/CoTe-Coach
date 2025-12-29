@@ -4,8 +4,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../ShopModal';
-import ProfileSettingsModal from '../ProfileSettingsModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const ITEM_EMOJIS: Record<string, string> = {
@@ -17,9 +16,10 @@ interface MainLayoutProps {
     children: React.ReactNode;
     activeTab: 'HOME' | 'STATS';
     onTabChange: (tab: 'HOME' | 'STATS') => void;
+    onAccountSettingsOpen: () => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen }) => {
     const level = useUserStore((state) => state.level);
     const xp = useUserStore((state) => state.xp);
     const tier = useUserStore((state) => state.tier);
@@ -29,8 +29,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
     const { signOut } = useAuthStore();
     const { showConfirm } = useModalStore();
+
+    // We'll manage the internal state for the modal here or use the prop
+    // To satisfy the user's request of "gear icon opens it", we should handle the modal visibility.
+    // However, if App.tsx also has a settings button, it's better to lift the state or use onSettingsOpen.
+    // Let's assume MainLayout receives the state if it's already in App.tsx.
+
     const [isShopOpen, setIsShopOpen] = useState(false);
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const progress = xp % 100;
 
     const { data: solvedAcData } = useSolvedAcUser(bojHandle);
@@ -76,6 +81,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         <Trophy className="w-6 h-6" />
                     </button>
                     <button
+                        onClick={onAccountSettingsOpen}
                         className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="설정"
                     >
@@ -173,30 +179,36 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                                     </div>
                                 </div>
                             ) : (
-                                <button
-                                    onClick={() => setIsProfileModalOpen(true)}
-                                    className="w-full py-2 flex items-center justify-center gap-2 text-[10px] font-black text-base-400 hover:text-misty-dark transition-colors cursor-pointer"
-                                >
-                                    <LinkIcon size={12} />
-                                    백준 핸들 연동하기
-                                </button>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm shadow-sm border border-base-100">
+                                            <LinkIcon size={16} className="text-base-400" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-black text-base-400 uppercase tracking-tighter">Solved.ac</p>
+                                            <p className="text-xs font-black text-base-800">연동 필요</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={onAccountSettingsOpen}
+                                        className="px-3 py-1.5 bg-misty-dark text-white rounded-lg text-[10px] font-black hover:bg-misty transition-all active:scale-95 cursor-pointer"
+                                    >
+                                        연동하기
+                                    </button>
+                                </div>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer">가방 확인</button>
-                            <button
-                                onClick={() => setIsProfileModalOpen(true)}
-                                className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer"
-                            >
-                                프로필 설정
+                        <div className="flex justify-center">
+                            <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6">
+                                <Briefcase className="w-3 h-3 text-base-400 group-hover:text-misty transition-colors" />
+                                가방 확인
                             </button>
                         </div>
                     </div>
                 </div>
 
                 <ShopModal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} />
-                <ProfileSettingsModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
             </aside>
 
             {/* 3. Main Content */}
