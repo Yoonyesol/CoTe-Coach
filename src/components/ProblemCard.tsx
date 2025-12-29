@@ -140,12 +140,12 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
 
       {/* Card Footer: Action */}
       <div className="mt-6 pt-4 border-t border-white/30 flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <button
             onClick={handleStart}
             disabled={isOtherRunning || isCompleted}
             className={cn(
-              "flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer",
+              "w-full sm:flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer",
               isCurrent && timer.isRunning ? "bg-coral text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
               (isOtherRunning || isCompleted) && "cursor-not-allowed opacity-50"
             )}
@@ -160,7 +160,8 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
             rel="noopener noreferrer"
             onClick={(e) => isCompleted && e.preventDefault()}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm shrink-0 cursor-pointer",
+              "flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm cursor-pointer",
+              "w-full sm:w-auto",
               type === 'CHALLENGE' ? 'bg-base-900 text-white' : 'bg-white border border-base-200 text-base-800 hover:bg-base-50',
               isCompleted && "opacity-50 cursor-not-allowed"
             )}
@@ -173,10 +174,11 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
           {!isCompleted && (
             <button
               onClick={() => onReview({ title, platform, difficulty })}
-              className="p-2.5 bg-sage-light text-sage-dark border-2 border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
+              className="w-full sm:w-auto p-2.5 bg-sage-light text-sage-dark border-2 border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group flex items-center justify-center gap-2"
               title="바로 완료 처리"
             >
               <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span className="sm:hidden font-black text-sm">완료 체크</span>
             </button>
           )}
         </div>
