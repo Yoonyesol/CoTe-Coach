@@ -4,7 +4,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../ShopModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info, BookOpen } from 'lucide-react';
 import TierBadge from '../TierBadge';
 import BojTierBadge from '../BojTierBadge';
 import { clsx } from 'clsx';
@@ -16,8 +16,8 @@ const ITEM_EMOJIS: Record<string, string> = {
 
 interface MainLayoutProps {
     children: React.ReactNode;
-    activeTab: 'HOME' | 'STATS';
-    onTabChange: (tab: 'HOME' | 'STATS') => void;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
 }
@@ -53,6 +53,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
     const navItems = [
         { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },
+        { id: 'JOURNAL', icon: <BookOpen className="w-6 h-6" />, label: '학습 일지' },
         { id: 'STATS', icon: <BarChart3 className="w-6 h-6" />, label: '상세 통계' },
     ] as const;
 

@@ -13,8 +13,11 @@ import TierGuideModal from './components/TierGuideModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
+import LearningJournal from './components/LearningJournal'
+import DailyHistory from './components/DailyHistory'
+import EditStudyLogModal from './components/EditStudyLogModal'
 import GlobalModal from './components/GlobalModal'
-import { useUserStore } from './store/useUserStore'
+import { useUserStore, StudyLog } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
@@ -87,7 +90,8 @@ function App() {
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS'>('HOME');
+  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL'>('HOME');
+  const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
 
   const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
     setSelectedProblem(problem);
@@ -215,13 +219,27 @@ function App() {
                       사용자님의 레벨에 맞춰 <span className="text-base-600 font-bold">워밍업부터 챌린지까지</span> 준비했어요!
                     </p>
                   </div>
-                  <button
-                    onClick={() => refetch()}
-                    className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
-                  >
-                    <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-                    새로고침
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setActiveTab('JOURNAL')}
+                      className="px-6 py-2 rounded-xl text-sm font-black transition-all text-base-400 hover:text-base-600 hover:bg-white/50"
+                    >
+                      학습 일지
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('STATS')}
+                      className="px-6 py-2 rounded-xl text-sm font-black transition-all text-base-400 hover:text-base-600 hover:bg-white/50"
+                    >
+                      학습 분석
+                    </button>
+                    <button
+                      onClick={() => refetch()}
+                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
+                    >
+                      <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                      새로고침
+                    </button>
+                  </div>
                 </div>
 
                 {isRecsLoading ? (
@@ -253,7 +271,11 @@ function App() {
                   </div>
                 )}
               </section>
+
+              <DailyHistory onEditLog={setEditingLog} />
             </>
+          ) : activeTab === 'JOURNAL' ? (
+            <LearningJournal />
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-1">
@@ -296,6 +318,13 @@ function App() {
           isOpen={isReviewModalOpen}
           onClose={() => setIsReviewModalOpen(false)}
           problem={selectedProblem}
+        />
+      )}
+      {editingLog && (
+        <EditStudyLogModal
+          log={editingLog}
+          isOpen={!!editingLog}
+          onClose={() => setEditingLog(null)}
         />
       )}
       <Stopwatch />

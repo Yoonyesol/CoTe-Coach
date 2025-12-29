@@ -11,6 +11,16 @@ export interface StudyPlan {
     problemCount: number;
 }
 
+export interface DailyTask {
+    id: string;
+    problemId: string;
+    problemTitle: string;
+    site: Platform;
+    difficulty: string;
+    status: 'pending' | 'completed';
+    targetDate: string; // YYYY-MM-DD
+}
+
 export interface StudyLog {
     id: string;
     problemId: string;
@@ -52,6 +62,7 @@ interface UserState {
     studyLogs: StudyLog[];
     inventory: string[]; // Item IDs
     equippedItems: string[]; // Item IDs
+    dailyTasks: DailyTask[];
 
     // Actions
     addXp: (amount: number) => void;
@@ -70,6 +81,14 @@ interface UserState {
 
     // Study Log Actions
     addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => Promise<void>;
+    updateStudyLog: (logId: string, updates: Partial<StudyLog>) => Promise<void>;
+    deleteStudyLog: (logId: string) => Promise<void>;
+
+    // Daily Task Actions
+    fetchDailyTasks: (userId: string) => Promise<void>;
+    addDailyTask: (task: Omit<DailyTask, 'id' | 'status'>) => Promise<void>;
+    toggleTaskStatus: (taskId: string) => Promise<void>;
+    deleteDailyTask: (taskId: string) => Promise<void>;
 
     // Timer Actions
     startTimer: (problemId: string) => boolean; // Returns false if another is running
@@ -146,6 +165,7 @@ export const useUserStore = create<UserState>()(
             studyLogs: [],
             inventory: [],
             equippedItems: [],
+            dailyTasks: [],
 
             addXp: (amount) => {
                 // To maintain history for Top 100, we add a generic record
@@ -260,6 +280,15 @@ export const useUserStore = create<UserState>()(
                 set({
                     bojHandle: '',
                     bojRating: 0,
+                    inventory: [],
+                    equippedItems: [],
+                    dailyTasks: [],
+                    timer: {
+                        isRunning: false,
+                        startTime: null,
+                        currentProblemId: null,
+                        problemTimers: {},
+                    },
                     level: 1,
                     xp: 0,
                     tier: get().calculateTier(1), // Reset to Bronze 5
@@ -357,8 +386,97 @@ export const useUserStore = create<UserState>()(
                     });
                 }
 
+                // 4. Fetch Daily Tasks
+                await get().fetchDailyTasks(userId);
+
                 // Force a final refresh to ensure UI is in sync
                 get().refreshRating();
+            },
+
+            fetchDailyTasks: async (userId) => {
+                const { data: tasks } = await supabase
+                    .from('daily_tasks')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('target_date', { ascending: true });
+
+                if (tasks) {
+                    const mappedTasks: DailyTask[] = tasks.map(t => ({
+                        id: t.id,
+                        problemId: t.problem_id,
+                        problemTitle: t.problem_title,
+                        site: t.site as Platform,
+                        difficulty: t.difficulty,
+                        status: t.status as 'pending' | 'completed',
+                        targetDate: t.target_date
+                    }));
+                    set({ dailyTasks: mappedTasks });
+                }
+            },
+
+            addDailyTask: async (taskData) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data, error } = await supabase
+                    .from('daily_tasks')
+                    .insert({
+                        user_id: user.id,
+                        problem_id: taskData.problemId,
+                        problem_title: taskData.problemTitle,
+                        site: taskData.site,
+                        difficulty: taskData.difficulty,
+                        target_date: taskData.targetDate,
+                        status: 'pending'
+                    })
+                    .select()
+                    .single();
+
+                if (!error && data) {
+                    const newTask: DailyTask = {
+                        id: data.id,
+                        problemId: data.problem_id,
+                        problemTitle: data.problem_title,
+                        site: data.site as Platform,
+                        difficulty: data.difficulty,
+                        status: data.status as 'pending' | 'completed',
+                        targetDate: data.target_date
+                    };
+                    set(state => ({ dailyTasks: [...state.dailyTasks, newTask] }));
+                }
+            },
+
+            toggleTaskStatus: async (taskId) => {
+                const task = get().dailyTasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                const newStatus = task.status === 'pending' ? 'completed' : 'pending';
+
+                const { error } = await supabase
+                    .from('daily_tasks')
+                    .update({ status: newStatus })
+                    .eq('id', taskId);
+
+                if (!error) {
+                    set(state => ({
+                        dailyTasks: state.dailyTasks.map(t =>
+                            t.id === taskId ? { ...t, status: newStatus } : t
+                        )
+                    }));
+                }
+            },
+
+            deleteDailyTask: async (taskId) => {
+                const { error } = await supabase
+                    .from('daily_tasks')
+                    .delete()
+                    .eq('id', taskId);
+
+                if (!error) {
+                    set(state => ({
+                        dailyTasks: state.dailyTasks.filter(t => t.id !== taskId)
+                    }));
+                }
             },
 
             saveProfile: async (userId) => {
@@ -379,6 +497,40 @@ export const useUserStore = create<UserState>()(
 
                 if (error) {
                     console.error('Profile sync error:', error);
+                }
+            },
+
+            updateStudyLog: async (logId, updates) => {
+                const dbUpdates: any = {};
+                if (updates.perceivedDifficulty) dbUpdates.perceived_difficulty = updates.perceivedDifficulty;
+                if (updates.feeling !== undefined) dbUpdates.feeling = updates.feeling;
+                if (updates.concepts) dbUpdates.concepts = updates.concepts;
+                if (updates.result) dbUpdates.result = updates.result;
+                if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
+                if (updates.elapsedTime !== undefined) dbUpdates.elapsed_time = updates.elapsedTime;
+
+                const { error } = await supabase
+                    .from('study_logs')
+                    .update(dbUpdates)
+                    .eq('id', logId);
+
+                if (!error) {
+                    set(state => ({
+                        studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l)
+                    }));
+                }
+            },
+
+            deleteStudyLog: async (logId) => {
+                const { error } = await supabase
+                    .from('study_logs')
+                    .delete()
+                    .eq('id', logId);
+
+                if (!error) {
+                    set(state => ({
+                        studyLogs: state.studyLogs.filter(l => l.id !== logId)
+                    }));
                 }
             },
 
