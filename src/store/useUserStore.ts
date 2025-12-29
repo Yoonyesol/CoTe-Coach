@@ -55,6 +55,9 @@ interface UserState {
     setBojHandle: (handle: string) => void;
     setStudyPlan: (plan: Partial<StudyPlan>) => void;
     calculateTier: (level: number) => string;
+    syncSolvedAcTier: (tier: number) => void;
+    linkBojAccount: (handle: string, tier: number) => void;
+    unlinkBojAccount: () => void;
 
     // Study Log Actions
     addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => void;
@@ -113,7 +116,7 @@ export const useUserStore = create<UserState>()(
             xp: 0,
             level: 1,
             points: 0,
-            tier: 'Novice I',
+            tier: 'Novice 1',
             bojHandle: '',
             studyPlan: {
                 targetTier: 'Gold 1',
@@ -145,7 +148,7 @@ export const useUserStore = create<UserState>()(
 
             addPoints: (amount) => set((state) => ({ points: state.points + amount })),
 
-            setBojHandle: (handle) => set({ bojHandle: handle }),
+            setBojHandle: (handle: string) => set({ bojHandle: handle }),
 
             setStudyPlan: (plan) => set((state) => ({
                 studyPlan: { ...state.studyPlan, ...plan }
@@ -157,6 +160,46 @@ export const useUserStore = create<UserState>()(
                 if (level <= 30) return `Solver ${level - 20}`;
                 if (level <= 40) return `Master ${level - 30}`;
                 return `Legend ${level - 40}`;
+            },
+
+            syncSolvedAcTier: (tier) => {
+                const currentLevel = get().level;
+                // solved.ac tier mapping: 1 (Bronze 5) ~ 31 (Master)
+                // We map tier T to level T + 1 (because our level starts from 1)
+                const targetLevel = tier + 1;
+
+                if (targetLevel > currentLevel) {
+                    const targetXp = (targetLevel - 1) * 100;
+                    const nextTier = get().calculateTier(targetLevel);
+
+                    set({
+                        level: targetLevel,
+                        xp: targetXp,
+                        tier: nextTier
+                    });
+                }
+            },
+
+            linkBojAccount: (handle, tier) => {
+                const targetLevel = (Number(tier) || 0) + 1;
+                const nextTierName = get().calculateTier(targetLevel);
+                const targetXp = (targetLevel - 1) * 100;
+
+                set({
+                    bojHandle: handle,
+                    level: targetLevel,
+                    xp: targetXp,
+                    tier: nextTierName
+                });
+            },
+
+            unlinkBojAccount: () => {
+                set({
+                    bojHandle: '',
+                    level: 1,
+                    xp: 0,
+                    tier: 'Novice 1'
+                });
             },
 
             addStudyLog: (logData) => {

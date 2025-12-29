@@ -20,7 +20,13 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange }) => {
-    const { tier, level, xp, points, equippedItems, bojHandle } = useUserStore();
+    const level = useUserStore((state) => state.level);
+    const xp = useUserStore((state) => state.xp);
+    const tier = useUserStore((state) => state.tier);
+    const points = useUserStore((state) => state.points);
+    const equippedItems = useUserStore((state) => state.equippedItems);
+    const bojHandle = useUserStore((state) => state.bojHandle);
+
     const { signOut } = useAuthStore();
     const { showConfirm } = useModalStore();
     const [isShopOpen, setIsShopOpen] = useState(false);
@@ -130,7 +136,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         </div>
 
                         <div className="mt-12 text-center space-y-2">
-                            <p className="text-xl font-black text-base-900 font-sans">코딩 초보 펭군</p>
+                            <p className="text-xl font-black text-base-900 font-sans">
+                                {level >= 41 ? '전설의' :
+                                    level >= 31 ? '코딩 마스터' :
+                                        level >= 21 ? '코딩 해결사' :
+                                            level >= 11 ? '코딩 도전자' : '코딩 초보'} 펭군
+                            </p>
                             <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-white shadow-sm">
                                 <span className="text-[10px] font-black text-misty-dark uppercase tracking-tighter shrink-0">Lv. {level}</span>
                                 <div className="w-24 h-2 bg-base-100 rounded-full overflow-hidden">

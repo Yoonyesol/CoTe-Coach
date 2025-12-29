@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, Search, AlertCircle, Loader2, Link as LinkIcon } from 'lucide-react';
+import { X, Check, Search, AlertCircle, Loader2, Link as LinkIcon, Trash2, Link2Off } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { fetchSolvedAcUser, SolvedAcUser } from '../api/solvedac';
 import { useModalStore } from '../store/useModalStore';
@@ -11,8 +11,8 @@ interface ProfileSettingsModalProps {
 }
 
 const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onClose }) => {
-    const { bojHandle, setBojHandle } = useUserStore();
-    const { showAlert } = useModalStore();
+    const { bojHandle, linkBojAccount, unlinkBojAccount } = useUserStore();
+    const { showAlert, showConfirm } = useModalStore();
     const [handle, setHandle] = useState(bojHandle || '');
     const [isLoading, setIsLoading] = useState(false);
     const [verifiedUser, setVerifiedUser] = useState<SolvedAcUser | null>(null);
@@ -53,10 +53,23 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onC
 
     const handleSave = () => {
         if (verifiedUser) {
-            setBojHandle(verifiedUser.handle);
-            showAlert("연동 완료", "백준 계정이 성공적으로 연동되었습니다!");
+            linkBojAccount(verifiedUser.handle, verifiedUser.tier);
+            showAlert("연동 완료", `백준 계정이 연동되었습니다! 당신의 코테코치 레벨이 ${verifiedUser.tier + 1}로 조정되었습니다. ✨`);
             onClose();
         }
+    };
+
+    const handleUnlink = () => {
+        showConfirm(
+            "계정 연동 해제",
+            '정말 백준 계정 연동을 해제하시겠습니까? 레벨과 경험치가 초기화됩니다.',
+            () => {
+                unlinkBojAccount();
+                setHandle('');
+                setVerifiedUser(null);
+                showAlert("연동 해제 완료", "계정 연동이 성공적으로 해제되었습니다.");
+            }
+        );
     };
 
     if (!isOpen) return null;
@@ -104,6 +117,28 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ isOpen, onC
                                 </button>
                             </div>
                         </div>
+
+                        {/* Existing Connection Info */}
+                        {bojHandle && !verifiedUser && (
+                            <div className="p-4 bg-red-50/50 rounded-2xl border border-red-100 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-red-400 shadow-sm">
+                                        <Link2Off size={20} />
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-red-400 uppercase tracking-tighter shrink-0">Currently Linked</p>
+                                        <p className="text-sm font-black text-red-600 shrink-0">{bojHandle}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleUnlink}
+                                    className="p-2 hover:bg-white rounded-xl text-red-500 transition-all cursor-pointer group"
+                                    title="연동 해제"
+                                >
+                                    <Trash2 size={18} className="group-hover:scale-110" />
+                                </button>
+                            </div>
+                        )}
 
                         {/* Error Message */}
                         <AnimatePresence>
