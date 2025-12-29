@@ -6,9 +6,10 @@ interface DailyPlannerProps {
     solvedCount: number;
     goalCount: number;
     daysRemaining: number;
+    onPlanDetailClick: () => void;
 }
 
-const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining }) => {
+const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining, onPlanDetailClick }) => {
     const percentage = Math.round((solvedCount / goalCount) * 100);
 
     return (
@@ -77,7 +78,10 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                 </div>
 
                 {/* Call to Action */}
-                <button className="px-6 py-4 bg-base-900 text-white rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-base-800 transition-all active:scale-95 shadow-lg group font-sans">
+                <button
+                    onClick={onPlanDetailClick}
+                    className="px-6 py-4 bg-base-900 text-white rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-base-800 transition-all active:scale-95 shadow-lg group font-sans cursor-pointer"
+                >
                     플랜 상세 보기
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>

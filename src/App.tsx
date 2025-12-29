@@ -8,6 +8,7 @@ import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
 import AccountSettingsModal from './components/AccountSettingsModal'
 import StudyPlanModal from './components/StudyPlanModal'
+import StudyPlanDetailModal from './components/StudyPlanDetailModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
@@ -32,6 +33,7 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [isPlanDetailModalOpen, setIsPlanDetailModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS'>('HOME');
@@ -117,6 +119,7 @@ function App() {
                 solvedCount={dailyProgress.solved}
                 goalCount={dailyProgress.goal}
                 daysRemaining={daysRemaining}
+                onPlanDetailClick={() => setIsPlanDetailModalOpen(true)}
               />
 
               {/* Recommendation Section */}
@@ -197,6 +200,11 @@ function App() {
       <AddProblemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       <AccountSettingsModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
       <StudyPlanModal isOpen={isPlanModalOpen} onClose={() => setIsPlanModalOpen(false)} />
+      <StudyPlanDetailModal
+        isOpen={isPlanDetailModalOpen}
+        onClose={() => setIsPlanDetailModalOpen(false)}
+        onEditPlan={() => setIsPlanModalOpen(true)}
+      />
       {selectedProblem && (
         <ReviewModal
           key={`${selectedProblem.title}-${isReviewModalOpen}`}
