@@ -22,7 +22,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const [concepts, setConcepts] = useState<string[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
+    // Manual time input states (initialized from elapsed time if available)
     const elapsedTime = getTotalElapsed(problem.title);
+    const initialMinutes = Math.floor(elapsedTime / 1000 / 60);
+    const initialSeconds = Math.floor((elapsedTime / 1000) % 60);
+
+    const [manualMinutes, setManualMinutes] = useState<number>(initialMinutes);
+    const [manualSeconds, setManualSeconds] = useState<number>(initialSeconds);
 
     const handleAddConcept = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && concept.trim()) {
@@ -41,12 +47,15 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        // Calculate final elapsed time from manual inputs
+        const finalElapsedTime = (manualMinutes * 60 * 1000) + (manualSeconds * 1000);
+
         addStudyLog({
             problemId: problem.title,
             platform: problem.platform as Platform,
             difficulty: problem.difficulty,
             perceivedDifficulty,
-            elapsedTime,
+            elapsedTime: finalElapsedTime,
             feeling,
             concepts,
         });
@@ -97,15 +106,46 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                 ) : (
                     <form onSubmit={handleSubmit} className="p-8 space-y-6">
 
-                        {/* Measured Time Info */}
-                        <div className="p-4 bg-base-50 rounded-2xl flex items-center justify-between border border-base-100">
-                            <div>
-                                <p className="text-[10px] font-black text-base-400 uppercase tracking-tighter mb-1">측정된 소요 시간</p>
-                                <p className="text-xl font-black text-base-800 font-sans">{formatTime(elapsedTime)}</p>
+                        {/* Time Input - Always Editable */}
+                        <div className="p-4 bg-misty-light/30 rounded-2xl border border-misty/20 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[10px] font-black text-misty-dark uppercase tracking-tighter">풀이 소요 시간</p>
+                                {elapsedTime > 0 && (
+                                    <span className="px-2 py-0.5 bg-sage-light text-sage-dark rounded-full text-[9px] font-black">
+                                        자동 기록됨
+                                    </span>
+                                )}
                             </div>
-                            <div className="px-3 py-1 bg-white border border-base-200 rounded-full text-[10px] font-black text-base-500">
-                                자동 기록됨
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="999"
+                                        value={manualMinutes}
+                                        onChange={(e) => setManualMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                                        className="w-full px-4 py-3 bg-white border-2 border-misty/30 rounded-xl text-center text-lg font-black focus:border-misty transition-all outline-none"
+                                        placeholder="0"
+                                    />
+                                    <p className="text-center text-[10px] font-black text-base-400 mt-1">분</p>
+                                </div>
+                                <span className="text-2xl font-black text-base-300">:</span>
+                                <div className="flex-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="59"
+                                        value={manualSeconds}
+                                        onChange={(e) => setManualSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        className="w-full px-4 py-3 bg-white border-2 border-misty/30 rounded-xl text-center text-lg font-black focus:border-misty transition-all outline-none"
+                                        placeholder="0"
+                                    />
+                                    <p className="text-center text-[10px] font-black text-base-400 mt-1">초</p>
+                                </div>
                             </div>
+                            <p className="text-[10px] text-base-500 font-medium text-center">
+                                {elapsedTime > 0 ? '자동 기록된 시간을 수정할 수 있어요' : '시간은 대략적으로 입력해주세요'}
+                            </p>
                         </div>
 
                         {/* Perceived Difficulty */}

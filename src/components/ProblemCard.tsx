@@ -168,6 +168,17 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
             {isCompleted ? '제출 완료' : '문제 열기'}
             {!isCompleted && <ExternalLink className="w-4 h-4" />}
           </a>
+
+          {/* Quick Complete Button */}
+          {!isCompleted && (
+            <button
+              onClick={() => onReview({ title, platform, difficulty })}
+              className="p-2.5 bg-sage-light text-sage-dark border-2 border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
+              title="바로 완료 처리"
+            >
+              <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </button>
+          )}
         </div>
 
         {/* Review Submission Button: Only shown when time is recorded and not currently running */}
