@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Search, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { useUserStore, calculateEarnedXp } from '../store/useUserStore';
 import { useModalStore } from '../store/useModalStore';
@@ -16,6 +16,22 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
     const [title, setTitle] = useState('');
     const [url, setUrl] = useState('');
 
+    // Prevent background scrolling when modal is open
+    useEffect(() => {
+        const mainElement = document.querySelector('main');
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            if (mainElement) mainElement.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+            if (mainElement) mainElement.style.overflow = 'auto';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            if (mainElement) mainElement.style.overflow = 'auto';
+        };
+    }, [isOpen]);
+
     if (!isOpen) return null;
 
     const handleAdd = () => {
@@ -32,11 +48,14 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-base-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="glass-card w-full max-w-md bg-white border-none shadow-2xl animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-base-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+            {/* Click backdrop to close */}
+            <div className="absolute inset-0" onClick={onClose} />
+
+            <div className="glass-card w-full max-w-md bg-white border-none shadow-2xl animate-in zoom-in-95 duration-200 relative z-10">
                 <div className="flex justify-between items-center p-6 border-b border-base-100">
                     <h2 className="text-xl font-black text-base-900 font-sans">외부 문제 기록하기</h2>
-                    <button onClick={onClose} className="p-1 hover:bg-base-100 rounded-lg transition-colors">
+                    <button onClick={onClose} className="p-1 hover:bg-base-100 rounded-lg transition-colors cursor-pointer">
                         <X className="w-5 h-5 text-base-400" />
                     </button>
                 </div>
@@ -50,7 +69,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                                 <button
                                     key={p}
                                     onClick={() => setPlatform(p)}
-                                    className={`flex-1 py-3 rounded-xl text-sm font-black transition-all ${platform === p
+                                    className={`flex-1 py-3 rounded-xl text-sm font-black transition-all cursor-pointer ${platform === p
                                         ? 'bg-misty-dark text-white ring-4 ring-misty-light'
                                         : 'bg-base-50 text-base-400 hover:bg-base-100'
                                         }`}
@@ -72,7 +91,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                                     placeholder="예: 타겟 넘버"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold"
+                                    className="w-full pl-10 pr-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold caret-coral"
                                 />
                             </div>
                         </div>
@@ -86,7 +105,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                                     placeholder="https://..."
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold"
+                                    className="w-full pl-10 pr-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold caret-coral"
                                 />
                             </div>
                         </div>
@@ -120,7 +139,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                     <button
                         onClick={handleAdd}
                         disabled={!title || !difficulty}
-                        className="w-full py-4 bg-base-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-base-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg font-sans"
+                        className="w-full py-4 bg-base-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-base-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg font-sans cursor-pointer"
                     >
                         <Plus className="w-5 h-5" />
                         기록 및 평점 받기

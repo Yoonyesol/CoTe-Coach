@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useModalStore } from '../store/useModalStore';
 import { AlertCircle, HelpCircle, X } from 'lucide-react';
@@ -6,6 +6,22 @@ import { clsx } from 'clsx';
 
 const GlobalModal: React.FC = () => {
     const { isOpen, options, closeModal } = useModalStore();
+
+    // Prevent background scrolling when modal is open
+    useEffect(() => {
+        const mainElement = document.querySelector('main');
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            if (mainElement) mainElement.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+            if (mainElement) mainElement.style.overflow = 'auto';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+            if (mainElement) mainElement.style.overflow = 'auto';
+        };
+    }, [isOpen]);
 
     if (!options) return null;
 
