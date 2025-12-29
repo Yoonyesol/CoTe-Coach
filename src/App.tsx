@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import DailyPlanner from './components/DailyPlanner'
 import StatsDashboard from './components/StatsDashboard'
@@ -10,13 +10,20 @@ import AddProblemModal from './components/AddProblemModal'
 import StudySettingsModal from './components/StudySettingsModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
+import LandingPage from './components/LandingPage'
 import { useUserStore } from './store/useUserStore'
+import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
-import { Plus, Settings2 } from 'lucide-react'
+import { Plus, Settings2, Loader2 } from 'lucide-react'
 
 function App() {
   const { tier, points, getDailyProgress, getDaysRemaining } = useUserStore();
-  const { data: recommendations, isLoading, refetch } = useRecommendations();
+  const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
+  const { data: recommendations, isLoading: isRecsLoading, refetch } = useRecommendations();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   const dailyProgress = getDailyProgress();
   const daysRemaining = getDaysRemaining();
@@ -32,6 +39,18 @@ function App() {
     setIsReviewModalOpen(true);
   };
 
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-base-900 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-coral animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LandingPage />;
+  }
+
   return (
     <MainLayout activeTab={activeTab} onTabChange={setActiveTab}>
       <motion.div
@@ -45,7 +64,7 @@ function App() {
           <>
             <header className="flex justify-between items-center">
               <div>
-                <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">윤님!</span></h1>
+                <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{user.email?.split('@')[0]}님!</span></h1>
                 <p className="text-sm font-medium text-base-400 mt-1 font-sans">
                   오늘의 목표인 <span className="text-base-800 font-bold">{dailyProgress.goal}문제</span> 중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}
                 </p>
@@ -125,7 +144,7 @@ function App() {
                 </button>
               </div>
 
-              {isLoading ? (
+              {isRecsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="glass-card h-64 animate-pulse bg-base-100" />
