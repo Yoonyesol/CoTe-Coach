@@ -20,7 +20,7 @@ import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react'
 
 function App() {
-  const { tier, points, getDailyProgress, getDaysRemaining, refreshRating } = useUserStore();
+  const { tier, points, getDailyProgress, getDaysRemaining, refreshRating, fetchUserData } = useUserStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, refetch } = useRecommendations();
 
@@ -44,20 +44,29 @@ function App() {
     checkHydration();
   }, [initialize]);
 
-  // Force sync tier with level once hydrated or logic updates
+  // 1. Initial Data Sync: Local Storage Hydration & Supabase Fetch
   useEffect(() => {
     if (!isHydrated) return;
 
-    // 1. Force recalculate rating from logs & boj
-    refreshRating();
+    const syncData = async () => {
+      // If user is logged in, prioritize Supabase data
+      if (user) {
+        await fetchUserData(user.id);
+      } else {
+        // Fallback for guest mode: recalculate from local storage
+        refreshRating();
+      }
 
-    // 2. Sync tier string
-    const currentState = useUserStore.getState();
-    const correctTier = currentState.calculateTier(currentState.level);
-    if (currentState.tier !== correctTier) {
-      useUserStore.setState({ tier: correctTier });
-    }
-  }, [isHydrated, refreshRating]);
+      // Sync tier string with level
+      const currentState = useUserStore.getState();
+      const correctTier = currentState.calculateTier(currentState.level);
+      if (currentState.tier !== correctTier) {
+        useUserStore.setState({ tier: correctTier });
+      }
+    };
+
+    syncData();
+  }, [isHydrated, user, fetchUserData, refreshRating]);
 
   const dailyProgress = getDailyProgress();
   const daysRemaining = getDaysRemaining();

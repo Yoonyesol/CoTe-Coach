@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { supabase } from '../lib/supabase';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
 
@@ -20,6 +21,7 @@ export interface StudyLog {
     feeling: string;
     concepts: string[];
     completedAt: string; // ISO String
+    result: 'SUCCESS' | 'FAIL'; // Added back
     ratingContribution?: number; // Added for top 100 rating logic
 }
 
@@ -57,12 +59,17 @@ interface UserState {
     setBojHandle: (handle: string) => void;
     setStudyPlan: (plan: Partial<StudyPlan>) => void;
     calculateTier: (level: number) => string;
-    syncSolvedAcTier: (tier: number) => void;
-    linkBojAccount: (handle: string, tier: number) => void;
+    syncSolvedAcTier: (tier: number) => Promise<void>;
+    linkBojAccount: (handle: string, tier: number) => Promise<void>;
     unlinkBojAccount: () => void;
+    resetProgress: () => Promise<void>;
+
+    // Supabase Sync Actions
+    fetchUserData: (userId: string) => Promise<void>;
+    saveProfile: (userId: string) => Promise<void>;
 
     // Study Log Actions
-    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => void;
+    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => Promise<void>;
 
     // Timer Actions
     startTimer: (problemId: string) => boolean; // Returns false if another is running
@@ -79,7 +86,7 @@ interface UserState {
     toggleEquip: (itemId: string) => void;
 
     // Helper to force recalculation
-    refreshRating: () => void;
+    refreshRating: () => Promise<void>;
 }
 
 // Solved.ac Style Rating Mapping (1 ~ 30 Points)
@@ -144,15 +151,16 @@ export const useUserStore = create<UserState>()(
                 // To maintain history for Top 100, we add a generic record
                 const newLog: StudyLog = {
                     id: Math.random().toString(36).substr(2, 9),
-                    problemId: 'manual-' + Date.now(),
+                    problemId: `Point Boost (${amount}G)`,
                     platform: 'BOJ',
                     difficulty: 'Manual',
                     perceivedDifficulty: 'NORMAL',
                     elapsedTime: 0,
-                    feeling: 'Quick Add',
+                    feeling: 'Manual Addition',
                     concepts: [],
                     completedAt: new Date().toISOString(),
-                    ratingContribution: amount
+                    result: 'SUCCESS',
+                    ratingContribution: amount // Using amount here
                 };
 
                 get().addStudyLog(newLog);
@@ -186,7 +194,7 @@ export const useUserStore = create<UserState>()(
                 return `Challenger ${level - 40}`;
             },
 
-            syncSolvedAcTier: (rating) => {
+            syncSolvedAcTier: async (rating) => {
                 const currentBojRating = get().bojRating;
                 const newBojRating = Math.max(0, rating);
 
@@ -208,10 +216,16 @@ export const useUserStore = create<UserState>()(
                     const nextTier = get().calculateTier(nextLevel);
 
                     set({ xp: totalRating, level: nextLevel, tier: nextTier });
+
+                    // Supabase Sync: Update Profile
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await get().saveProfile(user.id);
+                    }
                 }
             },
 
-            linkBojAccount: (handle, rating) => {
+            linkBojAccount: async (handle, rating) => {
                 const bojRating = Math.max(0, Number(rating) || 0);
 
                 set({
@@ -234,20 +248,135 @@ export const useUserStore = create<UserState>()(
                 const nextTier = get().calculateTier(nextLevel);
 
                 set({ xp: totalRating, level: nextLevel, tier: nextTier });
+
+                // Supabase Sync: Update Profile
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await get().saveProfile(user.id);
+                }
             },
 
-            unlinkBojAccount: () => {
+            unlinkBojAccount: async () => {
                 set({
                     bojHandle: '',
                     bojRating: 0,
                     level: 1,
                     xp: 0,
-                    tier: get().calculateTier(1), // Reset to Iron 1
+                    tier: get().calculateTier(1), // Reset to Bronze 5
                 });
+
+                // Supabase Sync: Update Profile if logged in
+                const { data: { user } = {} } = await supabase.auth.getUser(); // Destructure with default empty object
+                if (user) {
+                    await get().saveProfile(user.id);
+                }
             },
 
-            addStudyLog: (logData) => {
-                const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, get().level);
+            resetProgress: async () => {
+                set({
+                    studyLogs: [],
+                    xp: 0,
+                    level: 1,
+                    tier: 'Bronze 5',
+                    points: 0,
+                    bojHandle: '',
+                    bojRating: 0,
+                });
+
+                // Supabase Sync: Clean up if logged in
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase.from('study_logs').delete().eq('user_id', user.id);
+                    await get().saveProfile(user.id);
+                }
+            },
+
+            // Supabase Sync Actions Implementation
+            fetchUserData: async (userId) => {
+                // 1. Fetch Profile
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (profile) {
+                    set({
+                        bojHandle: profile.boj_handle || '',
+                        bojRating: profile.boj_rating || 0,
+                        level: profile.level || 1,
+                        xp: profile.xp || 0,
+                        tier: profile.tier || 'Bronze 5',
+                        points: profile.points || 0
+                    });
+                }
+
+                // 2. Fetch Study Logs
+                const { data: logs } = await supabase
+                    .from('study_logs')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false });
+
+                if (logs) {
+                    const mappedLogs: StudyLog[] = logs.map(l => ({
+                        id: l.id,
+                        problemId: l.problem_id,
+                        platform: l.site as Platform,
+                        difficulty: l.difficulty || '',
+                        perceivedDifficulty: l.perceived_difficulty as 'EASY' | 'NORMAL' | 'HARD',
+                        result: l.result as 'SUCCESS' | 'FAIL', // Fixed
+                        elapsedTime: l.elapsed_time || 0,
+                        feeling: l.feeling || '',
+                        concepts: l.concepts || [],
+                        completedAt: l.created_at,
+                        ratingContribution: l.rating_contribution || 0
+                    }));
+                    set({ studyLogs: mappedLogs });
+                }
+
+                // 3. Fetch User Assets (Inventory)
+                const { data: assets } = await supabase
+                    .from('user_assets')
+                    .select('*')
+                    .eq('user_id', userId);
+
+                if (assets) {
+                    const inventoryIds = assets.map(a => a.asset_id);
+                    const equippedIds = assets.filter(a => a.is_equipped).map(a => a.asset_id);
+                    set({
+                        inventory: inventoryIds,
+                        equippedItems: equippedIds
+                    });
+                }
+
+                // Force a final refresh to ensure UI is in sync
+                get().refreshRating();
+            },
+
+            saveProfile: async (userId) => {
+                const state = get();
+                const { error } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: userId,
+                        boj_handle: state.bojHandle,
+                        boj_rating: state.bojRating,
+                        level: state.level,
+                        tier: state.tier,
+                        points: state.points,
+                        xp: state.xp,
+                        updated_at: new Date().toISOString()
+                    });
+
+                if (error) {
+                    console.error('Profile sync error:', error);
+                }
+            },
+
+            addStudyLog: async (logData) => {
+                const currentLevel = get().level;
+                const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, currentLevel);
 
                 const newLog: StudyLog = {
                     ...logData,
@@ -292,9 +421,34 @@ export const useUserStore = create<UserState>()(
                         }
                     };
                 });
+
+                // Supabase Sync: Persist Log & Update Profile
+                const { data: { session } } = await supabase.auth.getSession();
+                const user = session?.user;
+
+                if (user) {
+                    const { error: logError } = await supabase.from('study_logs').insert({
+                        user_id: user.id,
+                        problem_id: newLog.problemId,
+                        site: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        perceived_difficulty: newLog.perceivedDifficulty,
+                        result: newLog.result,
+                        elapsed_time: newLog.elapsedTime,
+                        feeling: newLog.feeling,
+                        concepts: newLog.concepts,
+                        rating_contribution: newLog.ratingContribution
+                    });
+
+                    if (logError) {
+                        console.error('Study log sync error:', logError);
+                    }
+
+                    await get().saveProfile(user.id);
+                }
             },
 
-            refreshRating: () => {
+            refreshRating: async () => {
                 const { studyLogs, bojRating, bojHandle, calculateTier } = get();
 
                 // Filtering Logic: Official Source Policy
@@ -314,6 +468,12 @@ export const useUserStore = create<UserState>()(
                 const nextTier = calculateTier(nextLevel);
 
                 set({ xp: totalRating, level: nextLevel, tier: nextTier });
+
+                // Supabase Sync: Update Profile
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await get().saveProfile(user.id);
+                }
             },
 
             startTimer: (problemId) => {
@@ -417,16 +577,43 @@ export const useUserStore = create<UserState>()(
                     points: state.points - item.price,
                     inventory: [...state.inventory, item.id]
                 }));
+
+                // Supabase Sync: Deduct points and Add Asset
+                supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user) {
+                        get().saveProfile(user.id); // Save updated points
+                        supabase.from('user_assets').insert({
+                            user_id: user.id,
+                            asset_type: item.category,
+                            asset_id: item.id,
+                            is_equipped: false
+                        }).then(); // Fire and forget
+                    }
+                });
+
                 return true;
             },
 
             toggleEquip: (itemId) => {
                 set((state) => {
                     const isEquipped = state.equippedItems.includes(itemId);
+                    const newEquippedItems = isEquipped
+                        ? state.equippedItems.filter(id => id !== itemId)
+                        : [...state.equippedItems, itemId];
+
+                    // Supabase Sync: Update user_assets table
+                    supabase.auth.getUser().then(({ data: { user } }) => {
+                        if (user) {
+                            supabase.from('user_assets')
+                                .update({ is_equipped: !isEquipped })
+                                .eq('user_id', user.id)
+                                .eq('asset_id', itemId)
+                                .then(); // Fire and forget
+                        }
+                    });
+
                     return {
-                        equippedItems: isEquipped
-                            ? state.equippedItems.filter(id => id !== itemId)
-                            : [...state.equippedItems, itemId]
+                        equippedItems: newEquippedItems
                     };
                 });
             }
