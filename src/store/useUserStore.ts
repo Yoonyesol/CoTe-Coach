@@ -250,7 +250,12 @@ export const useUserStore = create<UserState>()(
 
                 const updatedLogs = [newLog, ...get().studyLogs];
 
-                const sortedPoints = updatedLogs
+                // Filtering Logic: If BOJ linked, don't count manual BOJ logs for Top 100 (Official Source Policy)
+                const relevantLogs = get().bojHandle
+                    ? updatedLogs.filter(l => l.platform !== 'BOJ')
+                    : updatedLogs;
+
+                const sortedPoints = relevantLogs
                     .map(l => l.ratingContribution || 0)
                     .sort((a, b) => b - a);
 
@@ -282,8 +287,14 @@ export const useUserStore = create<UserState>()(
             },
 
             refreshRating: () => {
-                const { studyLogs, bojRating, calculateTier } = get();
-                const sortedPoints = studyLogs
+                const { studyLogs, bojRating, bojHandle, calculateTier } = get();
+
+                // Filtering Logic: Official Source Policy
+                const relevantLogs = bojHandle
+                    ? studyLogs.filter(l => l.platform !== 'BOJ')
+                    : studyLogs;
+
+                const sortedPoints = relevantLogs
                     .map(l => l.ratingContribution || 0)
                     .sort((a, b) => b - a);
 
