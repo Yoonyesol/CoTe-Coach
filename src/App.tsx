@@ -16,7 +16,7 @@ import GlobalModal from './components/GlobalModal'
 import { useUserStore } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
-import { Plus, Settings2, Loader2 } from 'lucide-react'
+import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react'
 
 function App() {
   const { tier, points, getDailyProgress, getDaysRemaining } = useUserStore();
@@ -137,8 +137,9 @@ function App() {
                   </div>
                   <button
                     onClick={() => refetch()}
-                    className="text-sm font-bold text-misty-dark hover:underline flex items-center gap-1 transition-all active:scale-95 font-sans"
+                    className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
                   >
+                    <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
                     새로고침
                   </button>
                 </div>
