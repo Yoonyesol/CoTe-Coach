@@ -20,22 +20,44 @@ import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react'
 
 function App() {
-  const { tier, points, getDailyProgress, getDaysRemaining } = useUserStore();
+  const { tier, points, getDailyProgress, getDaysRemaining, refreshRating } = useUserStore();
   const { user, isLoading: isAuthLoading, initialize } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, refetch } = useRecommendations();
 
+  const [isHydrated, setIsHydrated] = useState(false);
+
   useEffect(() => {
     initialize();
+
+    // Check for hydration status
+    const checkHydration = () => {
+      if (useUserStore.persist.hasHydrated()) {
+        setIsHydrated(true);
+      } else {
+        const unsub = useUserStore.persist.onFinishHydration(() => {
+          setIsHydrated(true);
+          unsub();
+        });
+      }
+    };
+
+    checkHydration();
   }, [initialize]);
 
-  // Force sync tier with level to fix potential mismatch from logic updates
+  // Force sync tier with level once hydrated or logic updates
   useEffect(() => {
+    if (!isHydrated) return;
+
+    // 1. Force recalculate rating from logs & boj
+    refreshRating();
+
+    // 2. Sync tier string
     const currentState = useUserStore.getState();
     const correctTier = currentState.calculateTier(currentState.level);
     if (currentState.tier !== correctTier) {
       useUserStore.setState({ tier: correctTier });
     }
-  }, []);
+  }, [isHydrated, refreshRating]);
 
   const dailyProgress = getDailyProgress();
   const daysRemaining = getDaysRemaining();

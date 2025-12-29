@@ -42,6 +42,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const progress = xp % 100;
 
     const { data: solvedAcData } = useSolvedAcUser(bojHandle);
+    const syncSolvedAcTier = useUserStore((state) => state.syncSolvedAcTier);
+
+    // Auto-sync BOJ rating whenever data refreshed
+    React.useEffect(() => {
+        if (solvedAcData?.rating) {
+            syncSolvedAcTier(solvedAcData.rating);
+        }
+    }, [solvedAcData?.rating, syncSolvedAcTier]);
 
     const navItems = [
         { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },

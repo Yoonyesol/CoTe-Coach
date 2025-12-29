@@ -9,7 +9,7 @@ interface AddProblemModalProps {
 }
 
 const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) => {
-    const { addXp } = useUserStore();
+    const { addXp, level } = useUserStore();
     const { showAlert } = useModalStore();
     const [platform, setPlatform] = useState<'PROG' | 'LC' | 'SWEA'>('PROG');
     const [difficulty, setDifficulty] = useState('');
@@ -37,7 +37,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
     const handleAdd = () => {
         if (!title || !difficulty) return;
 
-        const earnedXp = calculateEarnedXp(platform, difficulty);
+        const earnedXp = calculateEarnedXp(platform, difficulty, level);
         addXp(earnedXp);
 
         showAlert(

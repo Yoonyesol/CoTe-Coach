@@ -20,6 +20,7 @@ export interface StudyLog {
     feeling: string;
     concepts: string[];
     completedAt: string; // ISO String
+    ratingContribution?: number; // Added for top 100 rating logic
 }
 
 export interface ShopItem {
@@ -43,6 +44,7 @@ interface UserState {
     points: number;
     tier: string;
     bojHandle: string;
+    bojRating: number; // Added to store linked BOJ rating
     studyPlan: StudyPlan;
     timer: TimerState;
     studyLogs: StudyLog[];
@@ -75,38 +77,41 @@ interface UserState {
     // Shop Actions
     buyItem: (item: ShopItem) => boolean;
     toggleEquip: (itemId: string) => void;
+
+    // Helper to force recalculation
+    refreshRating: () => void;
 }
 
-// XP Mapping Constants
+// Solved.ac Style Rating Mapping (1 ~ 30 Points)
 export const XP_MAP: Record<Platform, Record<string, number>> = {
     BOJ: {
-        'Bronze': 2,
-        'Silver': 10,
-        'Gold': 30,
-        'Platinum': 70,
-        'Diamond': 150,
-        'Ruby': 300,
+        'Bronze': 1,
+        'Silver': 6,
+        'Gold': 11,
+        'Platinum': 16,
+        'Diamond': 21,
+        'Ruby': 26,
     },
     PROG: {
-        '0': 2,
-        '1': 10,
-        '2': 25,
-        '3': 50,
-        '4': 100,
-        '5': 200,
+        '0': 1,
+        '1': 4,
+        '2': 10,
+        '3': 18,
+        '4': 25,
+        '5': 30,
     },
     LC: {
-        'Easy': 10,
-        'Medium': 35,
-        'Hard': 100,
+        'Easy': 5,
+        'Medium': 13,
+        'Hard': 25,
     },
     SWEA: {
-        'D1': 2,
-        'D2': 5,
-        'D3': 15,
-        'D4': 30,
-        'D5': 60,
-        'D6': 100,
+        'D1': 1,
+        'D2': 3,
+        'D3': 8,
+        'D4': 15,
+        'D5': 23,
+        'D6': 30,
     }
 };
 
@@ -118,6 +123,7 @@ export const useUserStore = create<UserState>()(
             points: 0,
             tier: 'Iron 1',
             bojHandle: '',
+            bojRating: 0,
             studyPlan: {
                 targetTier: 'Gold 1',
                 targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), // 30일 뒤
@@ -135,15 +141,21 @@ export const useUserStore = create<UserState>()(
             equippedItems: [],
 
             addXp: (amount) => {
-                const nextXp = get().xp + amount;
-                const nextLevel = Math.floor(nextXp / 100) + 1;
-                const nextTier = get().calculateTier(nextLevel);
+                // To maintain history for Top 100, we add a generic record
+                const newLog: StudyLog = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    problemId: 'manual-' + Date.now(),
+                    platform: 'BOJ',
+                    difficulty: 'Manual',
+                    perceivedDifficulty: 'NORMAL',
+                    elapsedTime: 0,
+                    feeling: 'Quick Add',
+                    concepts: [],
+                    completedAt: new Date().toISOString(),
+                    ratingContribution: amount
+                };
 
-                set({
-                    xp: nextXp,
-                    level: nextLevel,
-                    tier: nextTier
-                });
+                get().addStudyLog(newLog);
             },
 
             addPoints: (amount) => set((state) => ({ points: state.points + amount })),
@@ -155,77 +167,71 @@ export const useUserStore = create<UserState>()(
             })),
 
             calculateTier: (level) => {
-                // Eased Tier Distribution (User-Friendly)
+                // Solved.ac Standard Mapping (Level = Tier ID)
+                const majorTiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'];
 
-                // Lv 1-3: Iron (입문 구간 확대)
-                if (level <= 3) return `Iron ${level}`;
+                // 1-5: Bronze, 6-10: Silver, 11-15: Gold, 16-20: Platinum, 21-25: Diamond, 26-30: Ruby
+                const tierIndex = Math.floor((level - 1) / 5);
 
-                // Lv 4-8: Bronze (5레벨)
-                if (level <= 8) return `Bronze ${level - 3}`;
+                if (tierIndex < majorTiers.length) {
+                    const tierName = majorTiers[tierIndex];
+                    // Solved.ac style: 5 is lowest, 1 is highest (e.g., Level 12 = Gold 4)
+                    const subLevel = 5 - ((level - 1) % 5);
+                    return `${tierName} ${subLevel}`;
+                }
 
-                // Lv 9-18: Silver (10레벨 - 더 쉽게!)
-                if (level <= 18) return `Silver ${level - 8}`;
-
-                // Lv 19-28: Gold (10레벨 - 더 쉽게!)
-                if (level <= 28) return `Gold ${level - 18}`;
-
-                // Lv 29-35: Platinum (7레벨 - 완화)
-                if (level <= 35) return `Platinum ${level - 28}`;
-
-                // Lv 36-38: Diamond (3레벨)
-                if (level <= 38) return `Diamond ${level - 35}`;
-
-                // Lv 39-40: Master (2레벨)
-                if (level <= 40) return `Master ${level - 38}`;
-
-                // Lv 41: Grandmaster (1레벨)
-                if (level <= 41) return `Grandmaster ${level - 40}`;
-
-                // Lv 42+: Challenger (전설)
-                return `Challenger ${level - 41}`;
+                // Apex Tiers (31+)
+                if (level <= 35) return `Master ${level - 30}`;
+                if (level <= 40) return `Grandmaster ${level - 35}`;
+                return `Challenger ${level - 40}`;
             },
 
-            syncSolvedAcTier: (tier) => {
-                const currentLevel = get().level;
-                // solved.ac tier mapping: 1 (Bronze 5) ~ 31 (Master)
-                // We map tier T to level T (1-based), ensuring minimum level is 1
-                const targetLevel = Math.max(1, tier);
+            syncSolvedAcTier: (rating) => {
+                const currentBojRating = get().bojRating;
+                const newBojRating = Math.max(0, rating);
 
-                if (targetLevel > currentLevel) {
-                    const targetXp = (targetLevel - 1) * 100;
-                    const nextTier = get().calculateTier(targetLevel);
+                if (newBojRating !== currentBojRating) {
+                    set({ bojRating: newBojRating });
 
-                    set({
-                        level: targetLevel,
-                        xp: targetXp,
-                        tier: nextTier
-                    });
+                    // Force recalculation
+                    const logs = get().studyLogs;
+                    const sortedPoints = logs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+                    const localTop100 = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
+                    const bonus = Math.floor(175 * (1 - Math.pow(0.995, logs.length)));
+
+                    const totalRating = newBojRating + localTop100 + bonus;
+                    const nextLevel = Math.floor(totalRating / 100) + 1;
+                    const nextTier = get().calculateTier(nextLevel);
+
+                    set({ xp: totalRating, level: nextLevel, tier: nextTier });
                 }
             },
 
-            linkBojAccount: (handle, tier) => {
-                const currentLevel = get().level;
-                const bojLevel = Math.max(1, Number(tier) || 0);
-
-                // 합산 로직: (현재 앱 레벨 - 1)은 순수 활동량(Delta)
-                // 최종 레벨 = 백준 베이스 + 활동량
-                const activityDelta = Math.max(0, currentLevel - 1);
-                const targetLevel = bojLevel + activityDelta;
-
-                const nextTierName = get().calculateTier(targetLevel);
-                const targetXp = (targetLevel - 1) * 100;
+            linkBojAccount: (handle, rating) => {
+                const bojRating = Math.max(0, Number(rating) || 0);
 
                 set({
                     bojHandle: handle,
-                    level: targetLevel,
-                    xp: targetXp,
-                    tier: nextTierName
+                    bojRating: bojRating
                 });
+
+                // Recalculate everything immediately
+                const logs = get().studyLogs;
+                const sortedPoints = logs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+                const localTop100 = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
+                const bonus = Math.floor(175 * (1 - Math.pow(0.995, logs.length)));
+
+                const totalRating = bojRating + localTop100 + bonus;
+                const nextLevel = Math.floor(totalRating / 100) + 1;
+                const nextTier = get().calculateTier(nextLevel);
+
+                set({ xp: totalRating, level: nextLevel, tier: nextTier });
             },
 
             unlinkBojAccount: () => {
                 set({
                     bojHandle: '',
+                    bojRating: 0,
                     level: 1,
                     xp: 0,
                     tier: get().calculateTier(1), // Reset to Iron 1
@@ -233,31 +239,62 @@ export const useUserStore = create<UserState>()(
             },
 
             addStudyLog: (logData) => {
+                const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, get().level);
+
                 const newLog: StudyLog = {
                     ...logData,
                     id: Math.random().toString(36).substr(2, 9),
                     completedAt: new Date().toISOString(),
+                    ratingContribution: earnedRating
                 };
 
-                // XP 보너스 계산: 기본 XP + 복습 로그 작성 보너스 (+10)
-                const baseXP = calculateEarnedXp(logData.platform, logData.difficulty);
-                const bonusXP = 10;
+                const updatedLogs = [newLog, ...get().studyLogs];
 
-                get().addXp(baseXP + bonusXP);
-                get().addPoints(baseXP * 10); // 포인트 지급 로직 (XP의 10배 예시)
+                const sortedPoints = updatedLogs
+                    .map(l => l.ratingContribution || 0)
+                    .sort((a, b) => b - a);
+
+                const top100Sum = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
+                const countBonus = Math.floor(175 * (1 - Math.pow(0.995, updatedLogs.length)));
+
+                // Unified Integration: BOJ Rating + App Activities
+                const totalRating = (get().bojRating || 0) + top100Sum + countBonus;
+
+                const nextLevel = Math.floor(totalRating / 100) + 1;
+                const nextTier = get().calculateTier(nextLevel);
 
                 set((state) => {
                     const nextTimers = { ...state.timer.problemTimers };
-                    delete nextTimers[logData.problemId]; // 로그 제출 후 해당 문제 타이머 초기화
+                    delete nextTimers[logData.problemId];
 
                     return {
-                        studyLogs: [newLog, ...state.studyLogs],
+                        studyLogs: updatedLogs,
+                        xp: totalRating,
+                        level: nextLevel,
+                        tier: nextTier,
+                        points: state.points + (earnedRating * 10), // Keep shop points
                         timer: {
                             ...state.timer,
                             problemTimers: nextTimers
                         }
                     };
                 });
+            },
+
+            refreshRating: () => {
+                const { studyLogs, bojRating, calculateTier } = get();
+                const sortedPoints = studyLogs
+                    .map(l => l.ratingContribution || 0)
+                    .sort((a, b) => b - a);
+
+                const top100Sum = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
+                const countBonus = Math.floor(175 * (1 - Math.pow(0.995, studyLogs.length)));
+
+                const totalRating = (bojRating || 0) + top100Sum + countBonus;
+                const nextLevel = Math.floor(totalRating / 100) + 1;
+                const nextTier = calculateTier(nextLevel);
+
+                set({ xp: totalRating, level: nextLevel, tier: nextTier });
             },
 
             startTimer: (problemId) => {
@@ -377,7 +414,7 @@ export const useUserStore = create<UserState>()(
         }),
         {
             name: 'cote-coach-user-storage',
-            version: 4, // 상점 및 인벤토리 추가
+            version: 6, // AC 레이팅 시스템 & 자동 동기화 보정
             migrate: (persistedState: unknown, version: number) => {
                 const state = persistedState as UserState;
 
@@ -398,6 +435,61 @@ export const useUserStore = create<UserState>()(
                     if (!state.equippedItems) state.equippedItems = [];
                 }
 
+                if (version < 5) {
+                    if (!state.bojRating) state.bojRating = 0;
+
+                    // 기존 로그들(StudyLogs)에 ratingContribution이 없는 경우 채워줌
+                    if (state.studyLogs && state.studyLogs.length > 0) {
+                        state.studyLogs = state.studyLogs.map(log => {
+                            if (log.ratingContribution !== undefined) return log;
+
+                            // 임시 백필 매핑 (XP_MAP과 유사)
+                            let points = 5;
+                            const diff = log.difficulty;
+                            if (diff.includes('Bronze')) points = 2;
+                            else if (diff.includes('Silver')) points = 8;
+                            else if (diff.includes('Gold')) points = 13;
+                            else if (diff.includes('Platinum')) points = 18;
+                            else if (diff.includes('Diamond')) points = 23;
+                            else if (diff.includes('Ruby')) points = 28;
+                            else if (diff === 'Easy') points = 5;
+                            else if (diff === 'Medium') points = 15;
+                            else if (diff === 'Hard') points = 25;
+                            else if (diff === 'Lv.0') points = 1;
+                            else if (diff === 'Lv.1') points = 4;
+                            else if (diff === 'Lv.2') points = 10;
+                            else if (diff === 'Lv.3') points = 20;
+                            else if (diff === 'Lv.4') points = 25;
+                            else if (diff === 'Lv.5') points = 30;
+
+                            return { ...log, ratingContribution: points };
+                        });
+
+                        // 전체 레이팅(xp) 및 레벨 재계산
+                        const sorted = [...state.studyLogs].map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+                        const top100 = sorted.slice(0, 100).reduce((a, b) => a + b, 0);
+                        const bonus = Math.floor(175 * (1 - Math.pow(0.995, state.studyLogs.length)));
+
+                        state.xp = (state.bojRating || 0) + top100 + bonus;
+                        state.level = Math.floor(state.xp / 100) + 1;
+                    }
+                }
+
+                if (version < 6) {
+                    // Force complete recalculation for version 6
+                    const logs = state.studyLogs || [];
+                    const sorted = [...logs].map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+                    const top100 = sorted.slice(0, 100).reduce((a, b) => a + b, 0);
+                    const bonus = Math.floor(175 * (1 - Math.pow(0.995, logs.length)));
+                    const br = state.bojRating || 0;
+
+                    state.xp = br + top100 + bonus;
+                    state.level = Math.floor(state.xp / 100) + 1;
+
+                    // Note: calculateTier might not be available on state at migration time
+                    // We'll let the App.tsx sync effect handle the final tier string
+                }
+
                 return state;
             }
         }
@@ -405,29 +497,73 @@ export const useUserStore = create<UserState>()(
 );
 
 /**
- * 문제 난이도와 플랫폼을 받아 획득할 XP를 계산합니다.
+ * 문제 난이도를 대략적인 사용자 레벨로 매핑 (Solved.ac 분포 기준)
  */
-export const calculateEarnedXp = (platform: Platform, difficulty: string): number => {
-    // 플랫폼이 매핑에 없는 경우 방어 (런타임 에러 방지)
+const DIFFICULTY_LEVEL_MAP: Record<string, number> = {
+    // Programmers
+    'Lv.0': 1, 'Lv.1': 4, 'Lv.2': 10, 'Lv.3': 20, 'Lv.4': 30, 'Lv.5': 42,
+    // LeetCode
+    'Easy': 5, 'Medium': 18, 'Hard': 35,
+    // SWEA
+    'D1': 1, 'D2': 5, 'D3': 12, 'D4': 22, 'D5': 32, 'D6': 42,
+    // BOJ (Approx)
+    'Bronze': 3, 'Silver': 12, 'Gold': 22, 'Platinum': 32, 'Diamond': 40, 'Ruby': 45
+};
+
+/**
+ * 문제 난이도와 플랫폼, 유저 레벨을 받아 동적 XP를 계산합니다.
+ * (Solved.ac 방식: 내 티어보다 낮은 문제는 점수가 짜고, 높은 문제는 후함)
+ */
+export const calculateEarnedXp = (platform: Platform, difficulty: string, userLevel: number = 1): number => {
+    let baseXp = 10;
+    let problemLevel = 1;
+
     const platformMap = XP_MAP[platform];
-    if (!platformMap) return 10; // 기본 XP 반환
+    if (platformMap) {
+        // 1. Calculate Base XP from Table
+        if (platform === 'BOJ') {
+            const lv = parseInt(difficulty);
+            if (!isNaN(lv)) {
+                if (lv <= 5) baseXp = XP_MAP.BOJ.Bronze;
+                else if (lv <= 10) baseXp = XP_MAP.BOJ.Silver;
+                else if (lv <= 15) baseXp = XP_MAP.BOJ.Gold;
+                else if (lv <= 20) baseXp = XP_MAP.BOJ.Platinum;
+                else if (lv <= 25) baseXp = XP_MAP.BOJ.Diamond;
+                else baseXp = XP_MAP.BOJ.Ruby;
 
-    // 백준의 경우 숫자로 들어올 수 있으므로 매핑 필요 (1-5: Bronze, 6-10: Silver, 11-15: Gold ...)
-    if (platform === 'BOJ') {
-        const lv = parseInt(difficulty);
-        if (!isNaN(lv)) {
-            if (lv <= 5) return XP_MAP.BOJ.Bronze;
-            if (lv <= 10) return XP_MAP.BOJ.Silver;
-            if (lv <= 15) return XP_MAP.BOJ.Gold;
-            if (lv <= 20) return XP_MAP.BOJ.Platinum;
-            if (lv <= 25) return XP_MAP.BOJ.Diamond;
-            return XP_MAP.BOJ.Ruby;
+                // Problem Level Approx
+                problemLevel = Math.max(1, (lv - 1) * 2);
+            } else {
+                const tierBase = difficulty.split(' ')[0];
+                baseXp = XP_MAP.BOJ[tierBase] || 10;
+                problemLevel = DIFFICULTY_LEVEL_MAP[tierBase] || 10;
+            }
+        } else {
+            // @ts-ignore - Dynamic access
+            baseXp = platformMap[difficulty] || 10;
+            // Map Difficulty String to Level
+            problemLevel = DIFFICULTY_LEVEL_MAP[difficulty] || 10;
         }
-
-        // Tier Name으로 들어온 경우 (예: "Gold 3")
-        const tierBase = difficulty.split(' ')[0];
-        return XP_MAP.BOJ[tierBase] || 10;
     }
 
-    return platformMap[difficulty] || 10;
+    // 2. Calculate Gap Multiplier
+    // Gap = Problem Level - User Level
+    const gap = problemLevel - userLevel;
+    let multiplier = 1.0;
+
+    if (gap > 0) {
+        // Challenge Bonus: 10% bonus per level gap
+        multiplier = 1 + (gap * 0.1);
+    } else if (gap < 0) {
+        // Easy Penalty: 10% reduction per level gap (Exponential Decay)
+        // e.g. Gap -5 => 0.9^5 = 0.59 (59% XP)
+        // Gap -10 => 0.9^10 = 0.34 (34% XP)
+        multiplier = Math.pow(0.9, Math.abs(gap));
+    }
+
+    // 3. Final Calculation
+    let finalXp = Math.floor(baseXp * multiplier);
+
+    // Minimum 1 XP 
+    return Math.max(1, finalXp);
 };

@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Search, Loader2, Link as LinkIcon, Link2Off, Trash2, AlertCircle, Calendar, BarChart3 } from 'lucide-react';
+import { X, Search, Loader2, Link as LinkIcon, Link2Off, Trash2, AlertCircle } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { useModalStore } from '../store/useModalStore';
 import { fetchSolvedAcUser, SolvedAcUser } from '../api/solvedac';
 import { motion, AnimatePresence } from 'framer-motion';
-import { clsx } from 'clsx';
 
 interface AccountSettingsModalProps {
     isOpen: boolean;
@@ -55,8 +54,8 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
 
     const handleLinkAccount = () => {
         if (verifiedUser) {
-            linkBojAccount(verifiedUser.handle, verifiedUser.tier);
-            showAlert("연동 완료", `백준 계정이 연동되었습니다! 레벨이 ${verifiedUser.tier + 1}로 조정되었습니다. ✨`);
+            linkBojAccount(verifiedUser.handle, verifiedUser.rating); // Use rating instead of tier
+            showAlert("연동 완료", `백준 계정이 연동되었습니다! 실시간 레이팅이 반영되었습니다. ✨`);
             setVerifiedUser(null);
         }
     };
