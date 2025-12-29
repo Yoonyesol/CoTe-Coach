@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Play, Pause, RotateCcw, Maximize2, Minimize2, AlertCircle, X, Timer as TimerIcon } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
+import { useModalStore } from '../store/useModalStore';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Stopwatch: React.FC = () => {
     const { timer, stopTimer, resetTimer, getTotalElapsed, startTimer } = useUserStore();
+    const { showConfirm } = useModalStore();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isHidden, setIsHidden] = useState(false);
     // 타이머의 숫자를 갱신하기 위한 '틱' 상태 (실제 시간값은 getTotalElapsed에서 계산)
@@ -54,7 +56,7 @@ const Stopwatch: React.FC = () => {
 
     if (isExpanded) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-base-900/80 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-base-900/80 backdrop-blur-md animate-in fade-in duration-300 font-sans">
                 <div className="glass-card bg-white w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
                     <div className="bg-base-900 p-12 text-center text-white relative">
                         <button
@@ -67,12 +69,12 @@ const Stopwatch: React.FC = () => {
                             <div className="px-4 py-1.5 bg-coral/20 text-coral rounded-full text-xs font-black uppercase tracking-widest animate-pulse">
                                 {timer.isRunning ? 'Focus Mode Active' : 'Paused'}
                             </div>
-                            <h2 className="text-2xl font-black font-sans leading-tight max-w-md mx-auto line-clamp-2">
+                            <h2 className="text-2xl font-black leading-tight max-w-md mx-auto line-clamp-2">
                                 {currentProblem}
                             </h2>
                             <div className="mt-8 flex items-baseline gap-2">
-                                <span className="text-8xl font-black font-sans tracking-tighter tabular-nums">{time.main}</span>
-                                <span className="text-3xl font-bold text-white/30 font-sans tabular-nums w-12 text-left">{time.ms}</span>
+                                <span className="text-8xl font-black tracking-tighter tabular-nums">{time.main}</span>
+                                <span className="text-3xl font-bold text-white/30 tabular-nums w-12 text-left">{time.ms}</span>
                             </div>
                         </div>
                     </div>
@@ -89,7 +91,11 @@ const Stopwatch: React.FC = () => {
                         </button>
                         <button
                             onClick={() => {
-                                if (window.confirm("기록을 초기화하시겠습니까?")) resetTimer();
+                                showConfirm(
+                                    "기록 초기화",
+                                    "현재 문제의 공부 기록을 초기화하시겠습니까?",
+                                    () => resetTimer()
+                                );
                             }}
                             className="w-24 h-24 rounded-full bg-base-50 text-base-300 hover:bg-base-100 hover:text-base-500 flex items-center justify-center transition-all active:scale-90"
                         >
@@ -100,7 +106,7 @@ const Stopwatch: React.FC = () => {
                     <div className="px-12 pb-12 text-center">
                         <div className="inline-flex items-center gap-3 px-6 py-4 bg-sage-light/30 border border-sage/20 rounded-2xl text-sage-dark">
                             <AlertCircle className="w-5 h-5" />
-                            <p className="text-sm font-bold font-sans">
+                            <p className="text-sm font-bold">
                                 정확한 기록을 위해 페이지를 닫지 말아주세요. (백그라운드에서도 안전하게 측정됩니다)
                             </p>
                         </div>
@@ -148,7 +154,7 @@ const Stopwatch: React.FC = () => {
                         {/* Close/Hide Button */}
                         <button
                             onClick={() => setIsHidden(true)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-base-900 text-white rounded-full flex items-center justify-center border border-white/20 opacity-0 group-hover/timer:opacity-100 transition-all hover:bg-red-600 hover:scale-110 shadow-lg active:scale-90"
+                            className="absolute -top-2 -right-2 w-6 h-6 bg-base-900 text-white rounded-full flex items-center justify-center border border-white/20 opacity-0 group-hover/timer:opacity-100 transition-all hover:bg-red-600 hover:scale-110 shadow-lg active:scale-90 cursor-pointer"
                         >
                             <X className="w-3 h-3" />
                         </button>
@@ -156,7 +162,7 @@ const Stopwatch: React.FC = () => {
                         <button
                             onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
                             className={clsx(
-                                "w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg",
+                                "w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer",
                                 timer.isRunning ? "bg-coral text-white" : "bg-white text-base-900 hover:bg-base-50"
                             )}
                         >
@@ -165,10 +171,10 @@ const Stopwatch: React.FC = () => {
 
                         <div className="cursor-pointer group flex items-center gap-4 active:cursor-grabbing" onClick={() => setIsExpanded(true)}>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest font-sans leading-none mb-1 group-hover:text-misty transition-colors max-w-[120px] truncate">
+                                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 group-hover:text-misty transition-colors max-w-[120px] truncate">
                                     {currentProblem}
                                 </span>
-                                <span className="text-3xl font-black font-sans tracking-tighter leading-none tabular-nums">
+                                <span className="text-3xl font-black tracking-tighter leading-none tabular-nums">
                                     {time.main}
                                 </span>
                             </div>
@@ -179,8 +185,14 @@ const Stopwatch: React.FC = () => {
 
                         <div className="flex items-center gap-2 pl-4 border-l border-white/10">
                             <button
-                                onClick={() => resetTimer()}
-                                className="p-2 text-white/40 hover:text-white transition-colors"
+                                onClick={() => {
+                                    showConfirm(
+                                        "기록 초기화",
+                                        "현재 문제의 공부 기록을 초기화하시겠습니까?",
+                                        () => resetTimer()
+                                    );
+                                }}
+                                className="p-2 text-white/40 hover:text-white transition-colors cursor-pointer"
                             >
                                 <RotateCcw className="w-5 h-5" />
                             </button>

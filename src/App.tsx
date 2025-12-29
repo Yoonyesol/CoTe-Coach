@@ -11,6 +11,7 @@ import StudySettingsModal from './components/StudySettingsModal'
 import ReviewModal from './components/ReviewModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
+import GlobalModal from './components/GlobalModal'
 import { useUserStore } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
@@ -200,6 +201,7 @@ function App() {
         </div>
       </motion.div>
       <Stopwatch />
+      <GlobalModal />
     </MainLayout>
   )
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import ShopModal from '../ShopModal';
 import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut } from 'lucide-react';
@@ -19,6 +20,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange }) => {
     const { tier, level, xp, points, equippedItems } = useUserStore();
     const { signOut } = useAuthStore();
+    const { showConfirm } = useModalStore();
     const [isShopOpen, setIsShopOpen] = useState(false);
     const progress = xp % 100;
 
@@ -70,7 +72,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     </button>
                     <button
                         onClick={() => {
-                            if (window.confirm('로그아웃 하시겠습니까?')) signOut();
+                            showConfirm(
+                                '로그아웃',
+                                '정말 로그아웃 하시겠습니까?',
+                                () => signOut()
+                            );
                         }}
                         className="p-3 rounded-2xl text-white/40 hover:text-coral hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="로그아웃"

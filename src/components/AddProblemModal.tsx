@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Search, Link as LinkIcon, AlertCircle } from 'lucide-react';
 import { useUserStore, calculateEarnedXp } from '../store/useUserStore';
+import { useModalStore } from '../store/useModalStore';
 
 interface AddProblemModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface AddProblemModalProps {
 
 const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) => {
     const { addXp } = useUserStore();
+    const { showAlert } = useModalStore();
     const [platform, setPlatform] = useState<'PROG' | 'LC' | 'SWEA'>('PROG');
     const [difficulty, setDifficulty] = useState('');
     const [title, setTitle] = useState('');
@@ -22,7 +24,10 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
         const earnedXp = calculateEarnedXp(platform, difficulty);
         addXp(earnedXp);
 
-        alert(`${title} (${platform}) 등록 완료! ${earnedXp}XP가 지급되었습니다.`);
+        showAlert(
+            "등록 완료",
+            `${title} (${platform}) 등록 완료! ${earnedXp}XP가 지급되었습니다.`
+        );
         onClose();
     };
 
