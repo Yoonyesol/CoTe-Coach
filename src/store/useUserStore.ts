@@ -195,7 +195,11 @@ export const useUserStore = create<UserState>()(
 
                     // Force recalculation
                     const logs = get().studyLogs;
-                    const sortedPoints = logs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+
+                    // Official Source Policy Filtering
+                    const relevantLogs = logs.filter(l => l.platform !== 'BOJ');
+
+                    const sortedPoints = relevantLogs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
                     const localTop100 = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
                     const bonus = Math.floor(175 * (1 - Math.pow(0.995, logs.length)));
 
@@ -217,7 +221,11 @@ export const useUserStore = create<UserState>()(
 
                 // Recalculate everything immediately
                 const logs = get().studyLogs;
-                const sortedPoints = logs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
+
+                // Official Source Policy Filtering
+                const relevantLogs = logs.filter(l => l.platform !== 'BOJ');
+
+                const sortedPoints = relevantLogs.map(l => l.ratingContribution || 0).sort((a, b) => b - a);
                 const localTop100 = sortedPoints.slice(0, 100).reduce((a, b) => a + b, 0);
                 const bonus = Math.floor(175 * (1 - Math.pow(0.995, logs.length)));
 

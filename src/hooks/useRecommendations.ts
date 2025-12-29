@@ -15,8 +15,8 @@ const getTodayDateString = () => {
 const RECOMMENDATIONS_STORAGE_KEY = 'daily_recommendations';
 const RECOMMENDATIONS_DATE_KEY = 'daily_recommendations_date';
 
-// Load recommendations from localStorage if they exist and are from today
-const loadCachedRecommendations = (): RecommendedProblem[] | undefined => {
+// Load recommendations from localStorage if they exist, are from today, and match level
+const loadCachedRecommendations = (currentLevel: number): RecommendedProblem[] | undefined => {
     const storedDate = localStorage.getItem(RECOMMENDATIONS_DATE_KEY);
     const todayDate = getTodayDateString();
 
@@ -25,7 +25,12 @@ const loadCachedRecommendations = (): RecommendedProblem[] | undefined => {
         const storedData = localStorage.getItem(RECOMMENDATIONS_STORAGE_KEY);
         if (storedData) {
             try {
-                return JSON.parse(storedData);
+                const parsed = JSON.parse(storedData);
+                // NEW: Also check if the cached data level matches current level
+                // We'll store level in the cache object for validation
+                if (parsed.level === currentLevel) {
+                    return parsed.items;
+                }
             } catch (e) {
                 console.error('Failed to parse cached recommendations:', e);
                 return undefined;
@@ -43,9 +48,12 @@ const loadCachedRecommendations = (): RecommendedProblem[] | undefined => {
 };
 
 // Save recommendations to localStorage
-const saveRecommendations = (data: RecommendedProblem[]) => {
+const saveRecommendations = (data: RecommendedProblem[], level: number) => {
     const todayDate = getTodayDateString();
-    localStorage.setItem(RECOMMENDATIONS_STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(RECOMMENDATIONS_STORAGE_KEY, JSON.stringify({
+        items: data,
+        level: level
+    }));
     localStorage.setItem(RECOMMENDATIONS_DATE_KEY, todayDate);
 };
 
@@ -54,7 +62,7 @@ export const useRecommendations = () => {
     const todayDate = getTodayDateString();
 
     // Load initial data from localStorage
-    const cachedData = loadCachedRecommendations();
+    const cachedData = loadCachedRecommendations(level);
 
     return useQuery({
         // Include today's date in queryKey to ensure recommendations are unique per day
@@ -66,7 +74,7 @@ export const useRecommendations = () => {
             });
 
             // Save to localStorage after successful fetch
-            saveRecommendations(recommendations);
+            saveRecommendations(recommendations, level);
 
             return recommendations;
         },
