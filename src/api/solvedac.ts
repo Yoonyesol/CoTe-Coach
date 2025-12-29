@@ -15,7 +15,11 @@ export interface SolvedAcProblem {
   problemId: number;
   titleKo: string;
   level: number;
-  tags: { key: string; name: string }[];
+  tags: {
+    key: string;
+    bojTagId: number;
+    displayNames: { language: string; name: string; short: string }[];
+  }[];
 }
 
 /**

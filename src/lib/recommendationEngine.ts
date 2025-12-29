@@ -71,7 +71,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
-            tags: p.tags.slice(0, 2).map(t => t.name),
+            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });
     });
@@ -83,7 +83,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
-            tags: p.tags.slice(0, 2).map(t => t.name),
+            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });
     });
@@ -95,7 +95,7 @@ export const getRecommendations = async (
             title: p.titleKo,
             platform: 'BOJ',
             difficulty: levelToTierName(p.level),
-            tags: p.tags.slice(0, 2).map(t => t.name),
+            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
             problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
         });
     });
