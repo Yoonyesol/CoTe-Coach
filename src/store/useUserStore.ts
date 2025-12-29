@@ -31,8 +31,9 @@ export interface StudyLog {
     feeling: string;
     concepts: string[];
     completedAt: string; // ISO String
-    result: 'SUCCESS' | 'FAIL'; // Added back
-    ratingContribution?: number; // Added for top 100 rating logic
+    result: 'SUCCESS' | 'FAIL'; // SUCCESS: 해결함, FAIL: 못 끝냄
+    solvingMethod: 'SELF' | 'REFERENCE'; // SELF: 스스로 해결, REFERENCE: 답지 참고
+    ratingContribution?: number;
 }
 
 export interface ShopItem {
@@ -180,6 +181,7 @@ export const useUserStore = create<UserState>()(
                     concepts: [],
                     completedAt: new Date().toISOString(),
                     result: 'SUCCESS',
+                    solvingMethod: 'SELF',
                     ratingContribution: amount // Using amount here
                 };
 
@@ -361,7 +363,8 @@ export const useUserStore = create<UserState>()(
                         platform: l.site as Platform,
                         difficulty: l.difficulty || '',
                         perceivedDifficulty: l.perceived_difficulty as 'EASY' | 'NORMAL' | 'HARD',
-                        result: l.result as 'SUCCESS' | 'FAIL', // Fixed
+                        result: l.result as 'SUCCESS' | 'FAIL',
+                        solvingMethod: l.solving_method as 'SELF' | 'REFERENCE',
                         elapsedTime: l.elapsed_time || 0,
                         feeling: l.feeling || '',
                         concepts: l.concepts || [],
@@ -508,6 +511,7 @@ export const useUserStore = create<UserState>()(
                 if (updates.result) dbUpdates.result = updates.result;
                 if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
                 if (updates.elapsedTime !== undefined) dbUpdates.elapsed_time = updates.elapsedTime;
+                if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
 
                 const { error } = await supabase
                     .from('study_logs')
@@ -594,6 +598,7 @@ export const useUserStore = create<UserState>()(
                         difficulty: newLog.difficulty,
                         perceived_difficulty: newLog.perceivedDifficulty,
                         result: newLog.result,
+                        solving_method: newLog.solvingMethod,
                         elapsed_time: newLog.elapsedTime,
                         feeling: newLog.feeling,
                         concepts: newLog.concepts,

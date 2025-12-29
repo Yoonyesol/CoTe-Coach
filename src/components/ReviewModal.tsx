@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, CheckCircle2, MessageSquare, Brain } from 'lucide-react';
+import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
 import { useUserStore, Platform } from '../store/useUserStore';
 import { clsx } from 'clsx';
 
@@ -17,6 +17,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const { addStudyLog, getTotalElapsed } = useUserStore();
 
     const [perceivedDifficulty, setPerceivedDifficulty] = useState<'EASY' | 'NORMAL' | 'HARD'>('NORMAL');
+    const [result, setResult] = useState<'SUCCESS' | 'FAIL'>('SUCCESS');
+    const [solvingMethod, setSolvingMethod] = useState<'SELF' | 'REFERENCE'>('SELF');
     const [feeling, setFeeling] = useState('');
     const [concept, setConcept] = useState('');
     const [concepts, setConcepts] = useState<string[]>([]);
@@ -55,6 +57,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
             platform: problem.platform as Platform,
             difficulty: problem.difficulty,
             perceivedDifficulty,
+            result,
+            solvingMethod,
             elapsedTime: finalElapsedTime,
             feeling,
             concepts,
@@ -64,13 +68,6 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
         setTimeout(() => {
             onClose();
         }, 1500);
-    };
-
-    const formatTime = (ms: number) => {
-        const totalSeconds = Math.floor(ms / 1000);
-        const m = Math.floor(totalSeconds / 60);
-        const s = totalSeconds % 60;
-        return `${m}분 ${s}초`;
     };
 
     if (!isOpen) return null;
@@ -101,51 +98,70 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                             <CheckCircle2 className="w-10 h-10 text-sage-dark" />
                         </div>
                         <h3 className="text-2xl font-black text-base-900 font-sans">로그 제출 완료!</h3>
-                        <p className="text-base-500 font-bold">보너스 XP +10를 획득했습니다. ✨</p>
+                        <p className="text-base-500 font-bold">학습 데이터가 연동되었습니다. ✨</p>
                     </div>
                 ) : (
-                    <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
 
-                        {/* Time Input - Always Editable */}
-                        <div className="p-4 bg-misty-light/30 rounded-2xl border border-misty/20 space-y-3">
-                            <div className="flex items-center justify-between">
-                                <p className="text-[10px] font-black text-misty-dark uppercase tracking-tighter">풀이 소요 시간</p>
-                                {elapsedTime > 0 && (
-                                    <span className="px-2 py-0.5 bg-sage-light text-sage-dark rounded-full text-[9px] font-black">
-                                        자동 기록됨
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="999"
-                                        value={manualMinutes}
-                                        onChange={(e) => setManualMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                                        className="w-full px-4 py-3 bg-white border-2 border-misty/30 rounded-xl text-center text-lg font-black focus:border-misty transition-all outline-none"
-                                        placeholder="0"
-                                    />
-                                    <p className="text-center text-[10px] font-black text-base-400 mt-1">분</p>
-                                </div>
-                                <span className="text-2xl font-black text-base-300">:</span>
-                                <div className="flex-1">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max="59"
-                                        value={manualSeconds}
-                                        onChange={(e) => setManualSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                                        className="w-full px-4 py-3 bg-white border-2 border-misty/30 rounded-xl text-center text-lg font-black focus:border-misty transition-all outline-none"
-                                        placeholder="0"
-                                    />
-                                    <p className="text-center text-[10px] font-black text-base-400 mt-1">초</p>
+                        {/* Status Group */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Solve Status */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                                    <HelpCircle className="w-3 h-3" /> 해결 여부
+                                </label>
+                                <div className="flex bg-base-100 p-1 rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => setResult('SUCCESS')}
+                                        className={clsx(
+                                            "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                            result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-400"
+                                        )}
+                                    >
+                                        해결함
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setResult('FAIL')}
+                                        className={clsx(
+                                            "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                            result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-400"
+                                        )}
+                                    >
+                                        못 끝냄
+                                    </button>
                                 </div>
                             </div>
-                            <p className="text-[10px] text-base-500 font-medium text-center">
-                                {elapsedTime > 0 ? '자동 기록된 시간을 수정할 수 있어요' : '시간은 대략적으로 입력해주세요'}
-                            </p>
+
+                            {/* Method Status */}
+                            <div className="space-y-3">
+                                <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                                    <BookOpen className="w-3 h-3" /> 해결 방식
+                                </label>
+                                <div className="flex bg-base-100 p-1 rounded-xl">
+                                    <button
+                                        type="button"
+                                        onClick={() => setSolvingMethod('SELF')}
+                                        className={clsx(
+                                            "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                            solvingMethod === 'SELF' ? "bg-white text-misty-dark shadow-sm" : "text-base-400"
+                                        )}
+                                    >
+                                        <Lightbulb className="w-3 h-3" /> 스스로
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSolvingMethod('REFERENCE')}
+                                        className={clsx(
+                                            "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                            solvingMethod === 'REFERENCE' ? "bg-white text-amber-600 shadow-sm" : "text-base-400"
+                                        )}
+                                    >
+                                        <BookOpen className="w-3 h-3" /> 답지참고
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Perceived Difficulty */}
@@ -158,7 +174,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                         type="button"
                                         onClick={() => setPerceivedDifficulty(level)}
                                         className={clsx(
-                                            "py-3 rounded-xl text-xs font-black transition-all border-2",
+                                            "py-2.5 rounded-xl text-[11px] font-black transition-all border-2",
                                             perceivedDifficulty === level
                                                 ? (level === 'EASY' ? "bg-sage-light border-sage text-sage-dark" :
                                                     level === 'NORMAL' ? "bg-misty-light border-misty text-misty-dark" :
@@ -172,25 +188,48 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                             </div>
                         </div>
 
+                        {/* Time Input - Always Editable */}
+                        <div className="p-4 bg-base-50 rounded-2xl border-2 border-dashed border-base-100 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-[10px] font-black text-base-400 uppercase tracking-tighter">소요 시간</p>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        value={manualMinutes}
+                                        onChange={(e) => setManualMinutes(Math.max(0, parseInt(e.target.value) || 0))}
+                                        className="w-12 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
+                                    />
+                                    <span className="text-[10px] font-black text-base-400">분</span>
+                                    <input
+                                        type="number"
+                                        value={manualSeconds}
+                                        onChange={(e) => setManualSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                                        className="w-12 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
+                                    />
+                                    <span className="text-[10px] font-black text-base-400">초</span>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Concepts Learned */}
                         <div className="space-y-3">
-                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">사용된 알고리즘/개념</label>
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">학습 개념</label>
                             <div className="space-y-3">
                                 <div className="relative">
-                                    <Brain className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-base-300" />
+                                    < Brain className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-base-300" />
                                     <input
                                         type="text"
                                         value={concept}
                                         onChange={(e) => setConcept(e.target.value)}
                                         onKeyDown={handleAddConcept}
-                                        placeholder="엔터를 눌러 태그 추가 (예: BFS, DP)"
+                                        placeholder="엔터로 태그 추가"
                                         className="w-full pl-11 pr-4 py-3 bg-base-50 border-2 border-transparent focus:border-misty focus:bg-white rounded-xl text-sm font-bold transition-all outline-none"
                                     />
                                 </div>
                                 <div className="flex flex-wrap gap-2">
                                     {concepts.map((c) => (
-                                        <span key={c} className="flex items-center gap-1 px-3 py-1 bg-misty-light text-misty-dark rounded-full text-xs font-black">
-                                            {c}
+                                        <span key={c} className="flex items-center gap-1 px-3 py-1 bg-misty-light text-misty-dark rounded-full text-[10px] font-black uppercase tracking-tight">
+                                            #{c}
                                             <button type="button" onClick={() => removeConcept(c)} className="hover:text-coral transition-colors">
                                                 <X className="w-3 h-3" />
                                             </button>
@@ -202,29 +241,25 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
 
                         {/* Feeling/Note */}
                         <div className="space-y-3">
-                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">풀이 소감 및 회고</label>
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">풀이 회고</label>
                             <div className="relative">
                                 <MessageSquare className="absolute left-4 top-4 w-4 h-4 text-base-300" />
                                 <textarea
                                     value={feeling}
                                     onChange={(e) => setFeeling(e.target.value)}
-                                    placeholder="풀이 과정에서의 깨달음이나 아쉬웠던 점을 적어주세요."
-                                    rows={3}
+                                    placeholder="과정에서의 깨달음이나 아쉬운 점..."
+                                    rows={2}
                                     className="w-full pl-11 pr-4 py-4 bg-base-50 border-2 border-transparent focus:border-misty focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none resize-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="pt-4">
+                        <div className="pt-2">
                             <button
                                 type="submit"
-                                disabled={!feeling.trim()}
-                                className={clsx(
-                                    "w-full py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-center gap-2 shadow-lg active:scale-95",
-                                    feeling.trim() ? "bg-base-900 text-white hover:shadow-xl" : "bg-base-100 text-base-400 cursor-not-allowed"
-                                )}
+                                className="w-full py-4 bg-base-900 text-white rounded-2xl text-sm font-black hover:bg-black transition-all shadow-lg active:scale-95"
                             >
-                                <Save className="w-5 h-5" />
+                                <Save className="w-5 h-5 inline-block mr-2" />
                                 복습 로그 제출하기
                             </button>
                         </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Trash2, Clock } from 'lucide-react';
+import { X, Save, Trash2, Clock, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
 import { useUserStore, StudyLog } from '../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { clsx } from 'clsx';
 
 interface EditStudyLogModalProps {
     log: StudyLog;
@@ -13,6 +14,8 @@ const EditStudyLogModal: React.FC<EditStudyLogModalProps> = ({ log, isOpen, onCl
     const { updateStudyLog, deleteStudyLog } = useUserStore();
     const [feeling, setFeeling] = useState(log.feeling);
     const [perceivedDifficulty, setPerceivedDifficulty] = useState(log.perceivedDifficulty);
+    const [result, setResult] = useState(log.result);
+    const [solvingMethod, setSolvingMethod] = useState(log.solvingMethod);
     const [concepts, setConcepts] = useState(log.concepts.join(', '));
     const [elapsedMinutes, setElapsedMinutes] = useState(Math.round(log.elapsedTime / 60000));
 
@@ -20,6 +23,8 @@ const EditStudyLogModal: React.FC<EditStudyLogModalProps> = ({ log, isOpen, onCl
     useEffect(() => {
         setFeeling(log.feeling);
         setPerceivedDifficulty(log.perceivedDifficulty);
+        setResult(log.result);
+        setSolvingMethod(log.solvingMethod);
         setConcepts(log.concepts.join(', '));
         setElapsedMinutes(Math.round(log.elapsedTime / 60000));
     }, [log]);
@@ -28,6 +33,8 @@ const EditStudyLogModal: React.FC<EditStudyLogModalProps> = ({ log, isOpen, onCl
         await updateStudyLog(log.id, {
             feeling,
             perceivedDifficulty,
+            result,
+            solvingMethod,
             elapsedTime: elapsedMinutes * 60000,
             concepts: concepts.split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
         });
@@ -68,7 +75,66 @@ const EditStudyLogModal: React.FC<EditStudyLogModalProps> = ({ log, isOpen, onCl
                             </button>
                         </div>
 
-                        <div className="p-8 space-y-6">
+                        <div className="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            {/* Status Group */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-black text-base-400 uppercase tracking-tighter flex items-center gap-1">
+                                        <HelpCircle className="w-3 h-3" /> 해결 여부
+                                    </label>
+                                    <div className="flex bg-base-50 p-1 rounded-xl">
+                                        <button
+                                            type="button"
+                                            onClick={() => setResult('SUCCESS')}
+                                            className={clsx(
+                                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                                result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-400"
+                                            )}
+                                        >
+                                            해결함
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setResult('FAIL')}
+                                            className={clsx(
+                                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                                result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-400"
+                                            )}
+                                        >
+                                            못 끝냄
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-xs font-black text-base-400 uppercase tracking-tighter flex items-center gap-1">
+                                        <BookOpen className="w-3 h-3" /> 해결 방식
+                                    </label>
+                                    <div className="flex bg-base-50 p-1 rounded-xl">
+                                        <button
+                                            type="button"
+                                            onClick={() => setSolvingMethod('SELF')}
+                                            className={clsx(
+                                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                                solvingMethod === 'SELF' ? "bg-white text-misty-dark shadow-sm" : "text-base-400"
+                                            )}
+                                        >
+                                            <Lightbulb className="w-3 h-3" /> 스스로
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setSolvingMethod('REFERENCE')}
+                                            className={clsx(
+                                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                                solvingMethod === 'REFERENCE' ? "bg-white text-amber-600 shadow-sm" : "text-base-400"
+                                            )}
+                                        >
+                                            <BookOpen className="w-3 h-3" /> 답지참고
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Time & Difficulty Row */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-3">
