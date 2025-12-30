@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Award, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
-import TierBadge from './TierBadge';
+import TierBadge from '../TierBadge';
 
 interface TierGuideModalProps {
     isOpen: boolean;

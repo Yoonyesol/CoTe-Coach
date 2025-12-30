@@ -3,7 +3,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
-import ShopModal from '../ShopModal';
+import ShopModal from '../modals/ShopModal';
 import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info, BookOpen } from 'lucide-react';
 import TierBadge from '../TierBadge';
 import BojTierBadge from '../BojTierBadge';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, BarChart3, HelpCircle, Check } from 'lucide-react';
-import { useUserStore, RecommendationSettings } from '../store/useUserStore';
+import { useUserStore, RecommendationSettings } from '../../store/useUserStore';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import DifficultyGuideModal from './DifficultyGuideModal';

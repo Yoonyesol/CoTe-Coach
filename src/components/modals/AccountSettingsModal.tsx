@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, Loader2, Link as LinkIcon, Link2Off, Trash2, AlertCircle } from 'lucide-react';
-import { useUserStore } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
-import { fetchSolvedAcUser, SolvedAcUser } from '../api/solvedac';
+import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
+import { fetchSolvedAcUser, SolvedAcUser } from '../../api/solvedac';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AccountSettingsModalProps {

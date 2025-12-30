@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, Clock, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
-import { useUserStore, StudyLog } from '../store/useUserStore';
+import { useUserStore, StudyLog } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 

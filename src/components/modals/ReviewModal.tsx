@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
-import { useUserStore, Platform } from '../store/useUserStore';
+import { useUserStore, Platform } from '../../store/useUserStore';
 import { clsx } from 'clsx';
 
 interface ReviewModalProps {

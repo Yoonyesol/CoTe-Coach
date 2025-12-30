@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Target, Calendar, BarChart3, TrendingUp, Award, Edit } from 'lucide-react';
-import { useUserStore } from '../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
 import { motion } from 'framer-motion';
 
 interface StudyPlanDetailModalProps {

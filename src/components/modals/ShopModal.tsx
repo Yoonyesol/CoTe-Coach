@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShoppingBag, Check, Coins } from 'lucide-react';
-import { useUserStore, ShopItem } from '../store/useUserStore';
+import { useUserStore, ShopItem } from '../../store/useUserStore';
 import { clsx } from 'clsx';
 
 interface ShopModalProps {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Search, Link as LinkIcon, AlertCircle } from 'lucide-react';
-import { useUserStore, calculateEarnedXp } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
+import { useUserStore, calculateEarnedXp } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 
 interface AddProblemModalProps {
     isOpen: boolean;

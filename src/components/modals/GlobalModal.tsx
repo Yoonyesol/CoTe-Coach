@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useModalStore } from '../store/useModalStore';
+import { useModalStore } from '../../store/useModalStore';
 import { AlertCircle, HelpCircle, X } from 'lucide-react';
 import { clsx } from 'clsx';
 

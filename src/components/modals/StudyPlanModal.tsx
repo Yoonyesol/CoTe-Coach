@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target, Calendar, BarChart3, Save } from 'lucide-react';
-import { useUserStore, StudyPlan } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
+import { useUserStore, StudyPlan } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { motion } from 'framer-motion';
 
 interface StudyPlanModalProps {
