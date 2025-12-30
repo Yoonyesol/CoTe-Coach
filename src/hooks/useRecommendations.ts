@@ -66,11 +66,12 @@ export const useRecommendations = () => {
 
     return useQuery({
         // Include today's date in queryKey to ensure recommendations are unique per day
-        queryKey: ['recommendations', todayDate, level, bojHandle, studyPlan.problemCount],
+        queryKey: ['recommendations', todayDate, level, bojHandle, studyPlan.problemCount, studyPlan.recommendationDifficulty],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
-                problemCount: studyPlan.problemCount
+                problemCount: studyPlan.problemCount,
+                difficultyAdjustment: studyPlan.recommendationDifficulty
             });
 
             // Save to localStorage after successful fetch

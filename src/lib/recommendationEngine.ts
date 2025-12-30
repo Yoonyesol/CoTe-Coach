@@ -29,10 +29,18 @@ const levelToTierName = (level: number): string => {
  */
 export const getRecommendations = async (
     userLevel: number,
-    options: { handle?: string | null; problemCount?: number } = {}
+    options: {
+        handle?: string | null;
+        problemCount?: number;
+        difficultyAdjustment?: 'EASY' | 'NORMAL' | 'HARD';
+    } = {}
 ): Promise<RecommendedProblem[]> => {
-    const { handle, problemCount = 4 } = options;
-    const baseLevel = Math.min(userLevel, 30);
+    const { handle, problemCount = 4, difficultyAdjustment = 'NORMAL' } = options;
+
+    // 난이도 보정치 적용 (EASY: -2, NORMAL: 0, HARD: +1)
+    let baseLevel = Math.min(userLevel, 30);
+    if (difficultyAdjustment === 'EASY') baseLevel = Math.max(1, baseLevel - 2);
+    else if (difficultyAdjustment === 'HARD') baseLevel = Math.min(30, baseLevel + 1);
 
     const warmUpLevel = Math.max(baseLevel - 2, 1);
     const mainQuery = `tier:${Math.max(baseLevel - 1, 1)}..${Math.min(baseLevel + 1, 30)}`;

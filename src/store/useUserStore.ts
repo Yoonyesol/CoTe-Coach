@@ -9,6 +9,7 @@ export interface StudyPlan {
     targetDate: string; // ISO String
     dailyIntensity: 'LOW' | 'NORMAL' | 'HIGH';
     problemCount: number;
+    recommendationDifficulty: 'EASY' | 'NORMAL' | 'HARD';
 }
 
 export interface DailyTask {
@@ -156,6 +157,7 @@ export const useUserStore = create<UserState>()(
                 targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), // 30일 뒤
                 dailyIntensity: 'NORMAL',
                 problemCount: 4,
+                recommendationDifficulty: 'NORMAL',
             },
             timer: {
                 isRunning: false,
