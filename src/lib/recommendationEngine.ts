@@ -37,6 +37,28 @@ export const getRecommendations = async (
 ): Promise<RecommendedProblem[]> => {
     const { handle, problemCount = 4, difficultyAdjustment = 'NORMAL' } = options;
 
+    // Create a stable seed for the day (Daily Randomness)
+    const today = new Date();
+    const dateSeed = `${today.getFullYear()}${today.getMonth()}${today.getDate()}${handle || 'guest'}`;
+
+    const selectRandom = (items: SolvedAcProblem[], count: number, seed: string) => {
+        // Simple string hash function
+        const getHash = (str: string) => {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        };
+
+        return [...items].sort((a, b) => {
+            const hashA = getHash(seed + a.problemId);
+            const hashB = getHash(seed + b.problemId);
+            return hashA - hashB;
+        }).slice(0, count);
+    };
+
     // 난이도 보정치 적용 (EASY: -2, NORMAL: 0, HARD: +1)
     let baseLevel = Math.min(userLevel, 30);
     if (difficultyAdjustment === 'EASY') baseLevel = Math.max(1, baseLevel - 2);
@@ -67,14 +89,10 @@ export const getRecommendations = async (
         counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, counts.challenge * 2) : { items: [] },
     ]);
 
-    const selectRandom = (items: SolvedAcProblem[], count: number) => {
-        return [...items].sort(() => 0.5 - Math.random()).slice(0, count);
-    };
-
     const results: RecommendedProblem[] = [];
 
     // 워밍업
-    selectRandom(warmUpRes.items, counts.warmUp).forEach(p => {
+    selectRandom(warmUpRes.items, counts.warmUp, dateSeed).forEach(p => {
         results.push({
             type: 'WARM_UP',
             title: p.titleKo,
@@ -87,7 +105,7 @@ export const getRecommendations = async (
     });
 
     // 메인 공략
-    selectRandom(mainRes.items, counts.main).forEach(p => {
+    selectRandom(mainRes.items, counts.main, dateSeed).forEach(p => {
         results.push({
             type: 'MAIN',
             title: p.titleKo,
@@ -100,7 +118,7 @@ export const getRecommendations = async (
     });
 
     // 챌린지
-    selectRandom(challengeRes.items, counts.challenge).forEach(p => {
+    selectRandom(challengeRes.items, counts.challenge, dateSeed).forEach(p => {
         results.push({
             type: 'CHALLENGE',
             title: p.titleKo,
