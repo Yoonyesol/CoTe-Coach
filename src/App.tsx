@@ -16,6 +16,7 @@ import LandingPage from './components/LandingPage'
 import LearningJournal from './components/LearningJournal'
 import DailyHistory from './components/DailyHistory'
 import EditStudyLogModal from './components/EditStudyLogModal'
+import RecommendationSettingsModal from './components/RecommendationSettingsModal'
 import GlobalModal from './components/GlobalModal'
 import { useUserStore, StudyLog } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
@@ -102,6 +103,7 @@ function App() {
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL'>('HOME');
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
+  const [isRecoModalOpen, setIsRecoModalOpen] = useState(false);
 
   const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
     setSelectedProblem(problem);
@@ -231,16 +233,12 @@ function App() {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setActiveTab('JOURNAL')}
-                      className="px-6 py-2 rounded-xl text-sm font-black transition-all text-base-400 hover:text-base-600 hover:bg-white/50"
+                      onClick={() => setIsRecoModalOpen(true)}
+                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
+                      title="추천 필터 설정"
                     >
-                      학습 일지
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('STATS')}
-                      className="px-6 py-2 rounded-xl text-sm font-black transition-all text-base-400 hover:text-base-600 hover:bg-white/50"
-                    >
-                      학습 분석
+                      <Settings2 className="w-4 h-4" />
+                      필터
                     </button>
                     <button
                       onClick={async () => {
@@ -347,6 +345,11 @@ function App() {
         />
       )}
       <Stopwatch />
+      <RecommendationSettingsModal
+        isOpen={isRecoModalOpen}
+        onClose={() => setIsRecoModalOpen(false)}
+      />
+
       <GlobalModal />
     </>
   )

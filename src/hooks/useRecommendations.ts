@@ -76,19 +76,18 @@ const saveRecommendations = (
 };
 
 export const useRecommendations = () => {
-    const { level, bojHandle, studyPlan } = useUserStore();
+    const { level, bojHandle, studyPlan, recommendationSettings } = useUserStore();
     const todayDate = getTodayDateString();
+
+    const { difficulty, seedOffset, focusAlgorithms } = recommendationSettings;
 
     // Load initial data from localStorage
     const cachedData = loadCachedRecommendations(
         level,
-        studyPlan.recommendationDifficulty,
-        studyPlan.recommendationSeedOffset || 0,
-        studyPlan.focusAlgorithms || []
+        difficulty,
+        seedOffset,
+        focusAlgorithms
     );
-
-    const currentSeedOffset = studyPlan.recommendationSeedOffset || 0;
-    const currentAlgorithms = studyPlan.focusAlgorithms || [];
 
     return useQuery({
         // Include today's date, seedOffset, and algorithms in queryKey
@@ -98,26 +97,26 @@ export const useRecommendations = () => {
             level,
             bojHandle,
             studyPlan.problemCount,
-            studyPlan.recommendationDifficulty,
-            currentSeedOffset,
-            currentAlgorithms
+            difficulty,
+            seedOffset,
+            focusAlgorithms
         ],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
                 problemCount: studyPlan.problemCount,
-                difficultyAdjustment: studyPlan.recommendationDifficulty,
-                seedOffset: currentSeedOffset,
-                focusAlgorithms: currentAlgorithms
+                difficultyAdjustment: difficulty,
+                seedOffset: seedOffset,
+                focusAlgorithms: focusAlgorithms
             });
 
             // Save to localStorage after successful fetch
             saveRecommendations(
                 recommendations,
                 level,
-                studyPlan.recommendationDifficulty,
-                currentSeedOffset,
-                currentAlgorithms
+                difficulty,
+                seedOffset,
+                focusAlgorithms
             );
 
             return recommendations;
@@ -125,6 +124,6 @@ export const useRecommendations = () => {
         initialData: cachedData, // Use cached data as initial data
         staleTime: Infinity, // Never automatically refetch - only manual refresh
         gcTime: 1000 * 60 * 60 * 24, // Keep in memory for 24 hours
-        enabled: studyPlan.recommendationSeedOffset !== undefined // Use studyPlan from de-structuring above
+        enabled: true
     });
 };

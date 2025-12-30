@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Calendar, BarChart3, Save, HelpCircle, Plus } from 'lucide-react';
-import { useUserStore } from '../store/useUserStore';
+import { X, Target, Calendar, BarChart3, Save } from 'lucide-react';
+import { useUserStore, StudyPlan } from '../store/useUserStore';
 import { useModalStore } from '../store/useModalStore';
 import { motion } from 'framer-motion';
-import { clsx } from 'clsx';
-import DifficultyGuideModal from './DifficultyGuideModal';
 
 interface StudyPlanModalProps {
     isOpen: boolean;
@@ -14,17 +12,14 @@ interface StudyPlanModalProps {
 const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
     const { studyPlan, setStudyPlan } = useUserStore();
     const { showAlert } = useModalStore();
-    const [localPlan, setLocalPlan] = useState({
-        ...studyPlan,
-        recommendationDifficulty: studyPlan.recommendationDifficulty || 'NORMAL'
+    const [localPlan, setLocalPlan] = useState<StudyPlan>({
+        ...studyPlan
     });
-    const [showGuide, setShowGuide] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
             setLocalPlan({
-                ...studyPlan,
-                recommendationDifficulty: studyPlan.recommendationDifficulty || 'NORMAL'
+                ...studyPlan
             });
         }
     }, [isOpen, studyPlan]);
@@ -156,90 +151,6 @@ const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
                             />
                         </div>
 
-                        {/* Recommendation Difficulty */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-base-400">
-                                    <BarChart3 className="w-4 h-4 text-misty" />
-                                    <label className="text-[10px] font-black uppercase tracking-widest font-sans">추천 문제 난이도</label>
-                                </div>
-                                <button
-                                    onClick={() => setShowGuide(true)}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-misty/10 text-misty-dark hover:bg-misty/20 rounded-lg transition-all text-[10px] font-black uppercase tracking-tight cursor-pointer group"
-                                >
-                                    <HelpCircle className="w-3 h-3 transition-transform group-hover:scale-110" />
-                                    <span>가이드 보기</span>
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2 p-1 bg-base-50 rounded-[1.25rem]">
-                                {(['EASY', 'NORMAL', 'HARD'] as const).map((level) => (
-                                    <button
-                                        key={level}
-                                        onClick={() => setLocalPlan({ ...localPlan, recommendationDifficulty: level })}
-                                        className={clsx(
-                                            "py-3 rounded-[1rem] text-[11px] font-black transition-all",
-                                            localPlan.recommendationDifficulty === level
-                                                ? "bg-white text-base-900 shadow-sm"
-                                                : "text-base-400 hover:text-base-600"
-                                        )}
-                                    >
-                                        {level === 'EASY' ? '쉬움' : level === 'NORMAL' ? '보통' : '어려움'}
-                                    </button>
-                                ))}
-                            </div>
-                            <p className="text-[10px] text-center text-base-400 font-bold px-2">
-                                {localPlan.recommendationDifficulty === 'EASY' && "🐢 내 티어보다 낮은 문제를 추천받아 기초를 다집니다."}
-                                {localPlan.recommendationDifficulty === 'NORMAL' && "⚖️ 현재 내 티어에 가장 적합한 문제를 추천받습니다."}
-                                {localPlan.recommendationDifficulty === 'HARD' && "🔥 내 티어보다 높고 도전적인 문제를 추천받습니다."}
-                            </p>
-                        </div>
-
-                        {/* Focus Algorithms */}
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 text-base-400">
-                                    <Plus className="w-4 h-4 text-misty" />
-                                    <label className="text-[10px] font-black uppercase tracking-widest font-sans">집중 학습 알고리즘</label>
-                                </div>
-                                <span className="text-[10px] font-bold text-base-400 font-sans">최대 3개 선택</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {[
-                                    { id: 'dp', name: 'DP' },
-                                    { id: 'graphs', name: '그래프' },
-                                    { id: 'greedy', name: '그리디' },
-                                    { id: 'bfs', name: 'BFS/DFS' },
-                                    { id: 'string', name: '문자열' },
-                                    { id: 'data_structures', name: '자료구조' },
-                                    { id: 'backtracking', name: '백트래킹' },
-                                    { id: 'math', name: '수학' },
-                                ].map((tag) => {
-                                    const isSelected = localPlan.focusAlgorithms?.includes(tag.id);
-                                    return (
-                                        <button
-                                            key={tag.id}
-                                            onClick={() => {
-                                                const current = localPlan.focusAlgorithms || [];
-                                                if (isSelected) {
-                                                    setLocalPlan({ ...localPlan, focusAlgorithms: current.filter(id => id !== tag.id) });
-                                                } else if (current.length < 3) {
-                                                    setLocalPlan({ ...localPlan, focusAlgorithms: [...current, tag.id] });
-                                                }
-                                            }}
-                                            className={clsx(
-                                                "px-4 py-2.5 rounded-xl text-[11px] font-black transition-all border-2",
-                                                isSelected
-                                                    ? "bg-misty/10 border-misty text-misty-dark"
-                                                    : "bg-white border-base-100 text-base-400 hover:border-base-200"
-                                            )}
-                                        >
-                                            {tag.name}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
                         <button
                             onClick={handleSave}
                             className="w-full py-5 bg-base-900 text-white rounded-[1.25rem] font-black shadow-xl hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group cursor-pointer"
@@ -250,12 +161,6 @@ const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
                     </div>
                 </div>
             </motion.div>
-
-            {/* Difficulty Guide */}
-            <DifficultyGuideModal
-                isOpen={showGuide}
-                onClose={() => setShowGuide(false)}
-            />
         </div>
     );
 };
