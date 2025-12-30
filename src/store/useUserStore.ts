@@ -194,9 +194,17 @@ export const useUserStore = create<UserState>()(
 
             setBojHandle: (handle: string) => set({ bojHandle: handle }),
 
-            setStudyPlan: (plan) => set((state) => ({
-                studyPlan: { ...state.studyPlan, ...plan }
-            })),
+            setStudyPlan: async (plan) => {
+                set((state) => ({
+                    studyPlan: { ...state.studyPlan, ...plan }
+                }));
+
+                // DB Sync if user is logged in
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await get().saveProfile(user.id);
+                }
+            },
 
             calculateTier: (level) => {
                 // Solved.ac Standard Mapping (Level = Tier ID)
