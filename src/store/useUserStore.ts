@@ -10,6 +10,7 @@ export interface StudyPlan {
     dailyIntensity: 'LOW' | 'NORMAL' | 'HIGH';
     problemCount: number;
     recommendationDifficulty: 'EASY' | 'NORMAL' | 'HARD';
+    recommendationSeedOffset: number; // For manual refresh
 }
 
 export interface DailyTask {
@@ -108,6 +109,7 @@ interface UserState {
 
     // Helper to force recalculation
     refreshRating: () => Promise<void>;
+    refreshRecommendations: () => Promise<void>;
 }
 
 // Solved.ac Style Rating Mapping (1 ~ 30 Points)
@@ -158,6 +160,7 @@ export const useUserStore = create<UserState>()(
                 dailyIntensity: 'NORMAL',
                 problemCount: 4,
                 recommendationDifficulty: 'NORMAL',
+                recommendationSeedOffset: 0,
             },
             timer: {
                 isRunning: false,
@@ -200,6 +203,21 @@ export const useUserStore = create<UserState>()(
                 }));
 
                 // DB Sync if user is logged in
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await get().saveProfile(user.id);
+                }
+            },
+
+            refreshRecommendations: async () => {
+                set((state) => ({
+                    studyPlan: {
+                        ...state.studyPlan,
+                        recommendationSeedOffset: (state.studyPlan.recommendationSeedOffset || 0) + 1
+                    }
+                }));
+
+                // Sync with DB
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
                     await get().saveProfile(user.id);

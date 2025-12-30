@@ -37,7 +37,11 @@ export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> =
  */
 export const searchSolvedAcProblems = async (query: string, page: number = 1): Promise<{ count: number; items: SolvedAcProblem[] }> => {
   const { data } = await axios.get(`${BASE_URL}/search/problem`, {
-    params: { query, page }
+    params: {
+      query,
+      page,
+      _t: Date.now() // Cache busting parameter
+    }
   });
   return data;
 };

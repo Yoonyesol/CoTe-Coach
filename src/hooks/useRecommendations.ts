@@ -15,8 +15,8 @@ const getTodayDateString = () => {
 const RECOMMENDATIONS_STORAGE_KEY = 'daily_recommendations';
 const RECOMMENDATIONS_DATE_KEY = 'daily_recommendations_date';
 
-// Load recommendations from localStorage if they exist, are from today, and match level/difficulty
-const loadCachedRecommendations = (currentLevel: number, currentDifficulty: string): RecommendedProblem[] | undefined => {
+// Load recommendations from localStorage if they exist, are from today, and match level/difficulty/seed
+const loadCachedRecommendations = (currentLevel: number, currentDifficulty: string, currentSeedOffset: number): RecommendedProblem[] | undefined => {
     const storedDate = localStorage.getItem(RECOMMENDATIONS_DATE_KEY);
     const todayDate = getTodayDateString();
 
@@ -28,8 +28,10 @@ const loadCachedRecommendations = (currentLevel: number, currentDifficulty: stri
                 const parsed = JSON.parse(storedData);
                 // NEW: Also check if the cached data level matches current level
                 // We'll store level in the cache object for validation
-                // NEW: Also check if the cached data level and difficulty match
-                if (parsed.level === currentLevel && parsed.difficulty === currentDifficulty) {
+                // NEW: Also check if the cached data level, difficulty, and seedOffset match
+                if (parsed.level === currentLevel &&
+                    parsed.difficulty === currentDifficulty &&
+                    parsed.seedOffset === currentSeedOffset) {
                     return parsed.items;
                 }
             } catch (e) {
@@ -49,12 +51,13 @@ const loadCachedRecommendations = (currentLevel: number, currentDifficulty: stri
 };
 
 // Save recommendations to localStorage
-const saveRecommendations = (data: RecommendedProblem[], level: number, difficulty: string) => {
+const saveRecommendations = (data: RecommendedProblem[], level: number, difficulty: string, seedOffset: number) => {
     const todayDate = getTodayDateString();
     localStorage.setItem(RECOMMENDATIONS_STORAGE_KEY, JSON.stringify({
         items: data,
         level: level,
-        difficulty: difficulty
+        difficulty: difficulty,
+        seedOffset: seedOffset
     }));
     localStorage.setItem(RECOMMENDATIONS_DATE_KEY, todayDate);
 };
@@ -64,25 +67,29 @@ export const useRecommendations = () => {
     const todayDate = getTodayDateString();
 
     // Load initial data from localStorage
-    const cachedData = loadCachedRecommendations(level, studyPlan.recommendationDifficulty);
+    const cachedData = loadCachedRecommendations(level, studyPlan.recommendationDifficulty, studyPlan.recommendationSeedOffset || 0);
+
+    const currentSeedOffset = studyPlan.recommendationSeedOffset || 0;
 
     return useQuery({
-        // Include today's date in queryKey to ensure recommendations are unique per day
-        queryKey: ['recommendations', todayDate, level, bojHandle, studyPlan.problemCount, studyPlan.recommendationDifficulty],
+        // Include today's date and seedOffset in queryKey to ensure recommendations are unique per day/refresh
+        queryKey: ['recommendations', todayDate, level, bojHandle, studyPlan.problemCount, studyPlan.recommendationDifficulty, currentSeedOffset],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
                 problemCount: studyPlan.problemCount,
-                difficultyAdjustment: studyPlan.recommendationDifficulty
+                difficultyAdjustment: studyPlan.recommendationDifficulty,
+                seedOffset: currentSeedOffset
             });
 
             // Save to localStorage after successful fetch
-            saveRecommendations(recommendations, level, studyPlan.recommendationDifficulty);
+            saveRecommendations(recommendations, level, studyPlan.recommendationDifficulty, currentSeedOffset);
 
             return recommendations;
         },
         initialData: cachedData, // Use cached data as initial data
         staleTime: Infinity, // Never automatically refetch - only manual refresh
         gcTime: 1000 * 60 * 60 * 24, // Keep in memory for 24 hours
+        enabled: studyPlan.recommendationSeedOffset !== undefined // Use studyPlan from de-structuring above
     });
 };

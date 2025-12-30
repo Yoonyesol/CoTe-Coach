@@ -33,30 +33,38 @@ export const getRecommendations = async (
         handle?: string | null;
         problemCount?: number;
         difficultyAdjustment?: 'EASY' | 'NORMAL' | 'HARD';
+        seedOffset?: number;
     } = {}
 ): Promise<RecommendedProblem[]> => {
-    const { handle, problemCount = 4, difficultyAdjustment = 'NORMAL' } = options;
+    const { handle, problemCount = 4, difficultyAdjustment = 'NORMAL', seedOffset = 0 } = options;
 
-    // Create a stable seed for the day (Daily Randomness)
+    // Create a stable seed for the day + Offset for manual refresh
+    // Using separators to avoid ID collisions
     const today = new Date();
-    const dateSeed = `${today.getFullYear()}${today.getMonth()}${today.getDate()}${handle || 'guest'}`;
+    const dateSeed = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}-${handle || 'guest'}-${seedOffset}`;
 
     const selectRandom = (items: SolvedAcProblem[], count: number, seed: string) => {
-        // Simple string hash function
-        const getHash = (str: string) => {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0; // Convert to 32bit integer
+        // Robust seed-based pseudo-random generator (MurmurHash3-like)
+        const getSeededRandom = (s: string) => {
+            let h = 0;
+            for (let i = 0; i < s.length; i++) {
+                h = Math.imul(31, h) + s.charCodeAt(i) | 0;
             }
-            return hash;
+            return () => {
+                h = Math.imul(h ^ h >>> 16, 2246822507);
+                h = Math.imul(h ^ h >>> 13, 3266489909);
+                return (h ^= h >>> 16) >>> 0;
+            };
         };
 
-        return [...items].sort((a, b) => {
-            const hashA = getHash(seed + a.problemId);
-            const hashB = getHash(seed + b.problemId);
-            return hashA - hashB;
-        }).slice(0, count);
+        const random = getSeededRandom(seed);
+        // Fisher-Yates shuffle using seeded random
+        const shuffled = [...items];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = random() % (i + 1);
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled.slice(0, count);
     };
 
     // 난이도 보정치 적용 (EASY: -2, NORMAL: 0, HARD: +1)
@@ -82,11 +90,11 @@ export const getRecommendations = async (
         counts.main = problemCount - counts.warmUp - counts.challenge;
     }
 
-    // API 호출 병렬화로 속도 개선
+    // API 호출 병렬화로 속도 개선 (페이지 1에서 후보 50개를 가져옴)
     const [warmUpRes, mainRes, challengeRes] = await Promise.all([
-        counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, counts.warmUp * 2) : { items: [] },
-        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}`, counts.main * 2) : { items: [] },
-        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, counts.challenge * 2) : { items: [] },
+        counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, 1) : { items: [] },
+        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}`, 1) : { items: [] },
+        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, 1) : { items: [] },
     ]);
 
     const results: RecommendedProblem[] = [];

@@ -3,7 +3,7 @@ import MainLayout from './components/layout/MainLayout'
 import DailyPlanner from './components/DailyPlanner'
 import StatsDashboard from './components/StatsDashboard'
 import Heatmap from './components/Heatmap'
-import { motion } from 'framer-motion'
+import { motion } from 'framer-motion';
 import ProblemCard from './components/ProblemCard'
 import AddProblemModal from './components/AddProblemModal'
 import AccountSettingsModal from './components/AccountSettingsModal'
@@ -21,6 +21,7 @@ import { useUserStore, StudyLog } from './store/useUserStore'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
+import clsx from 'clsx';
 import {
   ProblemCardSkeleton,
   StatSkeleton,
@@ -29,9 +30,18 @@ import {
 } from './components/common/Skeleton';
 
 function App() {
-  const { tier, points, getDailyProgress, getDaysRemaining, refreshRating, fetchUserData } = useUserStore();
+  const {
+    tier,
+    points,
+    getDailyProgress,
+    getDaysRemaining,
+    fetchUserData,
+    refreshRating,
+    refreshRecommendations
+  } = useUserStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
-  const { data: recommendations, isLoading: isRecsLoading, refetch } = useRecommendations();
+  const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(false);
@@ -233,16 +243,25 @@ function App() {
                       학습 분석
                     </button>
                     <button
-                      onClick={() => refetch()}
-                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
+                      onClick={async () => {
+                        setIsRefreshing(true);
+                        await refreshRecommendations();
+                        await refetch();
+                        setIsRefreshing(false);
+                      }}
+                      disabled={isRefreshing}
+                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group disabled:opacity-50"
                     >
-                      <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-                      새로고침
+                      <RefreshCw className={clsx(
+                        "w-4 h-4 transition-transform duration-500",
+                        isRefreshing ? "animate-spin" : "group-hover:rotate-180"
+                      )} />
+                      {isRefreshing ? '섞는 중...' : '다른 문제 보기'}
                     </button>
                   </div>
                 </div>
 
-                {isRecsLoading ? (
+                {isRecsLoading || isRecsFetching || isRefreshing ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((i) => (
                       <ProblemCardSkeleton key={i} />
