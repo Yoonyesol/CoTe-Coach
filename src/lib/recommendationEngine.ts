@@ -34,9 +34,16 @@ export const getRecommendations = async (
         problemCount?: number;
         difficultyAdjustment?: 'EASY' | 'NORMAL' | 'HARD';
         seedOffset?: number;
+        focusAlgorithms?: string[]; // Added: Filter by algorithm tags
     } = {}
 ): Promise<RecommendedProblem[]> => {
-    const { handle, problemCount = 4, difficultyAdjustment = 'NORMAL', seedOffset = 0 } = options;
+    const {
+        handle,
+        problemCount = 4,
+        difficultyAdjustment = 'NORMAL',
+        seedOffset = 0,
+        focusAlgorithms = []
+    } = options;
 
     // Create a stable seed for the day + Offset for manual refresh
     // Using separators to avoid ID collisions
@@ -78,6 +85,11 @@ export const getRecommendations = async (
 
     const handleFilter = handle ? ` -solved_by:${handle}` : '';
 
+    // 알고리즘 필터 생성 (예: tag:dp|tag:greedy)
+    const algorithmFilter = focusAlgorithms.length > 0
+        ? ` (${focusAlgorithms.map(tag => `tag:${tag}`).join('|')})`
+        : '';
+
     // 배분 로직: 전체 개수에 따라 워밍업/메인/챌린지 비율 조절
     // 예: 4개 -> 1/2/1, 6개 -> 1/4/1, 2개 -> 1/1/0
     let counts = { warmUp: 1, main: 2, challenge: 1 };
@@ -92,9 +104,11 @@ export const getRecommendations = async (
 
     // API 호출 병렬화로 속도 개선 (페이지 1에서 후보 50개를 가져옴)
     const [warmUpRes, mainRes, challengeRes] = await Promise.all([
+        // 워밍업은 알고리즘에 관계없이 평범한 수준으로 추천 (기본기 강화)
         counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, 1) : { items: [] },
-        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}`, 1) : { items: [] },
-        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}`, 1) : { items: [] },
+        // 메인 공략과 챌린지는 선택한 알고리즘을 우선적으로 반영
+        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
+        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
     ]);
 
     const results: RecommendedProblem[] = [];

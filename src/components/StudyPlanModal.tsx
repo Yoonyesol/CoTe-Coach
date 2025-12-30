@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Target, Calendar, BarChart3, Save, HelpCircle } from 'lucide-react';
+import { X, Target, Calendar, BarChart3, Save, HelpCircle, Plus } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
 import { useModalStore } from '../store/useModalStore';
 import { motion } from 'framer-motion';
@@ -53,7 +53,7 @@ const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="glass-card w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col"
+                className="glass-card w-full max-w-md max-h-[90vh] bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col"
             >
                 {/* Header with gradient background */}
                 <div className="bg-misty-dark p-8 pb-12 relative overflow-hidden">
@@ -69,120 +69,185 @@ const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
                     </div>
                     <p className="text-white/80 text-sm font-medium font-sans relative z-10">나에게 맞는 학습 강도로 목표 티어를 달성하세요.</p>
                 </div>
-
-                <div className="px-8 py-8 -mt-8 bg-white rounded-t-[2.5rem] relative z-20 space-y-8 shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-                    {/* Target Tier */}
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-base-400">
-                            <BarChart3 className="w-4 h-4 text-misty" />
-                            <label className="text-[10px] font-black uppercase tracking-widest font-sans">목표 티어</label>
-                        </div>
-                        <div className="relative">
-                            <select
-                                value={localPlan.targetTier}
-                                onChange={(e) => setLocalPlan({ ...localPlan, targetTier: e.target.value })}
-                                className="w-full px-5 py-4 bg-base-50 border-none rounded-2xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold font-sans appearance-none shadow-inner cursor-pointer"
-                            >
-                                {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'].map(t => (
-                                    [5, 4, 3, 2, 1].map(v => (
-                                        <option key={`${t} ${v}`} value={`${t} ${v}`}>{t} {v}</option>
-                                    ))
-                                ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-base-300">
-                                <Save className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Daily Problem Count */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-base-400">
-                                <Target className="w-4 h-4 text-misty" />
-                                <label className="text-[10px] font-black uppercase tracking-widest font-sans">일일 목표 문제 수</label>
-                            </div>
-                            <span className="text-3xl font-black text-misty-dark font-sans tracking-tight">{localPlan.problemCount}</span>
-                        </div>
-                        <div className="px-2">
-                            <input
-                                type="range"
-                                min="1"
-                                max="10"
-                                step="1"
-                                value={localPlan.problemCount}
-                                onChange={(e) => setLocalPlan({ ...localPlan, problemCount: parseInt(e.target.value) })}
-                                className="w-full h-2 bg-base-100 rounded-lg appearance-none cursor-pointer accent-misty-dark"
-                            />
-                        </div>
-                        <div className="p-4 bg-base-50 rounded-2xl border border-base-100/50">
-                            <p className="text-[11px] text-base-500 font-bold font-sans leading-relaxed text-center">
-                                {localPlan.problemCount <= 2 && "🐢 가벼운 워밍업 모드입니다. 부담 없이 시작해봐요!"}
-                                {localPlan.problemCount > 2 && localPlan.problemCount <= 5 && "🚀 가장 추천하는 학습 강도입니다. 꾸준함이 생명!"}
-                                {localPlan.problemCount > 5 && "🔥 상당히 도전적인 계획입니다. 빡세게 달려볼까요?"}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Target Date */}
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-base-400">
-                            <Calendar className="w-4 h-4 text-misty" />
-                            <label className="text-[10px] font-black uppercase tracking-widest font-sans">달성 목표일</label>
-                        </div>
-                        <input
-                            type="date"
-                            value={localPlan.targetDate.split('T')[0]}
-                            onChange={(e) => setLocalPlan({ ...localPlan, targetDate: new Date(e.target.value).toISOString() })}
-                            className="w-full px-5 py-4 bg-base-50 border-none rounded-2xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold font-sans shadow-inner"
-                        />
-                    </div>
-
-                    {/* Recommendation Difficulty */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
+                <style>{`
+                    #study-plan-content::-webkit-scrollbar {
+                        width: 6px;
+                    }
+                    #study-plan-content::-webkit-scrollbar-track {
+                        background: transparent;
+                    }
+                    #study-plan-content::-webkit-scrollbar-thumb {
+                        background: #d1d5db;
+                        border-radius: 9999px;
+                    }
+                    #study-plan-content::-webkit-scrollbar-thumb:hover {
+                        background: #9ca3af;
+                    }
+                `}</style>
+                <div className="flex-1 -mt-8 bg-white rounded-t-[2.5rem] relative z-20 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] flex flex-col min-h-0 overflow-hidden">
+                    <div
+                        id="study-plan-content"
+                        className="flex-1 overflow-y-auto px-8 pb-8 space-y-8 mt-10"
+                    >
+                        {/* Target Tier */}
+                        <div className="space-y-3 pt-5">
                             <div className="flex items-center gap-2 text-base-400">
                                 <BarChart3 className="w-4 h-4 text-misty" />
-                                <label className="text-[10px] font-black uppercase tracking-widest font-sans">추천 문제 난이도</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest font-sans">목표 티어</label>
                             </div>
-                            <button
-                                onClick={() => setShowGuide(true)}
-                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-misty/10 text-misty-dark hover:bg-misty/20 rounded-lg transition-all text-[10px] font-black uppercase tracking-tight cursor-pointer group"
-                            >
-                                <HelpCircle className="w-3 h-3 transition-transform group-hover:scale-110" />
-                                <span>가이드 보기</span>
-                            </button>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 p-1 bg-base-50 rounded-[1.25rem]">
-                            {(['EASY', 'NORMAL', 'HARD'] as const).map((level) => (
-                                <button
-                                    key={level}
-                                    onClick={() => setLocalPlan({ ...localPlan, recommendationDifficulty: level })}
-                                    className={clsx(
-                                        "py-3 rounded-[1rem] text-[11px] font-black transition-all",
-                                        localPlan.recommendationDifficulty === level
-                                            ? "bg-white text-base-900 shadow-sm"
-                                            : "text-base-400 hover:text-base-600"
-                                    )}
+                            <div className="relative">
+                                <select
+                                    value={localPlan.targetTier}
+                                    onChange={(e) => setLocalPlan({ ...localPlan, targetTier: e.target.value })}
+                                    className="w-full px-5 py-4 bg-base-50 border-none rounded-2xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold font-sans appearance-none shadow-inner cursor-pointer"
                                 >
-                                    {level === 'EASY' ? '쉬움' : level === 'NORMAL' ? '보통' : '어려움'}
-                                </button>
-                            ))}
+                                    {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond'].map(t => (
+                                        [5, 4, 3, 2, 1].map(v => (
+                                            <option key={`${t} ${v}`} value={`${t} ${v}`}>{t} {v}</option>
+                                        ))
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-base-300">
+                                    <Save className="w-4 h-4" />
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-[10px] text-center text-base-400 font-bold px-2">
-                            {localPlan.recommendationDifficulty === 'EASY' && "🐢 내 티어보다 낮은 문제를 추천받아 기초를 다집니다."}
-                            {localPlan.recommendationDifficulty === 'NORMAL' && "⚖️ 현재 내 티어에 가장 적합한 문제를 추천받습니다."}
-                            {localPlan.recommendationDifficulty === 'HARD' && "🔥 내 티어보다 높고 도전적인 문제를 추천받습니다."}
-                        </p>
-                    </div>
 
-                    <button
-                        onClick={handleSave}
-                        className="w-full py-5 bg-base-900 text-white rounded-[1.25rem] font-black shadow-xl hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group cursor-pointer"
-                    >
-                        <span>플랜 저장하고 시작하기</span>
-                        <Save className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                    </button>
+                        {/* Daily Problem Count */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-base-400">
+                                    <Target className="w-4 h-4 text-misty" />
+                                    <label className="text-[10px] font-black uppercase tracking-widest font-sans">일일 목표 문제 수</label>
+                                </div>
+                                <span className="text-3xl font-black text-misty-dark font-sans tracking-tight">{localPlan.problemCount}</span>
+                            </div>
+                            <div className="px-2">
+                                <input
+                                    type="range"
+                                    min="1"
+                                    max="10"
+                                    step="1"
+                                    value={localPlan.problemCount}
+                                    onChange={(e) => setLocalPlan({ ...localPlan, problemCount: parseInt(e.target.value) })}
+                                    className="w-full h-2 bg-base-100 rounded-lg appearance-none cursor-pointer accent-misty-dark"
+                                />
+                            </div>
+                            <div className="p-4 bg-base-50 rounded-2xl border border-base-100/50">
+                                <p className="text-[11px] text-base-500 font-bold font-sans leading-relaxed text-center">
+                                    {localPlan.problemCount <= 2 && "🐢 가벼운 워밍업 모드입니다. 부담 없이 시작해봐요!"}
+                                    {localPlan.problemCount > 2 && localPlan.problemCount <= 5 && "🚀 가장 추천하는 학습 강도입니다. 꾸준함이 생명!"}
+                                    {localPlan.problemCount > 5 && "🔥 상당히 도전적인 계획입니다. 빡세게 달려볼까요?"}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Target Date */}
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-base-400">
+                                <Calendar className="w-4 h-4 text-misty" />
+                                <label className="text-[10px] font-black uppercase tracking-widest font-sans">달성 목표일</label>
+                            </div>
+                            <input
+                                type="date"
+                                value={localPlan.targetDate.split('T')[0]}
+                                onChange={(e) => setLocalPlan({ ...localPlan, targetDate: new Date(e.target.value).toISOString() })}
+                                className="w-full px-5 py-4 bg-base-50 border-none rounded-2xl focus:ring-2 focus:ring-misty transition-all text-sm font-bold font-sans shadow-inner"
+                            />
+                        </div>
+
+                        {/* Recommendation Difficulty */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-base-400">
+                                    <BarChart3 className="w-4 h-4 text-misty" />
+                                    <label className="text-[10px] font-black uppercase tracking-widest font-sans">추천 문제 난이도</label>
+                                </div>
+                                <button
+                                    onClick={() => setShowGuide(true)}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-misty/10 text-misty-dark hover:bg-misty/20 rounded-lg transition-all text-[10px] font-black uppercase tracking-tight cursor-pointer group"
+                                >
+                                    <HelpCircle className="w-3 h-3 transition-transform group-hover:scale-110" />
+                                    <span>가이드 보기</span>
+                                </button>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 p-1 bg-base-50 rounded-[1.25rem]">
+                                {(['EASY', 'NORMAL', 'HARD'] as const).map((level) => (
+                                    <button
+                                        key={level}
+                                        onClick={() => setLocalPlan({ ...localPlan, recommendationDifficulty: level })}
+                                        className={clsx(
+                                            "py-3 rounded-[1rem] text-[11px] font-black transition-all",
+                                            localPlan.recommendationDifficulty === level
+                                                ? "bg-white text-base-900 shadow-sm"
+                                                : "text-base-400 hover:text-base-600"
+                                        )}
+                                    >
+                                        {level === 'EASY' ? '쉬움' : level === 'NORMAL' ? '보통' : '어려움'}
+                                    </button>
+                                ))}
+                            </div>
+                            <p className="text-[10px] text-center text-base-400 font-bold px-2">
+                                {localPlan.recommendationDifficulty === 'EASY' && "🐢 내 티어보다 낮은 문제를 추천받아 기초를 다집니다."}
+                                {localPlan.recommendationDifficulty === 'NORMAL' && "⚖️ 현재 내 티어에 가장 적합한 문제를 추천받습니다."}
+                                {localPlan.recommendationDifficulty === 'HARD' && "🔥 내 티어보다 높고 도전적인 문제를 추천받습니다."}
+                            </p>
+                        </div>
+
+                        {/* Focus Algorithms */}
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 text-base-400">
+                                    <Plus className="w-4 h-4 text-misty" />
+                                    <label className="text-[10px] font-black uppercase tracking-widest font-sans">집중 학습 알고리즘</label>
+                                </div>
+                                <span className="text-[10px] font-bold text-base-400 font-sans">최대 3개 선택</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { id: 'dp', name: 'DP' },
+                                    { id: 'graphs', name: '그래프' },
+                                    { id: 'greedy', name: '그리디' },
+                                    { id: 'bfs', name: 'BFS/DFS' },
+                                    { id: 'string', name: '문자열' },
+                                    { id: 'data_structures', name: '자료구조' },
+                                    { id: 'backtracking', name: '백트래킹' },
+                                    { id: 'math', name: '수학' },
+                                ].map((tag) => {
+                                    const isSelected = localPlan.focusAlgorithms?.includes(tag.id);
+                                    return (
+                                        <button
+                                            key={tag.id}
+                                            onClick={() => {
+                                                const current = localPlan.focusAlgorithms || [];
+                                                if (isSelected) {
+                                                    setLocalPlan({ ...localPlan, focusAlgorithms: current.filter(id => id !== tag.id) });
+                                                } else if (current.length < 3) {
+                                                    setLocalPlan({ ...localPlan, focusAlgorithms: [...current, tag.id] });
+                                                }
+                                            }}
+                                            className={clsx(
+                                                "px-4 py-2.5 rounded-xl text-[11px] font-black transition-all border-2",
+                                                isSelected
+                                                    ? "bg-misty/10 border-misty text-misty-dark"
+                                                    : "bg-white border-base-100 text-base-400 hover:border-base-200"
+                                            )}
+                                        >
+                                            {tag.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleSave}
+                            className="w-full py-5 bg-base-900 text-white rounded-[1.25rem] font-black shadow-xl hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-3 group cursor-pointer"
+                        >
+                            <span>플랜 저장하고 시작하기</span>
+                            <Save className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                        </button>
+                    </div>
                 </div>
             </motion.div>
 

@@ -11,6 +11,7 @@ export interface StudyPlan {
     problemCount: number;
     recommendationDifficulty: 'EASY' | 'NORMAL' | 'HARD';
     recommendationSeedOffset: number; // For manual refresh
+    focusAlgorithms: string[]; // Added: Targeted algorithm tags (e.g., ['dp', 'bfs'])
 }
 
 export interface DailyTask {
@@ -161,6 +162,7 @@ export const useUserStore = create<UserState>()(
                 problemCount: 4,
                 recommendationDifficulty: 'NORMAL',
                 recommendationSeedOffset: 0,
+                focusAlgorithms: [],
             },
             timer: {
                 isRunning: false,

@@ -15,8 +15,13 @@ const getTodayDateString = () => {
 const RECOMMENDATIONS_STORAGE_KEY = 'daily_recommendations';
 const RECOMMENDATIONS_DATE_KEY = 'daily_recommendations_date';
 
-// Load recommendations from localStorage if they exist, are from today, and match level/difficulty/seed
-const loadCachedRecommendations = (currentLevel: number, currentDifficulty: string, currentSeedOffset: number): RecommendedProblem[] | undefined => {
+// Load recommendations from localStorage if they exist, are from today, and match level/difficulty/seed/algorithms
+const loadCachedRecommendations = (
+    currentLevel: number,
+    currentDifficulty: string,
+    currentSeedOffset: number,
+    currentAlgorithms: string[]
+): RecommendedProblem[] | undefined => {
     const storedDate = localStorage.getItem(RECOMMENDATIONS_DATE_KEY);
     const todayDate = getTodayDateString();
 
@@ -31,7 +36,8 @@ const loadCachedRecommendations = (currentLevel: number, currentDifficulty: stri
                 // NEW: Also check if the cached data level, difficulty, and seedOffset match
                 if (parsed.level === currentLevel &&
                     parsed.difficulty === currentDifficulty &&
-                    parsed.seedOffset === currentSeedOffset) {
+                    parsed.seedOffset === currentSeedOffset &&
+                    JSON.stringify(parsed.focusAlgorithms || []) === JSON.stringify(currentAlgorithms)) {
                     return parsed.items;
                 }
             } catch (e) {
@@ -51,13 +57,20 @@ const loadCachedRecommendations = (currentLevel: number, currentDifficulty: stri
 };
 
 // Save recommendations to localStorage
-const saveRecommendations = (data: RecommendedProblem[], level: number, difficulty: string, seedOffset: number) => {
+const saveRecommendations = (
+    data: RecommendedProblem[],
+    level: number,
+    difficulty: string,
+    seedOffset: number,
+    focusAlgorithms: string[]
+) => {
     const todayDate = getTodayDateString();
     localStorage.setItem(RECOMMENDATIONS_STORAGE_KEY, JSON.stringify({
         items: data,
         level: level,
         difficulty: difficulty,
-        seedOffset: seedOffset
+        seedOffset: seedOffset,
+        focusAlgorithms: focusAlgorithms
     }));
     localStorage.setItem(RECOMMENDATIONS_DATE_KEY, todayDate);
 };
@@ -67,23 +80,45 @@ export const useRecommendations = () => {
     const todayDate = getTodayDateString();
 
     // Load initial data from localStorage
-    const cachedData = loadCachedRecommendations(level, studyPlan.recommendationDifficulty, studyPlan.recommendationSeedOffset || 0);
+    const cachedData = loadCachedRecommendations(
+        level,
+        studyPlan.recommendationDifficulty,
+        studyPlan.recommendationSeedOffset || 0,
+        studyPlan.focusAlgorithms || []
+    );
 
     const currentSeedOffset = studyPlan.recommendationSeedOffset || 0;
+    const currentAlgorithms = studyPlan.focusAlgorithms || [];
 
     return useQuery({
-        // Include today's date and seedOffset in queryKey to ensure recommendations are unique per day/refresh
-        queryKey: ['recommendations', todayDate, level, bojHandle, studyPlan.problemCount, studyPlan.recommendationDifficulty, currentSeedOffset],
+        // Include today's date, seedOffset, and algorithms in queryKey
+        queryKey: [
+            'recommendations',
+            todayDate,
+            level,
+            bojHandle,
+            studyPlan.problemCount,
+            studyPlan.recommendationDifficulty,
+            currentSeedOffset,
+            currentAlgorithms
+        ],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
                 problemCount: studyPlan.problemCount,
                 difficultyAdjustment: studyPlan.recommendationDifficulty,
-                seedOffset: currentSeedOffset
+                seedOffset: currentSeedOffset,
+                focusAlgorithms: currentAlgorithms
             });
 
             // Save to localStorage after successful fetch
-            saveRecommendations(recommendations, level, studyPlan.recommendationDifficulty, currentSeedOffset);
+            saveRecommendations(
+                recommendations,
+                level,
+                studyPlan.recommendationDifficulty,
+                currentSeedOffset,
+                currentAlgorithms
+            );
 
             return recommendations;
         },
