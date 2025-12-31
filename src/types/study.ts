@@ -1,5 +1,10 @@
 import { Platform } from './user';
 
+export type ReviewStatus = 'ACTIVE' | 'COMPLETED';
+export type ReviewResult = 'SUCCESS' | 'FAIL';
+export type SolvingMethod = 'SELF' | 'REFERENCE';
+export type PerceivedDifficulty = 'EASY' | 'NORMAL' | 'HARD';
+
 export interface StudyPlan {
     targetTier: string;
     targetDate: string; // ISO String
@@ -27,14 +32,29 @@ export interface DailyTask {
 export interface StudyLog {
     id: string;
     problemId: string;
+    problemTitle: string;
     platform: Platform;
     difficulty: string;
-    perceivedDifficulty: 'EASY' | 'NORMAL' | 'HARD';
+    perceivedDifficulty: PerceivedDifficulty;
     elapsedTime: number; // ms
-    feeling: string;
+    reflection: string; // 학습 소감
+    approach: string; // 해결 방식 (예: 재귀, DFS)
     concepts: string[];
     completedAt: string; // ISO String
-    result: 'SUCCESS' | 'FAIL'; // SUCCESS: 해결함, FAIL: 못 끝냄
-    solvingMethod: 'SELF' | 'REFERENCE'; // SELF: 스스로 해결, REFERENCE: 답지 참고
+    result: ReviewResult;
+    solvingMethod: SolvingMethod;
+    stage: number; // 0: 최초, 1: 1차 복습...
     ratingContribution?: number;
+}
+
+export interface ReviewPlan {
+    id: string;
+    problemId: string;
+    problemTitle: string;
+    platform: Platform;
+    difficulty: string;
+    currentStage: number;
+    nextReviewAt: string | null;
+    status: ReviewStatus;
+    lastCompletedAt: string;
 }

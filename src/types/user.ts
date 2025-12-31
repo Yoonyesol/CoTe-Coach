@@ -1,4 +1,4 @@
-import { StudyPlan, RecommendationSettings, DailyTask, StudyLog } from './study';
+import { StudyPlan, RecommendationSettings, DailyTask, StudyLog, ReviewPlan } from './study';
 import { ShopItem } from './shop';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
@@ -33,6 +33,7 @@ export interface UserState {
     inventory: string[];
     equippedItems: string[];
     dailyTasks: DailyTask[];
+    reviewPlans: ReviewPlan[];
 
     // Actions
     addXp: (amount: number) => void;
@@ -60,6 +61,10 @@ export interface UserState {
     addDailyTask: (task: Omit<DailyTask, 'id' | 'status'>) => Promise<void>;
     toggleTaskStatus: (taskId: string) => Promise<void>;
     deleteDailyTask: (taskId: string) => Promise<void>;
+
+    // Review Actions
+    addReviewSession: (problemId: string, log: Omit<StudyLog, 'id' | 'completedAt' | 'stage'>) => Promise<void>;
+    fetchReviewPlans: (userId: string) => Promise<void>;
 
     // Timer Actions
     startTimer: (problemId: string) => boolean;

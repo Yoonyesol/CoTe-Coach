@@ -38,18 +38,22 @@ export const useUserStore = create<UserState>()(
             inventory: [],
             equippedItems: [],
             dailyTasks: [],
+            reviewPlans: [],
 
             addXp: (amount) => {
                 const newLog: Omit<StudyLog, 'id' | 'completedAt'> = {
                     problemId: `Point Boost (${amount}G)`,
+                    problemTitle: `경험치 추가 (${amount}G)`,
                     platform: 'BOJ',
                     difficulty: 'Manual',
                     perceivedDifficulty: 'NORMAL',
                     elapsedTime: 0,
-                    feeling: 'Manual Addition',
+                    reflection: 'Manual Addition',
+                    approach: '',
                     concepts: [],
                     result: 'SUCCESS',
                     solvingMethod: 'SELF',
+                    stage: 0,
                     ratingContribution: amount
                 };
                 get().addStudyLog(newLog);
@@ -171,6 +175,8 @@ export const useUserStore = create<UserState>()(
                     });
                 }
 
+                await get().fetchReviewPlans(userId);
+
                 const { data: logs } = await supabase
                     .from('study_logs')
                     .select('*')
@@ -182,15 +188,18 @@ export const useUserStore = create<UserState>()(
                         studyLogs: logs.map(l => ({
                             id: l.id,
                             problemId: l.problem_id,
+                            problemTitle: l.problem_title || l.problem_id,
                             platform: l.site as Platform,
                             difficulty: l.difficulty || '',
-                            perceivedDifficulty: l.perceived_difficulty as 'EASY' | 'NORMAL' | 'HARD',
-                            result: l.result as 'SUCCESS' | 'FAIL',
-                            solvingMethod: l.solving_method as 'SELF' | 'REFERENCE',
+                            perceivedDifficulty: l.perceived_difficulty as any,
+                            result: l.result as any,
+                            solvingMethod: l.solving_method as any,
                             elapsedTime: l.elapsed_time || 0,
-                            feeling: l.feeling || '',
+                            reflection: l.reflection || l.feeling || '',
+                            approach: l.approach || '',
                             concepts: l.concepts || [],
                             completedAt: l.created_at,
+                            stage: l.stage || 0,
                             ratingContribution: l.rating_contribution || 0
                         }))
                     });
@@ -303,10 +312,134 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
+            fetchReviewPlans: async (userId) => {
+                const { data: plans } = await supabase
+                    .from('review_plans')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('next_review_at', { ascending: true });
+
+                if (plans) {
+                    set({
+                        reviewPlans: plans.map(p => ({
+                            id: p.id,
+                            problemId: p.problem_id,
+                            problemTitle: p.problem_title,
+                            platform: p.platform as Platform,
+                            difficulty: p.difficulty,
+                            currentStage: p.current_stage,
+                            nextReviewAt: p.next_review_at,
+                            status: p.status as any,
+                            lastCompletedAt: p.last_completed_at
+                        }))
+                    });
+                }
+            },
+
+            addReviewSession: async (problemId, logData) => {
+                const state = get();
+                const existingPlan = state.reviewPlans.find(p => p.problemId === problemId);
+                const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
+
+                // Ebbinghaus Curve Intervals (days): 1, 3, 7, 15, 30
+                const intervals = [1, 3, 7, 15, 30];
+                const nextInterval = intervals[currentStage] || 30;
+
+                const nextReviewAt = logData.result === 'SUCCESS'
+                    ? new Date(Date.now() + 1000 * 60 * 60 * 24 * nextInterval).toISOString()
+                    : new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString(); // Fail 시 내일 다시
+
+                const ratingContribution = calculateEarnedXp(logData.platform, logData.difficulty, state.level);
+
+                const newLog: StudyLog = {
+                    ...logData,
+                    id: Math.random().toString(36).substr(2, 9),
+                    problemId,
+                    problemTitle: logData.problemTitle || problemId,
+                    completedAt: new Date().toISOString(),
+                    stage: currentStage,
+                    ratingContribution: ratingContribution
+                };
+
+                // Update Local State
+                set(s => {
+                    const nextTimers = { ...s.timer.problemTimers };
+                    delete nextTimers[problemId];
+
+                    let nextPlans = [...s.reviewPlans];
+                    if (existingPlan) {
+                        nextPlans = nextPlans.map(p => p.problemId === problemId ? {
+                            ...p,
+                            currentStage,
+                            nextReviewAt,
+                            lastCompletedAt: newLog.completedAt,
+                            status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE'
+                        } : p);
+                    } else {
+                        nextPlans.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            problemId,
+                            problemTitle: newLog.problemTitle,
+                            platform: newLog.platform,
+                            difficulty: newLog.difficulty,
+                            currentStage,
+                            nextReviewAt,
+                            status: 'ACTIVE',
+                            lastCompletedAt: newLog.completedAt
+                        });
+                    }
+
+                    return {
+                        studyLogs: [newLog, ...s.studyLogs],
+                        reviewPlans: nextPlans,
+                        timer: { ...s.timer, problemTimers: nextTimers }
+                    };
+                });
+
+                await get().refreshRating();
+
+                // DB Sync
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    // 1. Save Study Log
+                    await supabase.from('study_logs').insert({
+                        user_id: user.id,
+                        problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
+                        site: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        perceived_difficulty: newLog.perceivedDifficulty,
+                        result: newLog.result,
+                        solving_method: newLog.solvingMethod,
+                        elapsed_time: newLog.elapsedTime,
+                        reflection: newLog.reflection,
+                        approach: newLog.approach,
+                        concepts: newLog.concepts,
+                        stage: newLog.stage,
+                        rating_contribution: newLog.ratingContribution
+                    });
+
+                    // 2. Save/Update Review Plan
+                    await supabase.from('review_plans').upsert({
+                        user_id: user.id,
+                        problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
+                        platform: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        current_stage: currentStage,
+                        next_review_at: nextReviewAt,
+                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
+                        last_completed_at: newLog.completedAt
+                    }, { onConflict: 'user_id,problem_id' });
+
+                    await get().saveProfile(user.id);
+                }
+            },
+
             updateStudyLog: async (logId, updates) => {
                 const dbUpdates: any = {};
                 if (updates.perceivedDifficulty) dbUpdates.perceived_difficulty = updates.perceivedDifficulty;
-                if (updates.feeling !== undefined) dbUpdates.feeling = updates.feeling;
+                if (updates.reflection !== undefined) dbUpdates.reflection = updates.reflection;
                 if (updates.concepts) dbUpdates.concepts = updates.concepts;
                 if (updates.result) dbUpdates.result = updates.result;
                 if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
@@ -357,7 +490,7 @@ export const useUserStore = create<UserState>()(
                         result: newLog.result,
                         solving_method: newLog.solvingMethod,
                         elapsed_time: newLog.elapsedTime,
-                        feeling: newLog.feeling,
+                        reflection: newLog.reflection,
                         concepts: newLog.concepts,
                         rating_contribution: newLog.ratingContribution
                     });

@@ -8,9 +8,11 @@ import {
     Plus,
     Trash2,
     Target,
-    BookOpen,
     Clock,
-    Trophy
+    Trophy,
+    Zap,
+    Bell,
+    BookOpen
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useUserStore } from '../store/useUserStore';
@@ -26,7 +28,8 @@ const LearningJournal: React.FC = () => {
         studyLogs,
         addDailyTask,
         toggleTaskStatus,
-        deleteDailyTask
+        deleteDailyTask,
+        reviewPlans
     } = useUserStore();
 
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -90,6 +93,7 @@ const LearningJournal: React.FC = () => {
     // Filter Tasks & Logs for selected date
     const dayTasks = dailyTasks.filter(t => t.targetDate === selectedDate);
     const dayLogs = studyLogs.filter(l => l.completedAt.startsWith(selectedDate));
+    const dayReviews = reviewPlans.filter(p => p.nextReviewAt && p.nextReviewAt.startsWith(selectedDate) && p.status === 'ACTIVE');
 
     const handleAddTask = () => {
         if (!newTaskTitle.trim()) return;
@@ -147,6 +151,7 @@ const LearningJournal: React.FC = () => {
                                 const isSelected = dayObj.dateStr === selectedDate;
                                 const hasLogs = studyLogs.some(l => l.completedAt.startsWith(dayObj.dateStr));
                                 const hasPendingTasks = dailyTasks.some(t => t.targetDate === dayObj.dateStr && t.status === 'pending');
+                                const hasReviews = reviewPlans.some(p => p.nextReviewAt && p.nextReviewAt.startsWith(dayObj.dateStr) && p.status === 'ACTIVE');
 
                                 return (
                                     <button
@@ -173,6 +178,9 @@ const LearningJournal: React.FC = () => {
                                             {hasPendingTasks && (
                                                 <div className="w-2 h-2 rounded-full bg-coral animate-pulse" />
                                             )}
+                                            {hasReviews && (
+                                                <div className="w-2 h-2 rounded-full bg-lavender shadow-sm shadow-lavender/50" />
+                                            )}
                                         </div>
                                     </button>
                                 );
@@ -187,8 +195,8 @@ const LearningJournal: React.FC = () => {
                             <span className="text-xs font-black text-base-600">문제 해결 완료</span>
                         </div>
                         <div className="glass-card p-4 bg-white shadow-md flex items-center gap-3 border-none">
-                            <div className="w-3 h-3 rounded-full bg-coral" />
-                            <span className="text-xs font-black text-base-600">미완료 계획 있음</span>
+                            <div className="w-3 h-3 rounded-full bg-lavender" />
+                            <span className="text-xs font-black text-base-600">복습 예정일</span>
                         </div>
                     </div>
                 </div>
@@ -276,6 +284,36 @@ const LearningJournal: React.FC = () => {
                                 {dayTasks.length === 0 && !isAddTaskOpen && (
                                     <div className="py-8 text-center border-2 border-dashed border-base-100 rounded-3xl">
                                         <p className="text-xs font-bold text-base-300">오늘의 계획이 없습니다.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Review Schedule */}
+                        <div className="space-y-4 mb-8">
+                            <h4 className="text-sm font-black text-base-400 uppercase tracking-tighter flex items-center gap-2">
+                                <Bell className="w-4 h-4" />
+                                Review Schedule
+                            </h4>
+                            <div className="space-y-2">
+                                {dayReviews.map(plan => (
+                                    <div key={plan.id} className="p-4 bg-lavender-light/10 rounded-2xl border border-lavender/10 flex gap-4 items-center shadow-sm">
+                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-lavender/10 text-lg">
+                                            {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded uppercase">
+                                                    {plan.currentStage + 1}회차 복습
+                                                </span>
+                                            </div>
+                                            <p className="text-sm font-black text-base-700 leading-tight mt-1">{plan.problemTitle}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {dayReviews.length === 0 && (
+                                    <div className="py-8 text-center border-2 border-dashed border-base-100 rounded-3xl">
+                                        <p className="text-xs font-bold text-base-300">이 날의 복습 일정이 없습니다.</p>
                                     </div>
                                 )}
                             </div>

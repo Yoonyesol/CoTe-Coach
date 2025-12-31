@@ -15,6 +15,7 @@ import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
 import LearningJournal from './components/LearningJournal'
 import DailyHistory from './components/DailyHistory'
+import ReviewNotifications from './components/ReviewNotifications'
 import EditStudyLogModal from './components/modals/EditStudyLogModal'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
@@ -218,6 +219,9 @@ function App() {
                   onPlanDetailClick={() => setIsPlanDetailModalOpen(true)}
                 />
               )}
+
+              {/* Review Notifications Section */}
+              <ReviewNotifications onReviewClick={handleReviewOpen} />
 
               {/* Recommendation Section */}
               <section className="space-y-6">

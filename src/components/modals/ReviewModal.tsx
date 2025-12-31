@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
+import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb, Zap } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { Platform } from '../../types/user';
 import { clsx } from 'clsx';
@@ -7,12 +7,16 @@ import { clsx } from 'clsx';
 import { ReviewModalProps } from '../../types/modal';
 
 const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) => {
-    const { addStudyLog, getTotalElapsed } = useUserStore();
+    const { addReviewSession, getTotalElapsed, reviewPlans } = useUserStore();
+
+    const existingPlan = reviewPlans.find(p => p.problemId === problem.title);
+    const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
 
     const [perceivedDifficulty, setPerceivedDifficulty] = useState<'EASY' | 'NORMAL' | 'HARD'>('NORMAL');
     const [result, setResult] = useState<'SUCCESS' | 'FAIL'>('SUCCESS');
     const [solvingMethod, setSolvingMethod] = useState<'SELF' | 'REFERENCE'>('SELF');
-    const [feeling, setFeeling] = useState('');
+    const [approach, setApproach] = useState('');
+    const [reflection, setReflection] = useState('');
     const [concept, setConcept] = useState('');
     const [concepts, setConcepts] = useState<string[]>([]);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -45,15 +49,17 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
         // Calculate final elapsed time from manual inputs
         const finalElapsedTime = (manualMinutes * 60 * 1000) + (manualSeconds * 1000);
 
-        addStudyLog({
+        addReviewSession(problem.title, {
             problemId: problem.title,
+            problemTitle: problem.title,
             platform: problem.platform as Platform,
             difficulty: problem.difficulty,
             perceivedDifficulty,
             result,
             solvingMethod,
             elapsedTime: finalElapsedTime,
-            feeling,
+            reflection,
+            approach,
             concepts,
         });
 
@@ -76,7 +82,9 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                             <Brain className="w-5 h-5 text-misty" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-black font-sans leading-tight">복습 로그 작성</h2>
+                            <h2 className="text-lg font-black font-sans leading-tight">
+                                {currentStage === 0 ? '학습 로그 작성' : `${currentStage}차 복습 로그 작성`}
+                            </h2>
                             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{problem.platform} • {problem.difficulty}</p>
                         </div>
                     </div>
@@ -232,14 +240,29 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                             </div>
                         </div>
 
-                        {/* Feeling/Note */}
+                        {/* Solution Approach */}
                         <div className="space-y-3">
-                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">풀이 회고</label>
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">해결 방식</label>
+                            <div className="relative">
+                                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-base-300" />
+                                <input
+                                    type="text"
+                                    value={approach}
+                                    onChange={(e) => setApproach(e.target.value)}
+                                    placeholder="예: 재귀, DFS, 투 포인터 등"
+                                    className="w-full pl-11 pr-4 py-3 bg-base-50 border-2 border-transparent focus:border-misty focus:bg-white rounded-xl text-sm font-bold transition-all outline-none"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Reflection/Note */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">학습 소감</label>
                             <div className="relative">
                                 <MessageSquare className="absolute left-4 top-4 w-4 h-4 text-base-300" />
                                 <textarea
-                                    value={feeling}
-                                    onChange={(e) => setFeeling(e.target.value)}
+                                    value={reflection}
+                                    onChange={(e) => setReflection(e.target.value)}
                                     placeholder="과정에서의 깨달음이나 아쉬운 점..."
                                     rows={2}
                                     className="w-full pl-11 pr-4 py-4 bg-base-50 border-2 border-transparent focus:border-misty focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none resize-none"
