@@ -4,7 +4,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../modals/ShopModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info, BookOpen } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info, BookOpen, Library } from 'lucide-react';
 import TierBadge from '../TierBadge';
 import BojTierBadge from '../BojTierBadge';
 import { clsx } from 'clsx';
@@ -48,6 +48,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const navItems = [
         { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },
         { id: 'JOURNAL', icon: <BookOpen className="w-6 h-6" />, label: '학습 일지' },
+        { id: 'LIBRARY', icon: <Library className="w-6 h-6" />, label: '문제 보관함' },
         { id: 'STATS', icon: <BarChart3 className="w-6 h-6" />, label: '상세 통계' },
     ] as const;
 

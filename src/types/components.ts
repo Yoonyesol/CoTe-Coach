@@ -27,8 +27,8 @@ export interface ProblemCardProps {
 
 export interface MainLayoutProps {
     children: ReactNode;
-    activeTab: 'HOME' | 'STATS' | 'JOURNAL';
-    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL') => void;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
 }

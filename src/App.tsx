@@ -17,6 +17,7 @@ import LearningJournal from './components/LearningJournal'
 import DailyHistory from './components/DailyHistory'
 import ReviewNotifications from './components/ReviewNotifications'
 import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
+import ProblemLibrary from './components/ProblemLibrary'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
 import { useUserStore } from './store/useUserStore'
@@ -103,7 +104,7 @@ function App() {
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL'>('HOME');
+  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>('HOME');
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
   const [isRecoModalOpen, setIsRecoModalOpen] = useState(false);
 
@@ -298,6 +299,8 @@ function App() {
             </>
           ) : activeTab === 'JOURNAL' ? (
             <LearningJournal onLogClick={setEditingLog} />
+          ) : activeTab === 'LIBRARY' ? (
+            <ProblemLibrary onProblemClick={setEditingLog} />
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-1">
