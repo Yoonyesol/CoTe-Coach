@@ -6,9 +6,7 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-interface SkeletonProps {
-    className?: string;
-}
+import { SkeletonProps } from '../../types/components';
 
 export const Skeleton: React.FC<SkeletonProps> = ({ className }) => {
     return (

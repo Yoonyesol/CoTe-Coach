@@ -2,154 +2,11 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
 
-export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
+import { Platform, UserState, TimerState } from '../types/user';
+import { StudyPlan, RecommendationSettings, StudyLog } from '../types/study';
+import { ShopItem } from '../types/shop';
 
-export interface StudyPlan {
-    targetTier: string;
-    targetDate: string; // ISO String
-    dailyIntensity: 'LOW' | 'NORMAL' | 'HIGH';
-    problemCount: number;
-}
-
-export interface RecommendationSettings {
-    difficulty: 'EASY' | 'NORMAL' | 'HARD';
-    focusAlgorithms: string[];
-    seedOffset: number;
-}
-
-export interface DailyTask {
-    id: string;
-    problemId: string;
-    problemTitle: string;
-    site: Platform;
-    difficulty: string;
-    status: 'pending' | 'completed';
-    targetDate: string; // YYYY-MM-DD
-}
-
-export interface StudyLog {
-    id: string;
-    problemId: string;
-    platform: Platform;
-    difficulty: string;
-    perceivedDifficulty: 'EASY' | 'NORMAL' | 'HARD';
-    elapsedTime: number; // ms
-    feeling: string;
-    concepts: string[];
-    completedAt: string; // ISO String
-    result: 'SUCCESS' | 'FAIL'; // SUCCESS: 해결함, FAIL: 못 끝냄
-    solvingMethod: 'SELF' | 'REFERENCE'; // SELF: 스스로 해결, REFERENCE: 답지 참고
-    ratingContribution?: number;
-}
-
-export interface ShopItem {
-    id: string;
-    name: string;
-    price: number;
-    category: 'CLOTHES' | 'FURNITURE' | 'DECO';
-    emoji: string;
-}
-
-interface TimerState {
-    isRunning: boolean;
-    startTime: number | null;
-    currentProblemId: string | null;
-    problemTimers: Record<string, number>; // { [problemId]: totalMs }
-}
-
-interface UserState {
-    xp: number;
-    level: number;
-    points: number;
-    tier: string;
-    bojHandle: string;
-    bojRating: number; // Added to store linked BOJ rating
-    studyPlan: StudyPlan;
-    recommendationSettings: RecommendationSettings;
-    timer: TimerState;
-    studyLogs: StudyLog[];
-    inventory: string[]; // Item IDs
-    equippedItems: string[]; // Item IDs
-    dailyTasks: DailyTask[];
-
-    // Actions
-    addXp: (amount: number) => void;
-    addPoints: (amount: number) => void;
-    setBojHandle: (handle: string) => void;
-    setStudyPlan: (plan: Partial<StudyPlan>) => void;
-    setRecommendationSettings: (settings: Partial<RecommendationSettings>) => void;
-    calculateTier: (level: number) => string;
-    syncSolvedAcTier: (tier: number) => Promise<void>;
-    linkBojAccount: (handle: string, tier: number) => Promise<void>;
-    unlinkBojAccount: () => void;
-    resetProgress: () => Promise<void>;
-
-    // Supabase Sync Actions
-    fetchUserData: (userId: string) => Promise<void>;
-    saveProfile: (userId: string) => Promise<void>;
-
-    // Study Log Actions
-    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => Promise<void>;
-    updateStudyLog: (logId: string, updates: Partial<StudyLog>) => Promise<void>;
-    deleteStudyLog: (logId: string) => Promise<void>;
-
-    // Daily Task Actions
-    fetchDailyTasks: (userId: string) => Promise<void>;
-    addDailyTask: (task: Omit<DailyTask, 'id' | 'status'>) => Promise<void>;
-    toggleTaskStatus: (taskId: string) => Promise<void>;
-    deleteDailyTask: (taskId: string) => Promise<void>;
-
-    // Timer Actions
-    startTimer: (problemId: string) => boolean; // Returns false if another is running
-    stopTimer: () => void;
-    resetTimer: (problemId?: string) => void;
-    getTotalElapsed: (problemId: string) => number;
-
-    // Daily Planner Helpers (Derived State)
-    getDailyProgress: () => { solved: number; goal: number };
-    getDaysRemaining: () => number;
-
-    // Shop Actions
-    buyItem: (item: ShopItem) => boolean;
-    toggleEquip: (itemId: string) => void;
-
-    // Helper to force recalculation
-    refreshRating: () => Promise<void>;
-    refreshRecommendations: () => Promise<void>;
-}
-
-// Solved.ac Style Rating Mapping (1 ~ 30 Points)
-export const XP_MAP: Record<Platform, Record<string, number>> = {
-    BOJ: {
-        'Bronze': 1,
-        'Silver': 6,
-        'Gold': 11,
-        'Platinum': 16,
-        'Diamond': 21,
-        'Ruby': 26,
-    },
-    PROG: {
-        '0': 1,
-        '1': 4,
-        '2': 10,
-        '3': 18,
-        '4': 25,
-        '5': 30,
-    },
-    LC: {
-        'Easy': 5,
-        'Medium': 13,
-        'Hard': 25,
-    },
-    SWEA: {
-        'D1': 1,
-        'D2': 3,
-        'D3': 8,
-        'D4': 15,
-        'D5': 23,
-        'D6': 30,
-    }
-};
+import { calculateEarnedXp } from '../lib/xp';
 
 export const useUserStore = create<UserState>()(
     persist(
@@ -613,48 +470,11 @@ export const useUserStore = create<UserState>()(
             name: 'cote-coach-user-storage',
             version: 7, // Plan & Settings Separation
             partialize: (state) => ({ timer: state.timer }), // Only keep timer persisted locally
-            migrate: (persistedState: any, version: number) => {
+            migrate: (_persistedState: any, _version: number) => {
                 // Migration logic if needed
-                return persistedState;
+                return _persistedState;
             }
         }
     )
 );
 
-const DIFFICULTY_LEVEL_MAP: Record<string, number> = {
-    'Lv.0': 1, 'Lv.1': 4, 'Lv.2': 10, 'Lv.3': 20, 'Lv.4': 30, 'Lv.5': 42,
-    'Easy': 5, 'Medium': 18, 'Hard': 35,
-    'D1': 1, 'D2': 5, 'D3': 12, 'D4': 22, 'D5': 32, 'D6': 42,
-    'Bronze': 3, 'Silver': 12, 'Gold': 22, 'Platinum': 32, 'Diamond': 40, 'Ruby': 45
-};
-
-export const calculateEarnedXp = (platform: Platform, difficulty: string, userLevel: number = 1): number => {
-    let baseXp = 10;
-    let problemLevel = 1;
-    const platformMap = XP_MAP[platform];
-    if (platformMap) {
-        if (platform === 'BOJ') {
-            const lv = parseInt(difficulty);
-            if (!isNaN(lv)) {
-                if (lv <= 5) baseXp = XP_MAP.BOJ.Bronze;
-                else if (lv <= 10) baseXp = XP_MAP.BOJ.Silver;
-                else if (lv <= 15) baseXp = XP_MAP.BOJ.Gold;
-                else if (lv <= 20) baseXp = XP_MAP.BOJ.Platinum;
-                else if (lv <= 25) baseXp = XP_MAP.BOJ.Diamond;
-                else baseXp = XP_MAP.BOJ.Ruby;
-                problemLevel = Math.max(1, (lv - 1) * 2);
-            } else {
-                const tierBase = difficulty.split(' ')[0];
-                baseXp = XP_MAP.BOJ[tierBase] || 10;
-                problemLevel = DIFFICULTY_LEVEL_MAP[tierBase] || 10;
-            }
-        } else {
-            // @ts-ignore
-            baseXp = platformMap[difficulty] || 10;
-            problemLevel = DIFFICULTY_LEVEL_MAP[difficulty] || 10;
-        }
-    }
-    const gap = problemLevel - userLevel;
-    let multiplier = gap > 0 ? 1 + (gap * 0.1) : Math.pow(0.9, Math.abs(gap));
-    return Math.max(1, Math.floor(baseXp * multiplier));
-};

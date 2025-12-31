@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Loader2, Link as LinkIcon, Link2Off, Trash2, AlertCircle } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
-import { fetchSolvedAcUser, SolvedAcUser } from '../../api/solvedac';
+import { fetchSolvedAcUser } from '../../api/solvedac';
+import { SolvedAcUser } from '../../types/user';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface AccountSettingsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { AccountSettingsModalProps } from '../../types/modal';
 
 const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onClose }) => {
     const { bojHandle, linkBojAccount, unlinkBojAccount } = useUserStore();

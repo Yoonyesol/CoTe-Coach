@@ -10,18 +10,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type RecommendationType = 'WARM_UP' | 'MAIN' | 'CHALLENGE';
-
-interface ProblemCardProps {
-  type: RecommendationType;
-  title: string;
-  platform: string;
-  difficulty: string;
-  level: number; // Added: Raw Solved.ac level for UI clarity
-  tags: string[];
-  problemUrl: string;
-  onReview: (problem: { title: string; platform: string; difficulty: string }) => void;
-}
+import { ProblemCardProps } from '../types/components';
 
 const typeStyles = {
   WARM_UP: {

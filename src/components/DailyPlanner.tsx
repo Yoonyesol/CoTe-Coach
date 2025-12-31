@@ -2,12 +2,7 @@ import React from 'react';
 import { Target, CheckCircle2, Circle, Calendar, ArrowRight, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
-interface DailyPlannerProps {
-    solvedCount: number;
-    goalCount: number;
-    daysRemaining: number;
-    onPlanDetailClick: () => void;
-}
+import { DailyPlannerProps } from '../types/components';
 
 const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining, onPlanDetailClick }) => {
     const percentage = Math.round((solvedCount / goalCount) * 100);

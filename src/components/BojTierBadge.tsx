@@ -1,10 +1,6 @@
 import React from 'react';
 
-interface BojTierBadgeProps {
-    level: number; // Solved.ac level (1~30+)
-    size?: 'sm' | 'md' | 'lg';
-    className?: string;
-}
+import { BojTierBadgeProps } from '../types/components';
 
 const BojTierBadge: React.FC<BojTierBadgeProps> = ({ level, size = 'md', className = '' }) => {
 

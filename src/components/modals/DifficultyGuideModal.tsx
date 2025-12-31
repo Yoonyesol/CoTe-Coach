@@ -2,10 +2,7 @@ import React from 'react';
 import { X, Info, HelpCircle, Target, TrendingUp, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface DifficultyGuideModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { DifficultyGuideModalProps } from '../../types/modal';
 
 const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onClose }) => {
     return (

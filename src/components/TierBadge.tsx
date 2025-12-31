@@ -1,10 +1,6 @@
 import React from 'react';
 
-interface TierBadgeProps {
-    tier: string; // e.g., "Novice 3", "Challenger 10"
-    size?: 'sm' | 'md' | 'lg' | 'xl';
-    className?: string;
-}
+import { TierBadgeProps } from '../types/components';
 
 const TierBadge: React.FC<TierBadgeProps> = ({ tier, size = 'md', className = '' }) => {
     const [rankName, rankLevel] = tier.split(' ');

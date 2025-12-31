@@ -1,4 +1,5 @@
-import { calculateEarnedXp, useUserStore } from '../store/useUserStore';
+import { useUserStore } from '../store/useUserStore';
+import { calculateEarnedXp } from '../lib/xp';
 
 describe('통합 등급 시스템 및 XP 로직 테스트', () => {
 

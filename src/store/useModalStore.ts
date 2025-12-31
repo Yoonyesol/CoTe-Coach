@@ -1,22 +1,6 @@
 import { create } from 'zustand';
 
-interface ModalOptions {
-    title?: string;
-    message: string;
-    type: 'alert' | 'confirm';
-    onConfirm?: () => void;
-    onCancel?: () => void;
-    confirmText?: string;
-    cancelText?: string;
-}
-
-interface ModalState {
-    isOpen: boolean;
-    options: ModalOptions | null;
-    showAlert: (title: string, message: string, onConfirm?: () => void) => void;
-    showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => void;
-    closeModal: () => void;
-}
+import { ModalState } from '../types/modal';
 
 export const useModalStore = create<ModalState>((set) => ({
     isOpen: false,

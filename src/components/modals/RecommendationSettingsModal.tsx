@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { X, BarChart3, HelpCircle, Check } from 'lucide-react';
-import { useUserStore, RecommendationSettings } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
+import { RecommendationSettings } from '../../types/study';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import DifficultyGuideModal from './DifficultyGuideModal';
 
-interface RecommendationSettingsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { RecommendationSettingsModalProps } from '../../types/modal';
 
 const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = ({ isOpen, onClose }) => {
     const { recommendationSettings, setRecommendationSettings } = useUserStore();

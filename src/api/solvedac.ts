@@ -2,25 +2,8 @@ import axios from 'axios';
 
 const BASE_URL = '/api/v3';
 
-export interface SolvedAcUser {
-  handle: string;
-  tier: number;
-  rank: number;
-  solvedCount: number;
-  exp: number;
-  rating: number;
-}
-
-export interface SolvedAcProblem {
-  problemId: number;
-  titleKo: string;
-  level: number;
-  tags: {
-    key: string;
-    bojTagId: number;
-    displayNames: { language: string; name: string; short: string }[];
-  }[];
-}
+import { SolvedAcUser } from '../types/user';
+import { SolvedAcProblem } from '../types/problem';
 
 /**
  * 사용자 정보 가져오기

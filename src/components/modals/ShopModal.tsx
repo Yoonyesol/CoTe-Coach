@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { X, ShoppingBag, Check, Coins } from 'lucide-react';
-import { useUserStore, ShopItem } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
+import { ShopItem } from '../../types/shop';
 import { clsx } from 'clsx';
 
-interface ShopModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { ShopModalProps } from '../../types/modal';
 
 const SHOP_ITEMS: ShopItem[] = [
     { id: 'item_1', name: '멋쟁이 선글라스', price: 100, category: 'CLOTHES', emoji: '🕶️' },

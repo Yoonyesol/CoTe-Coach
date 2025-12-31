@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, Trash2, Clock, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
-import { useUserStore, StudyLog } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 
-interface EditStudyLogModalProps {
-    log: StudyLog;
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { EditStudyLogModalProps } from '../../types/modal';
 
 const EditStudyLogModal: React.FC<EditStudyLogModalProps> = ({ log, isOpen, onClose }) => {
     const { updateStudyLog, deleteStudyLog } = useUserStore();

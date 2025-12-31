@@ -1,16 +1,5 @@
-import { searchSolvedAcProblems, SolvedAcProblem } from '../api/solvedac';
-
-export type RecommendationType = 'WARM_UP' | 'MAIN' | 'CHALLENGE';
-
-export interface RecommendedProblem {
-    type: RecommendationType;
-    title: string;
-    platform: string;
-    difficulty: string;
-    level: number; // Added: Raw Solved.ac level for UI clarity
-    tags: string[];
-    problemUrl: string;
-}
+import { searchSolvedAcProblems } from '../api/solvedac';
+import { SolvedAcProblem, RecommendedProblem } from '../types/problem';
 
 /**
  * Solved.ac 레벨(1~30)을 티어 이름으로 변환

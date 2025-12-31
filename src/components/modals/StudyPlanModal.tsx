@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Target, Calendar, BarChart3, Save } from 'lucide-react';
-import { useUserStore, StudyPlan } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
+import { StudyPlan } from '../../types/study';
 import { useModalStore } from '../../store/useModalStore';
 import { motion } from 'framer-motion';
 
-interface StudyPlanModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { StudyPlanModalProps } from '../../types/modal';
 
 const StudyPlanModal: React.FC<StudyPlanModalProps> = ({ isOpen, onClose }) => {
     const { studyPlan, setStudyPlan } = useUserStore();

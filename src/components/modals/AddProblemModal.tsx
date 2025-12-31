@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Search, Link as LinkIcon, AlertCircle } from 'lucide-react';
-import { useUserStore, calculateEarnedXp } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
+import { calculateEarnedXp } from '../../lib/xp';
 import { useModalStore } from '../../store/useModalStore';
 
-interface AddProblemModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { AddProblemModalProps } from '../../types/modal';
 
 const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) => {
     const { addXp, level } = useUserStore();

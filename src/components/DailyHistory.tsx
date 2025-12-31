@@ -9,12 +9,9 @@ import {
     ChevronRight,
     Calendar
 } from 'lucide-react';
-import { useUserStore, StudyLog } from '../store/useUserStore';
+import { useUserStore } from '../store/useUserStore';
+import { DailyHistoryProps } from '../types/components';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface DailyHistoryProps {
-    onEditLog: (log: StudyLog) => void;
-}
 
 const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
     const { studyLogs } = useUserStore();

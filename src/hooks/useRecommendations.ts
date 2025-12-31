@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRecommendations, RecommendedProblem } from '../lib/recommendationEngine';
+import { getRecommendations } from '../lib/recommendationEngine';
+import { RecommendedProblem } from '../types/problem';
 import { useUserStore } from '../store/useUserStore';
 
 // Get today's date string (YYYY-MM-DD) based on local timezone

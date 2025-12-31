@@ -3,10 +3,7 @@ import { X, Award, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import TierBadge from '../TierBadge';
 
-interface TierGuideModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { TierGuideModalProps } from '../../types/modal';
 
 const TierGuideModal: React.FC<TierGuideModalProps> = ({ isOpen, onClose }) => {
     if (!isOpen) return null;

@@ -14,13 +14,7 @@ const ITEM_EMOJIS: Record<string, string> = {
     'item_4': '🛋️', 'item_5': '🖥️', 'item_6': '💰', 'item_7': '✨'
 };
 
-interface MainLayoutProps {
-    children: React.ReactNode;
-    activeTab: 'HOME' | 'STATS' | 'JOURNAL';
-    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL') => void;
-    onAccountSettingsOpen: () => void;
-    onTierClick?: () => void;
-}
+import { MainLayoutProps } from '../../types/components';
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen, onTierClick }) => {
     const level = useUserStore((state) => state.level);

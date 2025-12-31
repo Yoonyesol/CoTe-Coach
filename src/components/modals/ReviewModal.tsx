@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
 import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb } from 'lucide-react';
-import { useUserStore, Platform } from '../../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
+import { Platform } from '../../types/user';
 import { clsx } from 'clsx';
 
-interface ReviewModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    problem: {
-        title: string;
-        platform: string;
-        difficulty: string;
-    };
-}
+import { ReviewModalProps } from '../../types/modal';
 
 const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) => {
     const { addStudyLog, getTotalElapsed } = useUserStore();

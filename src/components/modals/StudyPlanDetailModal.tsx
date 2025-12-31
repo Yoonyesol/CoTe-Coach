@@ -3,11 +3,7 @@ import { X, Target, Calendar, BarChart3, TrendingUp, Award, Edit } from 'lucide-
 import { useUserStore } from '../../store/useUserStore';
 import { motion } from 'framer-motion';
 
-interface StudyPlanDetailModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onEditPlan: () => void;
-}
+import { StudyPlanDetailModalProps } from '../../types/modal';
 
 const StudyPlanDetailModal: React.FC<StudyPlanDetailModalProps> = ({ isOpen, onClose, onEditPlan }) => {
     const { studyPlan, getDailyProgress, getDaysRemaining, level, tier } = useUserStore();
