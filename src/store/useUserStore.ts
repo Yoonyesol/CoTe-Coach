@@ -389,6 +389,74 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
+            // Pagination Logic
+            libraryPage: 1,
+            libraryTotalSize: 0,
+            libraryProblems: [],
+
+            fetchLibraryPage: async (userId, page, size, sortBy = 'RECENT') => {
+                const start = (page - 1) * size;
+                const end = start + size - 1;
+
+                // 1. Get ReviewPlans for current page (Pagination Target)
+                let query = supabase
+                    .from('review_plans')
+                    .select('*', { count: 'exact' })
+                    .eq('user_id', userId);
+
+                // Server-side Sorting
+                if (sortBy === 'DIFFICULTY') {
+                    // Note: Difficulty sorting might need mapping if alphabetical isn't desired, but strings work loosely
+                    query = query.order('difficulty', { ascending: false });
+                } else {
+                    query = query.order('last_completed_at', { ascending: false });
+                }
+
+                const { data: plans, count } = await query.range(start, end);
+
+                if (plans && plans.length > 0) {
+                    const problemIds = plans.map(p => p.problem_id);
+
+                    // 2. Fetch ALL logs for these problems to ensure we have full history for stats
+                    const { data: logs } = await supabase
+                        .from('study_logs')
+                        .select('*')
+                        .in('problem_id', problemIds)
+                        .order('created_at', { ascending: false });
+
+                    if (logs) {
+                        set({
+                            libraryPage: page,
+                            libraryTotalSize: count || 0,
+                            libraryProblems: logs.map(l => ({
+                                id: l.id,
+                                problemId: l.problem_id,
+                                problemTitle: l.problem_title || l.problem_id,
+                                platform: l.site as Platform,
+                                difficulty: l.difficulty || '',
+                                perceivedDifficulty: l.perceived_difficulty as any,
+                                result: l.result as any,
+                                solvingMethod: l.solving_method as any,
+                                elapsedTime: l.elapsed_time || 0,
+                                reflection: l.reflection || l.feeling || '',
+                                approach: l.approach || '',
+                                concepts: l.concepts || [],
+                                completedAt: l.created_at,
+                                stage: l.stage || 0,
+                                ratingContribution: l.rating_contribution || 0,
+                                isFinished: l.is_finished || false
+                            }))
+                        });
+                    }
+                } else {
+                    set({
+                        libraryPage: page,
+                        libraryTotalSize: count || 0,
+                        libraryProblems: []
+                    });
+                }
+            },
+
             addStudyLog: async (logData) => {
                 const state = get();
                 const existingPlan = state.reviewPlans.find(p => p.problemId === logData.problemId);

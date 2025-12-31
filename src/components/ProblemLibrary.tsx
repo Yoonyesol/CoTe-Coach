@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Search, TrendingDown, Calendar, ChevronRight
 } from 'lucide-react';
@@ -27,15 +27,53 @@ interface ProblemLibraryProps {
 }
 
 const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
-    const { studyLogs, reviewPlans } = useUserStore();
+    const {
+        libraryProblems,
+        reviewPlans,
+        fetchLibraryPage,
+        libraryPage,
+        libraryTotalSize
+    } = useUserStore();
+
+    // Local state only for Search (Client-side filtering within fetched page? OR reset page?)
+    // Note: Search complicates pagination. Ideal: Search updates backend query.
+    // For now, let's keep Search local to the page (User requested page/size logic).
+    // Or better: If user searches, we might need a separate search API.
+    // Given the task "Use page, size", I will assume we paginate strictly. 
+    // Search might just filter the *current page* or we can't implement search easily without backend modification.
+    // I'll keep client search behaving on the current page for now as per "Archive" usually implies standard listing.
+
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState<'RECENT' | 'SOLVES' | 'IMPROVEMENT' | 'DIFFICULTY'>('RECENT');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // 1. GROUP LOGS BY PROBLEM ID
+    const PAGE_SIZE = 12;
+
+    useEffect(() => {
+        const load = async () => {
+            setIsLoading(true);
+            const { data: { user } } = await import('../lib/supabase').then(m => m.supabase.auth.getUser());
+            if (user) {
+                // Determine sort param for backend if applicable
+                const backendSort = sortBy === 'DIFFICULTY' ? 'DIFFICULTY' : 'RECENT';
+                await fetchLibraryPage(user.id, libraryPage, PAGE_SIZE, backendSort);
+            }
+            setIsLoading(false);
+        };
+        load();
+    }, [libraryPage, sortBy]); // Trigger on page or sort change
+
+    // Handle Page Change
+    const handlePageChange = (newPage: number) => {
+        if (newPage < 1 || newPage > Math.ceil(libraryTotalSize / PAGE_SIZE)) return;
+        useUserStore.setState({ libraryPage: newPage });
+    };
+
+    // 1. GROUP LOGS BY PROBLEM ID (Using libraryProblems instead of all studyLogs)
     const problemGroups = useMemo(() => {
         const groups: Record<string, ProblemStats> = {};
 
-        studyLogs.forEach(log => {
+        libraryProblems.forEach(log => {
             if (!groups[log.problemId]) {
                 const plan = reviewPlans.find(p => p.problemId === log.problemId);
                 groups[log.problemId] = {
@@ -72,25 +110,34 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
         });
 
         return Object.values(groups);
-    }, [studyLogs, reviewPlans]);
+    }, [libraryProblems, reviewPlans]);
 
-    // 2. FILTER & SORT
+    // 2. FILTER & SORT (Client-side refinement on the fetched page)
     const filteredProblems = useMemo(() => {
-        return problemGroups
-            .filter(p =>
+        let result = problemGroups;
+
+        if (searchTerm) {
+            result = result.filter(p =>
                 p.problemTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 p.problemId.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-            .sort((a, b) => {
-                switch (sortBy) {
-                    case 'RECENT': return new Date(b.lastSolvedAt).getTime() - new Date(a.lastSolvedAt).getTime();
-                    case 'SOLVES': return b.totalSolves - a.totalSolves;
-                    case 'IMPROVEMENT': return b.improvement - a.improvement;
-                    case 'DIFFICULTY': return b.difficulty.localeCompare(a.difficulty);
-                    default: return 0;
-                }
-            });
+            );
+        }
+
+        // Backend handles primary sort (RECENT/DIFFICULTY), but client applies specific sorts just in case
+        return result.sort((a, b) => {
+            switch (sortBy) {
+                // If backend sorted by Date, this is redundant but safe
+                case 'RECENT': return new Date(b.lastSolvedAt).getTime() - new Date(a.lastSolvedAt).getTime();
+                // These are only valid within the page unless we do backend sort
+                case 'SOLVES': return b.totalSolves - a.totalSolves;
+                case 'IMPROVEMENT': return b.improvement - a.improvement;
+                case 'DIFFICULTY': return b.difficulty.localeCompare(a.difficulty);
+                default: return 0;
+            }
+        });
     }, [problemGroups, searchTerm, sortBy]);
+
+    const totalPages = Math.ceil(libraryTotalSize / PAGE_SIZE);
 
     return (
         <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -99,7 +146,7 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                 <div className="space-y-1">
                     <h2 className="text-2xl font-black text-base-900 flex items-center gap-2 font-sans">
                         문제 보관함 <span className="text-sm font-bold bg-misty-dark px-2 py-0.5 rounded-lg text-white leading-none uppercase tracking-tighter">
-                            {problemGroups.length} Problems
+                            {libraryTotalSize} Problems
                         </span>
                     </h2>
                     <p className="text-sm font-medium text-base-400 font-sans">
@@ -108,11 +155,12 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                 </div>
 
                 <div className="flex items-center gap-2 w-full md:w-auto">
+                    {/* Search input - acts as filter on current page */}
                     <div className="relative flex-1 md:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-300" />
                         <input
                             type="text"
-                            placeholder="문제 제목 또는 ID 검색..."
+                            placeholder="Page Search..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full bg-white border border-base-100 rounded-xl pl-10 pr-4 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm"
@@ -124,15 +172,16 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                         className="bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm appearance-none cursor-pointer"
                     >
                         <option value="RECENT">최근 해결순</option>
-                        <option value="SOLVES">많이 푼 순</option>
-                        <option value="IMPROVEMENT">시간 단축순</option>
+                        {/* Note: SOLVES/IMPROVEMENT only sort the current page visually */}
+                        <option value="SOLVES">많이 푼 순 (Page)</option>
+                        <option value="IMPROVEMENT">시간 단축순 (Page)</option>
                         <option value="DIFFICULTY">난이도순</option>
                     </select>
                 </div>
             </div>
 
             {/* Problem List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                 <AnimatePresence mode="popLayout">
                     {filteredProblems.map((problem) => (
                         <motion.div
@@ -208,11 +257,38 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                         <div className="w-16 h-16 bg-base-50 rounded-full flex items-center justify-center text-3xl opacity-50 grayscale">📚</div>
                         <div className="text-center">
                             <p className="text-sm font-black text-base-300">표시할 문제가 없습니다.</p>
-                            <p className="text-[10px] font-bold text-base-200 uppercase tracking-widest mt-1">Start solving problems to build your library!</p>
+                            <p className="text-[10px] font-bold text-base-200 uppercase tracking-widest mt-1">
+                                {searchTerm ? '검색 결과가 없습니다.' : 'Start solving problems to build your library!'}
+                            </p>
                         </div>
                     </div>
                 )}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+                <div className="flex justify-center items-center gap-2 pt-4">
+                    <button
+                        onClick={() => handlePageChange(libraryPage - 1)}
+                        disabled={libraryPage === 1}
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all"
+                    >
+                        Previous
+                    </button>
+
+                    <span className="text-xs font-black text-base-400 px-4">
+                        Page {libraryPage} of {totalPages}
+                    </span>
+
+                    <button
+                        onClick={() => handlePageChange(libraryPage + 1)}
+                        disabled={libraryPage === totalPages}
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all"
+                    >
+                        Next
+                    </button>
+                </div>
+            )}
         </section>
     );
 };
