@@ -142,6 +142,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                 { id: 'BOJ', name: '백준' },
                                 { id: 'PROG', name: '프로그래머스' },
                                 { id: 'SWEA', name: 'SWEA' },
+                                { id: 'LC', name: '릿코드' },
                             ].map((platform) => {
                                 const isSelected = localSettings.platforms?.includes(platform.id as Platform);
                                 return (
