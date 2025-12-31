@@ -369,15 +369,47 @@ export const useUserStore = create<UserState>()(
             addStudyLog: async (logData) => {
                 const state = get();
                 const existingPlan = state.reviewPlans.find(p => p.problemId === logData.problemId);
-                const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
 
-                // Ebbinghaus Curve Intervals (days)
+                // --- Smart Stage Logic ---
+                // Ebbinghaus Curve Intervals (days): 1 -> 3 -> 7 -> 15 -> 30
                 const intervals = [1, 3, 7, 15, 30];
-                const nextInterval = intervals[currentStage] || 30;
+                let nextStage = 0;
+                let isEarlyReview = false;
 
+                if (!existingPlan) {
+                    // 1. New Problem
+                    nextStage = 0;
+                } else if (logData.result === 'FAIL') {
+                    // 2. Failed Review -> Reset to Stage 0 (or Keep current if you prefer soft penalty)
+                    // For now, let's keep it rigorous: Fail means restart cycle 1 (Stage 0->1 day)
+                    nextStage = 0;
+                } else if (existingPlan?.nextReviewAt) {
+                    // 3. Successful Review
+                    const now = new Date().getTime();
+                    const due = new Date(existingPlan.nextReviewAt).getTime();
+                    const diffHours = (due - now) / (1000 * 60 * 60);
+
+                    // Threshold: If more than 12 hours remains until review, it's "Early"
+                    if (diffHours > 12) {
+                        isEarlyReview = true;
+                        nextStage = existingPlan.currentStage; // Maintain Stage
+                    } else {
+                        // Regular Review (Due or Overdue)
+                        nextStage = existingPlan.currentStage + 1;
+                    }
+                } else {
+                    // Fallback for edge cases (shouldn't happen with existingPlan check)
+                    nextStage = existingPlan ? existingPlan.currentStage + 1 : 0;
+                }
+
+                const nextInterval = intervals[nextStage] || 30; // Max 30 days
+
+                // Next Review Date is ALWAYS calculated from NOW
+                // If early: "Reset clock" for current stage
+                // If regular: "Start clock" for next stage
                 const nextReviewAt = logData.result === 'SUCCESS'
                     ? new Date(Date.now() + 1000 * 60 * 60 * 24 * nextInterval).toISOString()
-                    : new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString();
+                    : new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString(); // Fail -> 1 day retry
 
                 const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, state.level);
 
@@ -385,7 +417,7 @@ export const useUserStore = create<UserState>()(
                     ...logData,
                     id: Math.random().toString(36).substr(2, 9),
                     completedAt: new Date().toISOString(),
-                    stage: currentStage,
+                    stage: nextStage,
                     ratingContribution: earnedRating
                 };
 
@@ -422,9 +454,9 @@ export const useUserStore = create<UserState>()(
                         problem_title: newLog.problemTitle,
                         platform: newLog.platform,
                         difficulty: newLog.difficulty,
-                        current_stage: currentStage,
+                        current_stage: nextStage,
                         next_review_at: nextReviewAt,
-                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
+                        status: nextStage >= 5 ? 'COMPLETED' : 'ACTIVE',
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
 
@@ -440,10 +472,10 @@ export const useUserStore = create<UserState>()(
                     if (existingPlan) {
                         nextPlans = nextPlans.map(p => p.problemId === logData.problemId ? {
                             ...p,
-                            currentStage,
+                            currentStage: nextStage,
                             nextReviewAt,
                             lastCompletedAt: newLog.completedAt,
-                            status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE'
+                            status: nextStage >= 5 ? 'COMPLETED' : 'ACTIVE'
                         } : p);
                     } else {
                         nextPlans.push({
@@ -452,7 +484,7 @@ export const useUserStore = create<UserState>()(
                             problemTitle: newLog.problemTitle,
                             platform: newLog.platform,
                             difficulty: newLog.difficulty,
-                            currentStage,
+                            currentStage: nextStage,
                             nextReviewAt,
                             status: 'ACTIVE',
                             lastCompletedAt: newLog.completedAt
