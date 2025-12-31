@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, BarChart3, HelpCircle, Check } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { RecommendationSettings } from '../../types/study';
+import { Platform } from '../../types/user';
 import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import DifficultyGuideModal from './DifficultyGuideModal';
@@ -127,6 +128,45 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                     >
                                         {isSelected && <Check className="w-3 h-3" />}
                                         {tag.name}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Preferred Platforms */}
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 대상 플랫폼</label>
+                        <div className="flex flex-wrap gap-2">
+                            {[
+                                { id: 'BOJ', name: '백준' },
+                                { id: 'PROG', name: '프로그래머스' },
+                                { id: 'SWEA', name: 'SWEA' },
+                            ].map((platform) => {
+                                const isSelected = localSettings.platforms?.includes(platform.id as Platform);
+                                return (
+                                    <button
+                                        key={platform.id}
+                                        onClick={() => {
+                                            const current = localSettings.platforms || ['BOJ'];
+                                            if (isSelected) {
+                                                // Prevent removing all platforms
+                                                if (current.length > 1) {
+                                                    setLocalSettings({ ...localSettings, platforms: current.filter(id => id !== platform.id) });
+                                                }
+                                            } else {
+                                                setLocalSettings({ ...localSettings, platforms: [...current, platform.id as Platform] });
+                                            }
+                                        }}
+                                        className={clsx(
+                                            "px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all border-2 flex items-center gap-2",
+                                            isSelected
+                                                ? "bg-base-900 border-base-900 text-white"
+                                                : "bg-white border-base-100 text-base-400 hover:border-base-200"
+                                        )}
+                                    >
+                                        {isSelected && <Check className="w-3 h-3 text-white" />}
+                                        {platform.name}
                                     </button>
                                 );
                             })}

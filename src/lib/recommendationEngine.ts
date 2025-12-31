@@ -1,5 +1,7 @@
 import { searchSolvedAcProblems } from '../api/solvedac';
 import { SolvedAcProblem, RecommendedProblem } from '../types/problem';
+import { Platform } from '../types/user';
+import { getProgrammersProblems, getSweaProblems, mapToUniversalFormat } from '../api/staticProblems';
 
 /**
  * Solved.ac 레벨(1~30)을 티어 이름으로 변환
@@ -23,7 +25,8 @@ export const getRecommendations = async (
         problemCount?: number;
         difficultyAdjustment?: 'EASY' | 'NORMAL' | 'HARD';
         seedOffset?: number;
-        focusAlgorithms?: string[]; // Added: Filter by algorithm tags
+        focusAlgorithms?: string[];
+        platforms?: Platform[];
     } = {}
 ): Promise<RecommendedProblem[]> => {
     const {
@@ -31,7 +34,8 @@ export const getRecommendations = async (
         problemCount = 4,
         difficultyAdjustment = 'NORMAL',
         seedOffset = 0,
-        focusAlgorithms = []
+        focusAlgorithms = [],
+        platforms = ['BOJ']
     } = options;
 
     // Create a stable seed for the day + Offset for manual refresh
@@ -91,55 +95,97 @@ export const getRecommendations = async (
         counts.main = problemCount - counts.warmUp - counts.challenge;
     }
 
-    // API 호출 병렬화로 속도 개선 (페이지 1에서 후보 50개를 가져옴)
-    const [warmUpRes, mainRes, challengeRes] = await Promise.all([
-        // 워밍업은 알고리즘에 관계없이 평범한 수준으로 추천 (기본기 강화)
-        counts.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, 1) : { items: [] },
-        // 메인 공략과 챌린지는 선택한 알고리즘을 우선적으로 반영
-        counts.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
-        counts.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
-    ]);
+    // --- Multi-Platform Quota Distribution ---
+    // Distribute the requested counts across selected platforms
+    const getProblemsForPlatform = async (p: Platform, targetCount: { warmUp: number, main: number, challenge: number }) => {
+        if (p === 'BOJ') {
+            const [warmUpRes, mainRes, challengeRes] = await Promise.all([
+                targetCount.warmUp > 0 ? searchSolvedAcProblems(`tier:${warmUpLevel}${handleFilter}`, 1) : { items: [] },
+                targetCount.main > 0 ? searchSolvedAcProblems(`${mainQuery}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
+                targetCount.challenge > 0 ? searchSolvedAcProblems(`tier:${challengeLevel}${handleFilter}${algorithmFilter}`, 1) : { items: [] },
+            ]);
+            return {
+                warmUp: warmUpRes.items,
+                main: mainRes.items,
+                challenge: challengeRes.items
+            };
+        }
+
+        if (p === 'PROG') {
+            // Mapping: floor((level-1)/5)
+            const progLv = Math.floor((baseLevel - 1) / 5);
+            const warmUpLv = Math.max(0, progLv - 1);
+            const challengeLv = Math.min(5, progLv + 1);
+
+            return {
+                warmUp: getProgrammersProblems(warmUpLv).map(p => mapToUniversalFormat(p, 'PROG')),
+                main: getProgrammersProblems(progLv).map(p => mapToUniversalFormat(p, 'PROG')),
+                challenge: getProgrammersProblems(challengeLv).map(p => mapToUniversalFormat(p, 'PROG'))
+            };
+        }
+
+        if (p === 'SWEA') {
+            const sweaIdx = Math.floor((baseLevel - 1) / 5) + 1; // 1-6
+            const warmUpIdx = Math.max(1, sweaIdx - 1);
+            const challengeIdx = Math.min(6, sweaIdx + 1);
+
+            return {
+                warmUp: getSweaProblems(`D${warmUpIdx}`).map(p => mapToUniversalFormat(p, 'SWEA')),
+                main: getSweaProblems(`D${sweaIdx}`).map(p => mapToUniversalFormat(p, 'SWEA')),
+                challenge: getSweaProblems(`D${challengeIdx}`).map(p => mapToUniversalFormat(p, 'SWEA'))
+            };
+        }
+
+        return { warmUp: [], main: [], challenge: [] };
+    };
 
     const results: RecommendedProblem[] = [];
 
-    // 워밍업
-    selectRandom(warmUpRes.items, counts.warmUp, dateSeed).forEach(p => {
-        results.push({
-            type: 'WARM_UP',
-            title: p.titleKo,
-            platform: 'BOJ',
-            difficulty: levelToTierName(p.level),
-            level: p.level,
-            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
-            problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
-        });
-    });
+    // Fetch from all platforms in parallel
+    const platformData = await Promise.all(platforms.map(p => getProblemsForPlatform(p, counts)));
 
-    // 메인 공략
-    selectRandom(mainRes.items, counts.main, dateSeed).forEach(p => {
-        results.push({
-            type: 'MAIN',
-            title: p.titleKo,
-            platform: 'BOJ',
-            difficulty: levelToTierName(p.level),
-            level: p.level,
-            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
-            problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
-        });
-    });
+    // Merge & Select (Round-robin or balanced distribution)
+    const mergeAndSelect = (type: 'WARM_UP' | 'MAIN' | 'CHALLENGE', targetTotal: number) => {
+        const pool: { p: SolvedAcProblem, platform: Platform }[] = [];
+        platforms.forEach((p, idx) => {
+            const items = type === 'WARM_UP' ? platformData[idx].warmUp :
+                type === 'MAIN' ? platformData[idx].main :
+                    platformData[idx].challenge;
 
-    // 챌린지
-    selectRandom(challengeRes.items, counts.challenge, dateSeed).forEach(p => {
-        results.push({
-            type: 'CHALLENGE',
-            title: p.titleKo,
-            platform: 'BOJ',
-            difficulty: levelToTierName(p.level),
-            level: p.level,
-            tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
-            problemUrl: `https://www.acmicpc.net/problem/${p.problemId}`
+            items.forEach(item => pool.push({ p: item, platform: p }));
         });
-    });
+
+        if (pool.length === 0) return;
+
+        // Shuffle the whole pool and select targetTotal
+        const shuffled = selectRandom(pool.map(entry => entry.p), targetTotal, `${dateSeed}-${type}`);
+
+        shuffled.forEach(p => {
+            // Find which platform this problem belongs to for correct icon/url
+            const entry = pool.find(e => e.p.problemId === p.problemId && e.p.titleKo === p.titleKo);
+            const platform = entry?.platform || 'BOJ';
+
+            results.push({
+                type,
+                title: p.titleKo,
+                platform: platform,
+                difficulty: platform === 'BOJ' ? levelToTierName(p.level) :
+                    platform === 'PROG' ? `Lv.${p.level}` :
+                        platform === 'SWEA' ? `D${p.level}` : String(p.level),
+                level: p.level,
+                tags: platform === 'BOJ' ? p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key) : [platform],
+                problemUrl: platform === 'BOJ' ? `https://www.acmicpc.net/problem/${p.problemId}` :
+                    (p as any).problemUrl || '#' // Static problems have stored URLs in Universal format if we map them
+            });
+        });
+    };
+
+    // Correcting mapToUniversalFormat to include problemUrl
+    // Wait, I need to update mapToUniversalFormat in staticProblems.ts too.
+
+    mergeAndSelect('WARM_UP', counts.warmUp);
+    mergeAndSelect('MAIN', counts.main);
+    mergeAndSelect('CHALLENGE', counts.challenge);
 
     return results;
 };

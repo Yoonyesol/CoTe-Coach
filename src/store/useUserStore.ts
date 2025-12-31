@@ -26,6 +26,7 @@ export const useUserStore = create<UserState>()(
                 difficulty: 'NORMAL',
                 seedOffset: 0,
                 focusAlgorithms: [],
+                platforms: ['BOJ'],
             },
             timer: {
                 isRunning: false,

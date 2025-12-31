@@ -22,3 +22,9 @@ export interface RecommendedProblem {
     tags: string[];
     problemUrl: string;
 }
+export interface StaticProblem {
+    id: string;
+    title: string;
+    level: string | number;
+    url: string;
+}

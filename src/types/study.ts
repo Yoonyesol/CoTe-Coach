@@ -11,6 +11,7 @@ export interface RecommendationSettings {
     difficulty: 'EASY' | 'NORMAL' | 'HARD';
     focusAlgorithms: string[];
     seedOffset: number;
+    platforms: Platform[];
 }
 
 export interface DailyTask {
