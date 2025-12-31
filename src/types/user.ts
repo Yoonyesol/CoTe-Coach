@@ -1,4 +1,4 @@
-import { StudyPlan, RecommendationSettings, DailyTask, StudyLog, ReviewPlan } from './study';
+import { StudyPlan, RecommendationSettings, DailyTask, StudyLog, ReviewPlan, StudyGoal } from './study';
 import { ShopItem } from './shop';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
@@ -34,6 +34,7 @@ export interface UserState {
     equippedItems: string[];
     dailyTasks: DailyTask[];
     reviewPlans: ReviewPlan[];
+    studyGoals: StudyGoal[];
 
     // Actions
     addXp: (amount: number) => void;
@@ -65,6 +66,13 @@ export interface UserState {
     // Review Actions
     addReviewSession: (problemId: string, log: Omit<StudyLog, 'id' | 'completedAt' | 'stage'>) => Promise<void>;
     fetchReviewPlans: (userId: string) => Promise<void>;
+
+    // Goal Actions
+    fetchGoals: (userId: string) => Promise<void>;
+    createGoal: (goal: Omit<StudyGoal, 'id' | 'createdAt' | 'status'>) => Promise<void>;
+    updateGoal: (goalId: string, updates: Partial<StudyGoal>) => Promise<void>;
+    deleteGoal: (goalId: string) => Promise<void>;
+    getActiveGoal: () => StudyGoal | null;
 
     // Library Pagination & Filtering
     libraryPage: number;

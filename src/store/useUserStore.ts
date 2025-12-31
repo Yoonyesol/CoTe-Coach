@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
 
 import { Platform, UserState } from '../types/user';
-import { StudyPlan, RecommendationSettings, StudyLog } from '../types/study';
+import { StudyPlan, RecommendationSettings, StudyLog, StudyGoal } from '../types/study';
 
 import { calculateEarnedXp } from '../lib/xp';
 
@@ -39,6 +39,7 @@ export const useUserStore = create<UserState>()(
             equippedItems: [],
             dailyTasks: [],
             reviewPlans: [],
+            studyGoals: [],
 
             addXp: (amount) => {
                 const newLog: Omit<StudyLog, 'id' | 'completedAt'> = {
@@ -347,6 +348,98 @@ export const useUserStore = create<UserState>()(
                     ...logData,
                     problemId
                 });
+            },
+
+            // Goal CRUD Functions
+            fetchGoals: async (userId) => {
+                const { data: goals } = await supabase
+                    .from('study_goals')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false });
+
+                if (goals) {
+                    set({
+                        studyGoals: goals.map(g => ({
+                            id: g.id,
+                            name: g.name,
+                            startDate: g.start_date,
+                            endDate: g.end_date,
+                            dailyTarget: g.daily_target,
+                            focusTags: g.focus_tags || [],
+                            status: g.status as StudyGoal['status'],
+                            createdAt: g.created_at
+                        }))
+                    });
+                }
+            },
+
+            createGoal: async (goalData) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const { data, error } = await supabase
+                    .from('study_goals')
+                    .insert({
+                        user_id: user.id,
+                        name: goalData.name,
+                        start_date: goalData.startDate,
+                        end_date: goalData.endDate,
+                        daily_target: goalData.dailyTarget,
+                        focus_tags: goalData.focusTags,
+                        status: 'ACTIVE'
+                    })
+                    .select()
+                    .single();
+
+                if (!error && data) {
+                    set(state => ({
+                        studyGoals: [{
+                            id: data.id,
+                            name: data.name,
+                            startDate: data.start_date,
+                            endDate: data.end_date,
+                            dailyTarget: data.daily_target,
+                            focusTags: data.focus_tags || [],
+                            status: data.status as StudyGoal['status'],
+                            createdAt: data.created_at
+                        }, ...state.studyGoals]
+                    }));
+                }
+            },
+
+            updateGoal: async (goalId, updates) => {
+                const dbUpdates: any = {};
+                if (updates.name !== undefined) dbUpdates.name = updates.name;
+                if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate;
+                if (updates.endDate !== undefined) dbUpdates.end_date = updates.endDate;
+                if (updates.dailyTarget !== undefined) dbUpdates.daily_target = updates.dailyTarget;
+                if (updates.focusTags !== undefined) dbUpdates.focus_tags = updates.focusTags;
+                if (updates.status !== undefined) dbUpdates.status = updates.status;
+
+                const { error } = await supabase
+                    .from('study_goals')
+                    .update(dbUpdates)
+                    .eq('id', goalId);
+
+                if (!error) {
+                    set(state => ({
+                        studyGoals: state.studyGoals.map(g =>
+                            g.id === goalId ? { ...g, ...updates } : g
+                        )
+                    }));
+                }
+            },
+
+            deleteGoal: async (goalId) => {
+                const { error } = await supabase.from('study_goals').delete().eq('id', goalId);
+                if (!error) {
+                    set(state => ({ studyGoals: state.studyGoals.filter(g => g.id !== goalId) }));
+                }
+            },
+
+            getActiveGoal: () => {
+                return get().studyGoals.find(g => g.status === 'ACTIVE') || null;
             },
 
             updateStudyLog: async (logId, updates) => {

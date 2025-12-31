@@ -21,6 +21,8 @@ import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
 import ProblemLibrary from './components/ProblemLibrary'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
+import GoalBanner from './components/GoalBanner'
+import GoalModal from './components/modals/GoalModal'
 import { useUserStore } from './store/useUserStore'
 import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
@@ -45,7 +47,9 @@ function App() {
     refreshRating,
     refreshRecommendations,
     dailyTasks,
-    stopTimer
+    stopTimer,
+    fetchGoals,
+    getActiveGoal
   } = useUserStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
@@ -81,6 +85,7 @@ function App() {
       // If user is logged in, prioritize Supabase data
       if (user) {
         await fetchUserData(user.id);
+        await fetchGoals(user.id);
       } else {
         // Fallback for guest mode: recalculate from local storage
         refreshRating();
@@ -145,6 +150,7 @@ function App() {
 
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
   const [isRecoModalOpen, setIsRecoModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
     setSelectedProblem(problem);
@@ -208,6 +214,9 @@ function App() {
                   </div>
                 </header>
               )}
+
+              {/* Goal Banner */}
+              <GoalBanner onOpenGoalModal={() => setIsGoalModalOpen(true)} />
 
               {/* Summary Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -438,6 +447,11 @@ function App() {
       />
 
       <GlobalModal />
+      <GoalModal
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        editGoal={getActiveGoal()}
+      />
     </>
   )
 }

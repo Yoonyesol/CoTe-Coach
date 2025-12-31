@@ -61,3 +61,17 @@ export interface ReviewPlan {
     status: ReviewStatus;
     lastCompletedAt: string;
 }
+
+export type GoalStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+
+export interface StudyGoal {
+    id: string;
+    name: string;
+    startDate: string;       // YYYY-MM-DD
+    endDate: string;         // YYYY-MM-DD (D-Day)
+    dailyTarget: number;     // 하루 목표 문제 수
+    focusTags: string[];     // 집중할 알고리즘 태그
+    status: GoalStatus;
+    createdAt: string;
+}
+
