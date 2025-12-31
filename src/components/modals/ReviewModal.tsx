@@ -21,6 +21,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const [reflection, setReflection] = useState('');
     const [concept, setConcept] = useState('');
     const [concepts, setConcepts] = useState<string[]>([]);
+    const [isFinished, setIsFinished] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     // Manual time input states (initialized from elapsed time if available)
@@ -64,6 +65,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                 reflection,
                 approach,
                 concepts,
+                isFinished
             });
 
             setIsSubmitted(true);
@@ -275,6 +277,27 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                     className="w-full pl-11 pr-4 py-4 bg-base-50 border-2 border-transparent focus:border-misty focus:bg-white rounded-2xl text-sm font-bold transition-all outline-none resize-none"
                                 />
                             </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <label className="flex items-center gap-3 p-4 bg-misty-light/30 rounded-2xl cursor-pointer hover:bg-misty-light/50 transition-colors border-2 border-transparent hover:border-misty-light group">
+                                <div className={clsx(
+                                    "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all",
+                                    isFinished ? "bg-misty border-misty" : "border-base-300 bg-white group-hover:border-misty"
+                                )}>
+                                    <input
+                                        type="checkbox"
+                                        checked={isFinished}
+                                        onChange={(e) => setIsFinished(e.target.checked)}
+                                        className="hidden"
+                                    />
+                                    {isFinished && <CheckCircle2 className="w-4 h-4 text-white" />}
+                                </div>
+                                <div>
+                                    <p className="font-black text-misty-dark text-sm">이 문제 졸업하기 🎓</p>
+                                    <p className="text-[11px] text-base-400 font-bold">체크하면 더 이상 복습 알림이 오지 않습니다.</p>
+                                </div>
+                            </label>
                         </div>
 
                         <div className="pt-2">

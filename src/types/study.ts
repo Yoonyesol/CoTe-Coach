@@ -45,6 +45,7 @@ export interface StudyLog {
     solvingMethod: SolvingMethod;
     stage: number; // 0: 최초, 1: 1차 복습...
     ratingContribution?: number;
+    isFinished?: boolean; // 사용자가 직접 복습 완료(졸업)로 간주했는지 여부
 }
 
 export interface ReviewPlan {

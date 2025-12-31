@@ -379,9 +379,13 @@ export const useUserStore = create<UserState>()(
                 if (!existingPlan) {
                     // 1. New Problem
                     nextStage = 0;
+                } else if (logData.isFinished) {
+                    // 2-a. Manual Finish (Graduation)
+                    isEarlyReview = false;
+                    nextStage = existingPlan ? existingPlan.currentStage : 0;
+                    // Will force status COMPLETED later
                 } else if (logData.result === 'FAIL') {
-                    // 2. Failed Review -> Reset to Stage 0 (or Keep current if you prefer soft penalty)
-                    // For now, let's keep it rigorous: Fail means restart cycle 1 (Stage 0->1 day)
+                    // 2-b. Failed Review -> Reset to Stage 0
                     nextStage = 0;
                 } else if (existingPlan?.nextReviewAt) {
                     // 3. Successful Review
@@ -456,7 +460,7 @@ export const useUserStore = create<UserState>()(
                         difficulty: newLog.difficulty,
                         current_stage: nextStage,
                         next_review_at: nextReviewAt,
-                        status: nextStage >= 5 ? 'COMPLETED' : 'ACTIVE',
+                        status: (logData.isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE',
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
 
@@ -475,7 +479,7 @@ export const useUserStore = create<UserState>()(
                             currentStage: nextStage,
                             nextReviewAt,
                             lastCompletedAt: newLog.completedAt,
-                            status: nextStage >= 5 ? 'COMPLETED' : 'ACTIVE'
+                            status: (logData.isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE'
                         } : p);
                     } else {
                         nextPlans.push({
