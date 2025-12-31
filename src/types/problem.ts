@@ -27,4 +27,5 @@ export interface StaticProblem {
     title: string;
     level: string | number;
     url: string;
+    tags?: string[];
 }

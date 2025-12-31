@@ -169,7 +169,7 @@ export const getRecommendations = async (
                         platform === 'SWEA' ? `D${p.level}` :
                             platform === 'LC' ? (p.level <= 5 ? 'Easy' : p.level <= 15 ? 'Medium' : 'Hard') : String(p.level),
                 level: p.level,
-                tags: platform === 'BOJ' ? p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key) : [platform],
+                tags: p.tags.slice(0, 2).map(t => t.displayNames?.[0]?.name || t.key),
                 problemUrl: platform === 'BOJ' ? `https://www.acmicpc.net/problem/${p.problemId}` : (p as any).problemUrl || '#'
             });
         });

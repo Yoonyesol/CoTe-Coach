@@ -26,7 +26,10 @@ export const mapToUniversalFormat = (p: StaticProblem, platform: string): Solved
         problemId: Number(p.id) || 0,
         titleKo: p.title,
         level: typeof p.level === 'number' ? p.level : parseInt(String(p.level).replace('D', '')) || 0,
-        tags: [{ key: platform, displayNames: [{ name: platform, language: 'ko' }] }],
-        problemUrl: p.url // Pass-through URL
+        tags: (p.tags || [platform]).map(tag => ({
+            key: tag,
+            displayNames: [{ name: tag, language: 'ko' }]
+        })),
+        problemUrl: p.url
     } as any;
 };
