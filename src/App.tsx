@@ -26,6 +26,7 @@ import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
+import { getLocalDateString } from './lib/dateUtils'
 import clsx from 'clsx';
 import {
   ProblemCardSkeleton,
@@ -334,7 +335,7 @@ function App() {
 
               {/* Custom Problem List Section */}
               {(() => {
-                const today = new Date().toISOString().split('T')[0];
+                const today = getLocalDateString(new Date());
                 const todayTasks = dailyTasks.filter(t => t.targetDate === today && t.status === 'pending');
 
                 if (todayTasks.length === 0) return null;

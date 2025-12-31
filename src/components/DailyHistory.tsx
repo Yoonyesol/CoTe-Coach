@@ -17,9 +17,22 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
     const { studyLogs } = useUserStore();
     const [selectedDate, setSelectedDate] = useState(new Date());
 
+    // Helper to get local date string (YYYY-MM-DD) without timezone offset
+    const getLocalDateString = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     const filteredLogs = useMemo(() => {
-        const dateStr = selectedDate.toISOString().split('T')[0];
-        return studyLogs.filter(log => log.completedAt.startsWith(dateStr));
+        const dateStr = getLocalDateString(selectedDate);
+        return studyLogs.filter(log => {
+            // Convert completedAt (ISO string) to local date string for comparison
+            const logDate = new Date(log.completedAt);
+            const logDateStr = getLocalDateString(logDate);
+            return logDateStr === dateStr;
+        });
     }, [studyLogs, selectedDate]);
 
     const changeDate = (offset: number) => {
@@ -28,7 +41,7 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
         setSelectedDate(nextDate);
     };
 
-    const isToday = selectedDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0];
+    const isToday = getLocalDateString(selectedDate) === getLocalDateString(new Date());
 
     return (
         <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">

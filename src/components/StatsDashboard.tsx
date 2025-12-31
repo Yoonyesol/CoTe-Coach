@@ -14,6 +14,7 @@ import {
 } from 'recharts';
 import { useUserStore } from '../store/useUserStore';
 import { Brain, Activity } from 'lucide-react';
+import { getLocalDateString } from '../lib/dateUtils';
 
 const StatsDashboard: React.FC = () => {
     const { studyLogs } = useUserStore();
@@ -48,10 +49,13 @@ const StatsDashboard: React.FC = () => {
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(today.getDate() - i);
-            const dateStr = d.toISOString().split('T')[0];
+            const dateStr = getLocalDateString(d);
             const label = d.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
 
-            const dayLogs = studyLogs.filter(log => log.completedAt.startsWith(dateStr));
+            const dayLogs = studyLogs.filter(log => {
+                const logDate = new Date(log.completedAt);
+                return getLocalDateString(logDate) === dateStr;
+            });
             result.push({
                 date: label,
                 solved: dayLogs.length,
@@ -139,7 +143,7 @@ const StatsDashboard: React.FC = () => {
                                     boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)',
                                     padding: '12px'
                                 }}
-                                itemStyle={{ fontBold: 900, fontSize: '12px' }}
+                                itemStyle={{ fontWeight: 900, fontSize: '12px' }}
                             />
                             <Bar
                                 dataKey="solved"

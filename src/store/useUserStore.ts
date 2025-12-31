@@ -687,8 +687,17 @@ export const useUserStore = create<UserState>()(
             },
 
             getDailyProgress: () => {
-                const today = new Date().toISOString().split('T')[0];
-                const solvedCount = get().studyLogs.filter(log => log.completedAt.startsWith(today)).length;
+                const getLocalDate = (date: Date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+                const today = getLocalDate(new Date());
+                const solvedCount = get().studyLogs.filter(log => {
+                    const logDate = new Date(log.completedAt);
+                    return getLocalDate(logDate) === today;
+                }).length;
                 return { solved: solvedCount, goal: get().studyPlan.problemCount };
             },
 

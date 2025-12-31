@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Search, Link as LinkIcon, Play, CheckCircle, AlertCircle } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { calculateEarnedXp } from '../../lib/xp';
+import { getTodayString } from '../../lib/dateUtils';
 import { useModalStore } from '../../store/useModalStore';
 import { clsx } from 'clsx';
 
@@ -62,7 +63,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
     const handleSolveNow = async () => {
         if (!title) return;
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = getTodayString();
         const tags = tagsInput.split(',').map(t => t.trim()).filter(t => t);
         await addDailyTask({
             problemId: `custom-${Date.now()}`,

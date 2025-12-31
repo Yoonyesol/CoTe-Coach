@@ -18,6 +18,7 @@ import { clsx } from 'clsx';
 import { useUserStore } from '../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { StudyLog } from '../types/study';
+import { getLocalDateString, getTodayString } from '../lib/dateUtils';
 
 const PLATFORM_ICONS: Record<string, string> = {
     BOJ: 'https://static.solved.ac/logo.json', // Placeholder for concept
@@ -38,7 +39,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
     } = useUserStore();
 
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+    const [selectedDate, setSelectedDate] = useState(getTodayString());
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -63,7 +64,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                 month: month - 1,
                 year,
                 isCurrentMonth: false,
-                dateStr: new Date(year, month - 1, prevMonthLastDay - i + 1).toISOString().split('T')[0]
+                dateStr: getLocalDateString(new Date(year, month - 1, prevMonthLastDay - i + 1))
             });
         }
         // Current month
@@ -73,7 +74,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                 month,
                 year,
                 isCurrentMonth: true,
-                dateStr: new Date(year, month, i + 1).toISOString().split('T')[0]
+                dateStr: getLocalDateString(new Date(year, month, i))
             });
         }
         // Next month padding
@@ -84,7 +85,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                 month: month + 1,
                 year,
                 isCurrentMonth: false,
-                dateStr: new Date(year, month + 1, i + 1).toISOString().split('T')[0]
+                dateStr: getLocalDateString(new Date(year, month + 1, i))
             });
         }
         return result;

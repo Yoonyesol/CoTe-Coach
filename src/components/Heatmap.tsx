@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
+import { getLocalDateString } from '../lib/dateUtils';
 
 const Heatmap: React.FC = () => {
     const { studyLogs } = useUserStore();
@@ -18,9 +19,12 @@ const Heatmap: React.FC = () => {
             for (let d = 0; d < 7; d++) {
                 const current = new Date(startDate);
                 current.setDate(startDate.getDate() + w * 7 + d);
-                const dateStr = current.toISOString().split('T')[0];
+                const dateStr = getLocalDateString(current);
 
-                const count = studyLogs.filter(log => log.completedAt.startsWith(dateStr)).length;
+                const count = studyLogs.filter(log => {
+                    const logDate = new Date(log.completedAt);
+                    return getLocalDateString(logDate) === dateStr;
+                }).length;
                 week.push({ date: dateStr, count });
             }
             result.push(week);
