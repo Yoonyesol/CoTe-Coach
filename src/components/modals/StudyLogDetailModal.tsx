@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     X, Save, Trash2, Clock, HelpCircle,
-    BookOpen, Lightbulb, Zap, MessageSquare,
-    Calendar, History, TrendingUp, Edit3
+    BookOpen, Zap, MessageSquare,
+    Calendar, History, TrendingUp, Edit3, BarChart3
 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,8 +30,80 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
     const historyLogs = useMemo(() => {
         return studyLogs
             .filter(l => l.problemId === currentLog.problemId)
-            .sort((a, b) => b.stage - a.stage); // Newest stage first
+            .sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime()); // Chronological for chart
     }, [studyLogs, currentLog.problemId]);
+
+    const displayLogs = useMemo(() => [...historyLogs].sort((a, b) => b.stage - a.stage), [historyLogs]);
+
+    // Aggregate Stats
+    const stats = useMemo(() => {
+        if (historyLogs.length === 0) return null;
+        const totalTime = historyLogs.reduce((acc, curr) => acc + curr.elapsedTime, 0);
+        const avgTime = totalTime / historyLogs.length;
+        const firstTime = historyLogs[0].elapsedTime;
+        const bestTime = Math.min(...historyLogs.map(l => l.elapsedTime));
+        const improvement = firstTime > 0 ? ((firstTime - historyLogs[historyLogs.length - 1].elapsedTime) / firstTime) * 100 : 0;
+
+        return { avgTime, firstTime, bestTime, improvement };
+    }, [historyLogs]);
+
+    // Trend Chart Component
+    const TrendChart = () => {
+        if (historyLogs.length < 2) return null;
+
+        const padding = 20;
+        const width = 400; // Adjusted for responsive Container
+        const height = 120;
+        const maxVal = Math.max(...historyLogs.map(l => l.elapsedTime));
+        const minVal = Math.min(...historyLogs.map(l => l.elapsedTime));
+        const range = maxVal - minVal || 1;
+
+        const points = historyLogs.map((l, i) => {
+            const x = (i / (historyLogs.length - 1)) * (width - padding * 2) + padding;
+            const y = height - ((l.elapsedTime - minVal) / range * (height - padding * 2) + padding);
+            return `${x},${y}`;
+        }).join(' ');
+
+        return (
+            <div className="relative h-28 w-full bg-base-50/50 rounded-2xl border border-base-100/50 p-3 overflow-hidden group">
+                <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${width} ${height}`}>
+                    <defs>
+                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8DA290" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#8DA290" stopOpacity="0" />
+                        </linearGradient>
+                    </defs>
+                    <path
+                        d={`M ${points.split(' ')[0]} L ${points} V ${height} H ${points.split(' ')[0]} Z`}
+                        fill="url(#chartGradient)"
+                    />
+                    <polyline
+                        fill="none"
+                        stroke="#8DA290"
+                        strokeWidth="2.5"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                        points={points}
+                        className="transition-all"
+                    />
+                    {historyLogs.map((l, i) => {
+                        const x = (i / (historyLogs.length - 1)) * (width - padding * 2) + padding;
+                        const y = height - ((l.elapsedTime - minVal) / range * (height - padding * 2) + padding);
+                        return (
+                            <circle
+                                key={i}
+                                cx={x} cy={y} r="3"
+                                className="fill-white stroke-sage-dark stroke-2 transition-transform group-hover:scale-125"
+                            />
+                        );
+                    })}
+                </svg>
+                <div className="absolute top-2 left-3 flex gap-1">
+                    <span className="text-[9px] font-black text-base-300 uppercase tracking-widest">Growth Trend (Time)</span>
+                </div>
+            </div>
+        );
+    };
 
     // Sync form state when current log changes
     useEffect(() => {
@@ -197,7 +269,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                 /* VIEW MODE */
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                     {/* Stats Grid */}
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                         <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
                                             <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
                                                 <Clock className="w-3 h-3" /> Time
@@ -224,7 +296,40 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 {currentLog.solvingMethod === 'SELF' ? 'Self' : 'Ref'}
                                             </p>
                                         </div>
+                                        <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
+                                            <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                                <Zap className="w-3 h-3 text-coral" /> Improve
+                                            </p>
+                                            <p className={clsx(
+                                                "text-lg font-black",
+                                                (stats?.improvement || 0) > 0 ? "text-coral" : "text-base-400"
+                                            )}>
+                                                {stats?.improvement && stats.improvement > 0 ? `-${Math.round(stats.improvement)}%` : '0%'}
+                                            </p>
+                                        </div>
                                     </div>
+
+                                    {/* Growth Analysis Section */}
+                                    {historyLogs.length >= 2 && (
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            <TrendChart />
+                                            <div className="bg-wheat/10 rounded-2xl border border-wheat/20 p-4 flex flex-col justify-center">
+                                                <h5 className="text-[10px] font-black text-wheat-dark uppercase tracking-widest mb-2 flex items-center gap-2">
+                                                    <BarChart3 className="w-3 h-3" /> Growth Insights
+                                                </h5>
+                                                <div className="space-y-1.5">
+                                                    <div className="flex justify-between items-center text-[11px]">
+                                                        <span className="font-bold text-base-400">최초 대비 단축</span>
+                                                        <span className="font-black text-coral">-{Math.round(((stats?.firstTime || 0) - (stats?.bestTime || 0)) / 60000)}분</span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-[11px]">
+                                                        <span className="font-bold text-base-400">평균 풀이 시간</span>
+                                                        <span className="font-black text-base-700">{Math.round((stats?.avgTime || 0) / 60000)}분</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Detailed Sections */}
                                     <div className="space-y-6">
@@ -300,7 +405,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                             </button>
                         </div>
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
-                            {historyLogs.map((h, i) => (
+                            {displayLogs.map((h, i) => (
                                 <button
                                     key={h.id}
                                     onClick={() => setCurrentLog(h)}
@@ -330,7 +435,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                     </p>
 
                                     {/* Timeline line */}
-                                    {i < historyLogs.length - 1 && (
+                                    {i < displayLogs.length - 1 && (
                                         <div className="absolute left-[2.5rem] bottom-[-1rem] w-[2px] h-4 bg-base-200 z-0" />
                                     )}
                                 </button>
@@ -338,7 +443,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         </div>
                         <div className="p-6 bg-white/50 border-t border-base-100">
                             <p className="text-[10px] font-bold text-base-300 leading-tight">
-                                전체 해결 {historyLogs.length}회 • 평균 시간 {Math.round(historyLogs.reduce((acc, curr) => acc + curr.elapsedTime, 0) / historyLogs.length / 60000)}분
+                                전체 해결 {historyLogs.length}회 • 평균 시간 {Math.round((stats?.avgTime || 0) / 60000)}분
                             </p>
                         </div>
                     </div>
