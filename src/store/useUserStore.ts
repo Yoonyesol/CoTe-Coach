@@ -389,7 +389,49 @@ export const useUserStore = create<UserState>()(
                     ratingContribution: earnedRating
                 };
 
-                // Update Local State
+                // DB Sync (Pessimistic: Check DB First)
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    // 1. Save Study Log
+                    const { error: logError } = await supabase.from('study_logs').insert({
+                        user_id: session.user.id,
+                        problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
+                        site: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        perceived_difficulty: newLog.perceivedDifficulty,
+                        result: newLog.result,
+                        solving_method: newLog.solvingMethod,
+                        elapsed_time: newLog.elapsedTime,
+                        reflection: newLog.reflection,
+                        approach: newLog.approach,
+                        concepts: newLog.concepts,
+                        stage: newLog.stage,
+                        rating_contribution: newLog.ratingContribution
+                    });
+
+                    if (logError) {
+                        console.error('Failed to save study log:', logError);
+                        throw new Error(logError.message || '학습 생성에 실패했습니다.');
+                    }
+
+                    // 2. Save/Update Review Plan
+                    await supabase.from('review_plans').upsert({
+                        user_id: session.user.id,
+                        problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
+                        platform: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        current_stage: currentStage,
+                        next_review_at: nextReviewAt,
+                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
+                        last_completed_at: newLog.completedAt
+                    }, { onConflict: 'user_id,problem_id' });
+
+                    await get().saveProfile(session.user.id);
+                }
+
+                // Update Local State (Only if DB sync succeeded)
                 set(s => {
                     const nextTimers = { ...s.timer.problemTimers };
                     delete nextTimers[logData.problemId];
@@ -425,43 +467,6 @@ export const useUserStore = create<UserState>()(
                 });
 
                 await get().refreshRating();
-
-                // DB Sync
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session?.user) {
-                    // 1. Save Study Log
-                    await supabase.from('study_logs').insert({
-                        user_id: session.user.id,
-                        problem_id: newLog.problemId,
-                        problem_title: newLog.problemTitle,
-                        site: newLog.platform,
-                        difficulty: newLog.difficulty,
-                        perceived_difficulty: newLog.perceivedDifficulty,
-                        result: newLog.result,
-                        solving_method: newLog.solvingMethod,
-                        elapsed_time: newLog.elapsedTime,
-                        reflection: newLog.reflection,
-                        approach: newLog.approach,
-                        concepts: newLog.concepts,
-                        stage: newLog.stage,
-                        rating_contribution: newLog.ratingContribution
-                    });
-
-                    // 2. Save/Update Review Plan
-                    await supabase.from('review_plans').upsert({
-                        user_id: session.user.id,
-                        problem_id: newLog.problemId,
-                        problem_title: newLog.problemTitle,
-                        platform: newLog.platform,
-                        difficulty: newLog.difficulty,
-                        current_stage: currentStage,
-                        next_review_at: nextReviewAt,
-                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
-                        last_completed_at: newLog.completedAt
-                    }, { onConflict: 'user_id,problem_id' });
-
-                    await get().saveProfile(session.user.id);
-                }
             },
 
             refreshRating: async () => {

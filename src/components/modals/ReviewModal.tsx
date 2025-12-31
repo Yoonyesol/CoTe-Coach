@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Save, CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb, Zap } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { Platform } from '../../types/user';
 import { clsx } from 'clsx';
 
@@ -8,6 +9,7 @@ import { ReviewModalProps } from '../../types/modal';
 
 const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) => {
     const { addReviewSession, getTotalElapsed, reviewPlans } = useUserStore();
+    const { showAlert } = useModalStore();
 
     const existingPlan = reviewPlans.find(p => p.problemId === problem.title);
     const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
@@ -43,30 +45,35 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
         setConcepts(concepts.filter(c => c !== target));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Calculate final elapsed time from manual inputs
         const finalElapsedTime = (manualMinutes * 60 * 1000) + (manualSeconds * 1000);
 
-        addReviewSession(problem.title, {
-            problemId: problem.title,
-            problemTitle: problem.title,
-            platform: problem.platform as Platform,
-            difficulty: problem.difficulty,
-            perceivedDifficulty,
-            result,
-            solvingMethod,
-            elapsedTime: finalElapsedTime,
-            reflection,
-            approach,
-            concepts,
-        });
+        try {
+            await addReviewSession(problem.title, {
+                problemId: problem.title,
+                problemTitle: problem.title,
+                platform: problem.platform as Platform,
+                difficulty: problem.difficulty,
+                perceivedDifficulty,
+                result,
+                solvingMethod,
+                elapsedTime: finalElapsedTime,
+                reflection,
+                approach,
+                concepts,
+            });
 
-        setIsSubmitted(true);
-        setTimeout(() => {
-            onClose();
-        }, 1500);
+            setIsSubmitted(true);
+            setTimeout(() => {
+                onClose();
+            }, 1500);
+        } catch (error: any) {
+            console.error('Review submission failed:', error);
+            showAlert('저장 실패', `저장에 실패했습니다.\n${error.message}`);
+        }
     };
 
     if (!isOpen) return null;
