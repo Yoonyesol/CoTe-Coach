@@ -2,9 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
 
-import { Platform, UserState, TimerState } from '../types/user';
+import { Platform, UserState } from '../types/user';
 import { StudyPlan, RecommendationSettings, StudyLog } from '../types/study';
-import { ShopItem } from '../types/shop';
 
 import { calculateEarnedXp } from '../lib/xp';
 
