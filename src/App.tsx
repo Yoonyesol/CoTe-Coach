@@ -104,7 +104,41 @@ function App() {
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>('HOME');
+  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>(() => {
+    if (typeof window === 'undefined') return 'HOME';
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'STATS') return 'STATS';
+    if (tab === 'JOURNAL') return 'JOURNAL';
+    if (tab === 'LIBRARY') return 'LIBRARY';
+    return 'HOME';
+  });
+
+  const handleTabChange = (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    if (tab === 'HOME') {
+      url.searchParams.delete('tab');
+    } else {
+      url.searchParams.set('tab', tab);
+    }
+    window.history.pushState({}, '', url);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab === 'STATS') setActiveTab('STATS');
+      else if (tab === 'JOURNAL') setActiveTab('JOURNAL');
+      else if (tab === 'LIBRARY') setActiveTab('LIBRARY');
+      else setActiveTab('HOME');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
   const [isRecoModalOpen, setIsRecoModalOpen] = useState(false);
 
@@ -129,7 +163,7 @@ function App() {
     <>
       <MainLayout
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onAccountSettingsOpen={() => setIsAccountModalOpen(true)}
         onTierClick={() => setIsTierGuideModalOpen(true)}
       >
