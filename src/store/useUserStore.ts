@@ -354,8 +354,31 @@ export const useUserStore = create<UserState>()(
                 if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
 
                 const { error } = await supabase.from('study_logs').update(dbUpdates).eq('id', logId);
+
                 if (!error) {
-                    set(state => ({ studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l) }));
+                    const targetLog = get().studyLogs.find(l => l.id === logId);
+
+                    if (updates.isFinished && targetLog) {
+                        // 1. Update DB Review Plan
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session?.user) {
+                            await supabase.from('review_plans').update({ status: 'COMPLETED' })
+                                .eq('user_id', session.user.id)
+                                .eq('problem_id', targetLog.problemId);
+                        }
+
+                        // 2. Update Local State Review Plan
+                        set(state => ({
+                            studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l),
+                            reviewPlans: state.reviewPlans.map(p =>
+                                p.problemId === targetLog.problemId
+                                    ? { ...p, status: 'COMPLETED' }
+                                    : p
+                            )
+                        }));
+                    } else {
+                        set(state => ({ studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l) }));
+                    }
                 }
             },
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-    X, Save, Trash2, Clock, HelpCircle,
+    X, Trash2, Clock,
     BookOpen, Zap, MessageSquare,
     Calendar, History, TrendingUp, Edit3, BarChart3
 } from 'lucide-react';
@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
 import { StudyLog } from '../../types/study';
 import { StudyLogDetailModalProps } from '../../types/modal';
+import LogForm from '../common/LogForm';
 
 const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialLog, isOpen, onClose }) => {
     const { updateStudyLog, deleteStudyLog, studyLogs } = useUserStore();
@@ -17,14 +18,6 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
     const [currentLog, setCurrentLog] = useState<StudyLog>(initialLog);
     const [isEditing, setIsEditing] = useState(false);
 
-    // EDIT FORM STATE
-    const [reflection, setReflection] = useState(initialLog.reflection);
-    const [approach, setApproach] = useState(initialLog.approach);
-    const [perceivedDifficulty, setPerceivedDifficulty] = useState(initialLog.perceivedDifficulty);
-    const [result, setResult] = useState(initialLog.result);
-    const [solvingMethod, setSolvingMethod] = useState(initialLog.solvingMethod);
-    const [concepts, setConcepts] = useState(initialLog.concepts.join(', '));
-    const [elapsedMinutes, setElapsedMinutes] = useState(Math.round(initialLog.elapsedTime / 60000));
 
     // HISTORY LOGS (All logs for the same problem)
     const historyLogs = useMemo(() => {
@@ -107,36 +100,33 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
 
     // Sync form state when current log changes
     useEffect(() => {
-        setReflection(currentLog.reflection);
-        setApproach(currentLog.approach);
-        setPerceivedDifficulty(currentLog.perceivedDifficulty);
-        setResult(currentLog.result);
-        setSolvingMethod(currentLog.solvingMethod);
-        setConcepts(currentLog.concepts.join(', '));
-        setElapsedMinutes(Math.round(currentLog.elapsedTime / 60000));
         setIsEditing(false); // Reset to view mode when switching logs
     }, [currentLog]);
 
-    const handleSave = async () => {
+    const handleFormSubmit = async (data: any) => {
         await updateStudyLog(currentLog.id, {
-            reflection,
-            approach,
-            perceivedDifficulty,
-            result,
-            solvingMethod,
-            elapsedTime: elapsedMinutes * 60000,
-            concepts: concepts.split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
+            reflection: data.reflection,
+            approach: data.approach,
+            perceivedDifficulty: data.perceivedDifficulty,
+            result: data.result,
+            solvingMethod: data.solvingMethod,
+            elapsedTime: data.elapsedTime,
+            concepts: data.concepts,
+            isFinished: data.isFinished
         });
-        // Update local current log view
+
+        // Optimistic UI Update (or re-fetch logic)
+        // Since we update the store, and we select from store, it should auto-update eventually.
+        // But for smoother transition, update local state:
         const updatedLog = {
             ...currentLog,
-            reflection,
-            approach,
-            perceivedDifficulty,
-            result,
-            solvingMethod,
-            elapsedTime: elapsedMinutes * 60000,
-            concepts: concepts.split(',').map((s: string) => s.trim()).filter((s: string) => s !== '')
+            reflection: data.reflection,
+            approach: data.approach,
+            perceivedDifficulty: data.perceivedDifficulty,
+            result: data.result,
+            solvingMethod: data.solvingMethod,
+            elapsedTime: data.elapsedTime,
+            concepts: data.concepts
         };
         setCurrentLog(updatedLog);
         setIsEditing(false);
@@ -209,61 +199,23 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
                             {isEditing ? (
                                 /* EDIT MODE */
-                                <div className="space-y-6 animate-in fade-in duration-300">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
-                                                <HelpCircle className="w-3 h-3" /> Success Status
-                                            </label>
-                                            <div className="flex bg-base-50 p-1 rounded-xl">
-                                                <button onClick={() => setResult('SUCCESS')} className={clsx("flex-1 py-2 text-[11px] font-black rounded-lg transition-all", result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-300")}>해결</button>
-                                                <button onClick={() => setResult('FAIL')} className={clsx("flex-1 py-2 text-[11px] font-black rounded-lg transition-all", result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-300")}>실패</button>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
-                                                <BookOpen className="w-3 h-3" /> Method
-                                            </label>
-                                            <div className="flex bg-base-50 p-1 rounded-xl">
-                                                <button onClick={() => setSolvingMethod('SELF')} className={clsx("flex-1 py-2 text-[11px] font-black rounded-lg transition-all", solvingMethod === 'SELF' ? "bg-white text-misty-dark shadow-sm" : "text-base-300")}>스스로</button>
-                                                <button onClick={() => setSolvingMethod('REFERENCE')} className={clsx("flex-1 py-2 text-[11px] font-black rounded-lg transition-all", solvingMethod === 'REFERENCE' ? "bg-white text-amber-600 shadow-sm" : "text-base-300")}>참고</button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-base-400 uppercase tracking-widest">Time (Min)</label>
-                                            <input type="number" value={elapsedMinutes} onChange={e => setElapsedMinutes(Number(e.target.value))} className="w-full bg-base-50 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-misty" />
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-[10px] font-black text-base-400 uppercase tracking-widest">Difficulty</label>
-                                            <select value={perceivedDifficulty} onChange={e => setPerceivedDifficulty(e.target.value as any)} className="w-full bg-base-50 rounded-xl px-4 py-3 text-sm font-black outline-none border-2 border-transparent focus:border-misty appearance-none">
-                                                <option value="EASY">쉬움</option>
-                                                <option value="NORMAL">보통</option>
-                                                <option value="HARD">어려움</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
-                                            <Zap className="w-3 h-3" /> Approach
-                                        </label>
-                                        <input type="text" value={approach} onChange={e => setApproach(e.target.value)} placeholder="접근법을 간단히 적어주세요" className="w-full bg-base-50 rounded-xl px-4 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-misty" />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
-                                            <MessageSquare className="w-3 h-3" /> Reflection
-                                        </label>
-                                        <textarea value={reflection} onChange={e => setReflection(e.target.value)} rows={3} placeholder="무엇을 배웠나요?" className="w-full bg-base-50 rounded-2xl px-4 py-4 text-sm font-bold outline-none border-2 border-transparent focus:border-misty resize-none" />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[10px] font-black text-base-400 uppercase tracking-widest">Concepts (Tags, comma separated)</label>
-                                        <input type="text" value={concepts} onChange={e => setConcepts(e.target.value)} placeholder="DFS, BFS, Greedy..." className="w-full bg-base-50 rounded-xl px-4 py-3 text-sm font-bold outline-none border-2 border-transparent focus:border-misty" />
-                                    </div>
+                                <div className="animate-in fade-in duration-300">
+                                    <LogForm
+                                        initialValues={{
+                                            result: currentLog.result,
+                                            solvingMethod: currentLog.solvingMethod,
+                                            perceivedDifficulty: currentLog.perceivedDifficulty,
+                                            elapsedMinutes: Math.floor(currentLog.elapsedTime / 60000),
+                                            elapsedSeconds: Math.floor((currentLog.elapsedTime / 1000) % 60),
+                                            approach: currentLog.approach,
+                                            reflection: currentLog.reflection,
+                                            concepts: currentLog.concepts,
+                                            isFinished: false // Default to false when editing unless retrieved from log (if we store it on log)
+                                        }}
+                                        onSubmit={handleFormSubmit}
+                                        onCancel={() => setIsEditing(false)}
+                                        submitLabel="기록 업데이트"
+                                    />
                                 </div>
                             ) : (
                                 /* VIEW MODE */
@@ -372,26 +324,17 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                             )}
                         </div>
 
-                        {/* Actions Footer */}
-                        <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100">
-                            {isEditing ? (
-                                <>
-                                    <button onClick={() => setIsEditing(false)} className="px-6 py-4 text-base-400 font-black text-sm hover:text-base-600 transition-colors">취소</button>
-                                    <button onClick={handleSave} className="flex-1 bg-base-900 text-white py-4 rounded-2xl font-black text-sm hover:bg-black transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
-                                        <Save className="w-4 h-4" /> 기록 업데이트
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button onClick={handleDelete} className="p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
-                                        <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                                    </button>
-                                    <button onClick={() => setIsEditing(true)} className="flex-1 bg-misty-dark text-white py-4 rounded-2xl font-black text-sm hover:bg-misty-dark/90 transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
-                                        <Edit3 className="w-4 h-4" /> 이 기록 수정하기
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                        {/* Actions Footer (Only visible in View Mode, LogForm has its own buttons) */}
+                        {!isEditing && (
+                            <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100">
+                                <button onClick={handleDelete} className="p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
+                                    <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                </button>
+                                <button onClick={() => setIsEditing(true)} className="flex-1 bg-misty-dark text-white py-4 rounded-2xl font-black text-sm hover:bg-misty-dark/90 transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
+                                    <Edit3 className="w-4 h-4" /> 이 기록 수정하기
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* RIGHT PANEL: History Timeline */}
