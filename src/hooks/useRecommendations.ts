@@ -15,7 +15,7 @@ export const useRecommendations = () => {
     const { level, bojHandle, studyPlan, recommendationSettings } = useUserStore();
     const todayDate = getTodayDateString();
 
-    const { difficulty, seedOffset, focusAlgorithms } = recommendationSettings;
+    const { difficulty, seedOffset, focusAlgorithms, platforms } = recommendationSettings;
 
     return useQuery({
         // Include today's date, seedOffset, and algorithms in queryKey
@@ -27,7 +27,8 @@ export const useRecommendations = () => {
             studyPlan.problemCount,
             difficulty,
             seedOffset,
-            focusAlgorithms
+            focusAlgorithms,
+            platforms
         ],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
@@ -35,7 +36,8 @@ export const useRecommendations = () => {
                 problemCount: studyPlan.problemCount,
                 difficultyAdjustment: difficulty,
                 seedOffset: seedOffset,
-                focusAlgorithms: focusAlgorithms
+                focusAlgorithms: focusAlgorithms,
+                platforms: platforms
             });
 
             return recommendations;
