@@ -3,66 +3,998 @@
         "id": "120803",
         "title": "두 수의 차",
         "level": 0,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120803"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120803",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120802",
+        "title": "두 수의 합",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120802",
+        "tags": [
+            "입문",
+            "수학"
+        ]
     },
     {
         "id": "120807",
         "title": "숫자 비교하기",
         "level": 0,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120807"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120807",
+        "tags": [
+            "입문",
+            "구현"
+        ]
     },
     {
-        "id": "12906",
-        "title": "같은 숫자는 싫어",
-        "level": 1,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12906"
+        "id": "120805",
+        "title": "몫 구하기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120805",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120806",
+        "title": "두 수의 나눗셈",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120806",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120810",
+        "title": "나머지 구하기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120810",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120817",
+        "title": "배열의 평균값",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120817",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120820",
+        "title": "나이 출력",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120820",
+        "tags": [
+            "입문",
+            "구현"
+        ]
+    },
+    {
+        "id": "120829",
+        "title": "각도기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120829",
+        "tags": [
+            "입문",
+            "구현"
+        ]
+    },
+    {
+        "id": "120831",
+        "title": "짝수의 합",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120831",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120830",
+        "title": "양꼬치",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120830",
+        "tags": [
+            "입문",
+            "수학"
+        ]
+    },
+    {
+        "id": "120583",
+        "title": "중복된 숫자 개수",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120583",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120585",
+        "title": "머쓱이보다 키 큰 사람",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120585",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120821",
+        "title": "배열 뒤집기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120821",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120822",
+        "title": "문자열 뒤집기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120822",
+        "tags": [
+            "입문",
+            "문자열"
+        ]
+    },
+    {
+        "id": "120825",
+        "title": "문자 반복 출력하기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120825",
+        "tags": [
+            "입문",
+            "문자열"
+        ]
+    },
+    {
+        "id": "120824",
+        "title": "짝수 홀수 개수",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120824",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120833",
+        "title": "배열 자르기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120833",
+        "tags": [
+            "입문",
+            "배열"
+        ]
+    },
+    {
+        "id": "120841",
+        "title": "점의 위치 구하기",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120841",
+        "tags": [
+            "입문",
+            "구현"
+        ]
+    },
+    {
+        "id": "120847",
+        "title": "최댓값 만들기(1)",
+        "level": 0,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/120847",
+        "tags": [
+            "입문",
+            "정렬"
+        ]
     },
     {
         "id": "42576",
         "title": "완주하지 못한 선수",
         "level": 1,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42576"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42576",
+        "tags": [
+            "해시",
+            "정렬"
+        ]
     },
     {
-        "id": "42577",
-        "title": "전화번호 목록",
-        "level": 2,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42577"
+        "id": "1845",
+        "title": "폰켓몬",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/1845",
+        "tags": [
+            "해시",
+            "완전탐색"
+        ]
+    },
+    {
+        "id": "42840",
+        "title": "모의고사",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42840",
+        "tags": [
+            "완전탐색"
+        ]
+    },
+    {
+        "id": "42748",
+        "title": "K번째수",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42748",
+        "tags": [
+            "정렬",
+            "배열"
+        ]
+    },
+    {
+        "id": "42862",
+        "title": "체육복",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42862",
+        "tags": [
+            "그리디"
+        ]
+    },
+    {
+        "id": "12906",
+        "title": "같은 숫자는 싫어",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12906",
+        "tags": [
+            "스택/큐"
+        ]
+    },
+    {
+        "id": "86491",
+        "title": "최소직사각형",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/86491",
+        "tags": [
+            "완전탐색"
+        ]
+    },
+    {
+        "id": "12901",
+        "title": "2016년",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12901",
+        "tags": [
+            "구현"
+        ]
+    },
+    {
+        "id": "12903",
+        "title": "가운데 글자 가져오기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12903",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12910",
+        "title": "나누어 떨어지는 숫자 배열",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12910",
+        "tags": [
+            "배열",
+            "정렬"
+        ]
+    },
+    {
+        "id": "12912",
+        "title": "두 정수 사이의 합",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12912",
+        "tags": [
+            "수학",
+            "구현"
+        ]
+    },
+    {
+        "id": "12916",
+        "title": "문자열 내 p와 y의 개수",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12916",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12919",
+        "title": "서울에서 김서방 찾기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12919",
+        "tags": [
+            "문자열",
+            "탐색"
+        ]
+    },
+    {
+        "id": "12922",
+        "title": "수박수박수박수박수박수?",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12922",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12925",
+        "title": "문자열을 정수로 바꾸기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12925",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12928",
+        "title": "약수의 합",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12928",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12931",
+        "title": "자릿수 더하기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12931",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12932",
+        "title": "자연수 뒤집어 배열로 만들기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12932",
+        "tags": [
+            "수학",
+            "배열"
+        ]
+    },
+    {
+        "id": "12933",
+        "title": "정수 내림차순으로 배치하기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12933",
+        "tags": [
+            "정렬"
+        ]
+    },
+    {
+        "id": "12934",
+        "title": "정수 제곱근 판별",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12934",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12935",
+        "title": "제일 작은 수 제거하기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12935",
+        "tags": [
+            "배열"
+        ]
+    },
+    {
+        "id": "12937",
+        "title": "짝수와 홀수",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12937",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12944",
+        "title": "평균 구하기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12944",
+        "tags": [
+            "수학",
+            "배열"
+        ]
+    },
+    {
+        "id": "12947",
+        "title": "하샤드 수",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12947",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12948",
+        "title": "핸드폰 번호 가리기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12948",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12954",
+        "title": "x만큼 간격이 있는 n개의 숫자",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12954",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "12969",
+        "title": "직사각형 별찍기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12969",
+        "tags": [
+            "구현"
+        ]
+    },
+    {
+        "id": "92334",
+        "title": "신고 결과 받기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/92334",
+        "tags": [
+            "해시",
+            "2022 Kakao"
+        ]
+    },
+    {
+        "id": "77484",
+        "title": "로또의 최고 순위와 최저 순위",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/77484",
+        "tags": [
+            "구현"
+        ]
+    },
+    {
+        "id": "72410",
+        "title": "신규 아이디 추천",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/72410",
+        "tags": [
+            "문자열",
+            "2021 Kakao"
+        ]
+    },
+    {
+        "id": "81301",
+        "title": "숫자 문자열과 영단어",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81301",
+        "tags": [
+            "문자열",
+            "2021 카카오 채용연계"
+        ]
+    },
+    {
+        "id": "118666",
+        "title": "성격 유형 검사하기",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/118666",
+        "tags": [
+            "해시",
+            "2022 카카오 인턴쉽"
+        ]
+    },
+    {
+        "id": "150370",
+        "title": "개인정보 수집 유효기간",
+        "level": 1,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150370",
+        "tags": [
+            "구현",
+            "2023 Kakao"
+        ]
     },
     {
         "id": "42586",
         "title": "기능개발",
         "level": 2,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42586"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42586",
+        "tags": [
+            "스택/큐"
+        ]
+    },
+    {
+        "id": "42587",
+        "title": "프린터",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42587",
+        "tags": [
+            "스택/큐"
+        ]
+    },
+    {
+        "id": "42583",
+        "title": "다리를 지나는 트럭",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42583",
+        "tags": [
+            "스택/큐"
+        ]
+    },
+    {
+        "id": "42577",
+        "title": "전화번호 목록",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42577",
+        "tags": [
+            "해시",
+            "정렬"
+        ]
+    },
+    {
+        "id": "42578",
+        "title": "위장",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42578",
+        "tags": [
+            "해시"
+        ]
+    },
+    {
+        "id": "42626",
+        "title": "더 맵게",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42626",
+        "tags": [
+            "힙(Heap)"
+        ]
+    },
+    {
+        "id": "42746",
+        "title": "가장 큰 수",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42746",
+        "tags": [
+            "정렬"
+        ]
+    },
+    {
+        "id": "42747",
+        "title": "H-Index",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42747",
+        "tags": [
+            "정렬"
+        ]
+    },
+    {
+        "id": "42842",
+        "title": "카펫",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42842",
+        "tags": [
+            "완전탐색"
+        ]
+    },
+    {
+        "id": "42860",
+        "title": "조이스틱",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42860",
+        "tags": [
+            "그리디"
+        ]
+    },
+    {
+        "id": "42883",
+        "title": "큰 수 만들기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42883",
+        "tags": [
+            "그리디"
+        ]
+    },
+    {
+        "id": "42885",
+        "title": "구명보트",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42885",
+        "tags": [
+            "그리디"
+        ]
+    },
+    {
+        "id": "43165",
+        "title": "타겟 넘버",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43165",
+        "tags": [
+            "DFS/BFS"
+        ]
+    },
+    {
+        "id": "1844",
+        "title": "게임 맵 최단거리",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/1844",
+        "tags": [
+            "DFS/BFS",
+            "최단경로"
+        ]
+    },
+    {
+        "id": "12909",
+        "title": "올바른 괄호",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12909",
+        "tags": [
+            "스택/큐"
+        ]
+    },
+    {
+        "id": "12899",
+        "title": "124 나라의 숫자",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12899",
+        "tags": [
+            "수학",
+            "구현"
+        ]
+    },
+    {
+        "id": "12911",
+        "title": "다음 큰 숫자",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12911",
+        "tags": [
+            "수학",
+            "비트연산"
+        ]
+    },
+    {
+        "id": "12945",
+        "title": "피보나치 수",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12945",
+        "tags": [
+            "DP",
+            "수학"
+        ]
+    },
+    {
+        "id": "12951",
+        "title": "JadenCase 문자열 만들기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12951",
+        "tags": [
+            "문자열"
+        ]
+    },
+    {
+        "id": "12953",
+        "title": "N개의 최소공배수",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12953",
+        "tags": [
+            "수학"
+        ]
+    },
+    {
+        "id": "70129",
+        "title": "이진 변환 반복하기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/70129",
+        "tags": [
+            "문자열",
+            "구현"
+        ]
+    },
+    {
+        "id": "92335",
+        "title": "k진수에서 소수 개수 구하기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/92335",
+        "tags": [
+            "수학",
+            "2022 Kakao"
+        ]
+    },
+    {
+        "id": "92341",
+        "title": "주차 요금 계산",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/92341",
+        "tags": [
+            "구현",
+            "2022 Kakao"
+        ]
+    },
+    {
+        "id": "118667",
+        "title": "두 큐 합 같게 만들기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/118667",
+        "tags": [
+            "그리디",
+            "2022 카카오 인턴쉽"
+        ]
+    },
+    {
+        "id": "150368",
+        "title": "이모티콘 할인행사",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150368",
+        "tags": [
+            "완전탐색",
+            "2023 Kakao"
+        ]
+    },
+    {
+        "id": "150369",
+        "title": "택배 배달과 수거하기",
+        "level": 2,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150369",
+        "tags": [
+            "그리디",
+            "2023 Kakao"
+        ]
     },
     {
         "id": "42579",
         "title": "베스트앨범",
         "level": 3,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42579"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42579",
+        "tags": [
+            "해시"
+        ]
+    },
+    {
+        "id": "42627",
+        "title": "디스크 컨트롤러",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42627",
+        "tags": [
+            "힙(Heap)"
+        ]
+    },
+    {
+        "id": "42628",
+        "title": "이중우선순위큐",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42628",
+        "tags": [
+            "힙(Heap)"
+        ]
+    },
+    {
+        "id": "43162",
+        "title": "네트워크",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43162",
+        "tags": [
+            "DFS/BFS"
+        ]
+    },
+    {
+        "id": "43163",
+        "title": "단어 변환",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43163",
+        "tags": [
+            "DFS/BFS"
+        ]
+    },
+    {
+        "id": "43164",
+        "title": "여행경로",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43164",
+        "tags": [
+            "DFS/BFS"
+        ]
+    },
+    {
+        "id": "42895",
+        "title": "N으로 표현",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42895",
+        "tags": [
+            "DP"
+        ]
+    },
+    {
+        "id": "43105",
+        "title": "정수 삼각형",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43105",
+        "tags": [
+            "DP"
+        ]
     },
     {
         "id": "42898",
         "title": "등굣길",
         "level": 3,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42898"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42898",
+        "tags": [
+            "DP"
+        ]
+    },
+    {
+        "id": "43238",
+        "title": "입국심사",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43238",
+        "tags": [
+            "이분탐색"
+        ]
+    },
+    {
+        "id": "49189",
+        "title": "가장 먼 노드",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/49189",
+        "tags": [
+            "그래프"
+        ]
+    },
+    {
+        "id": "49191",
+        "title": "순위",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/49191",
+        "tags": [
+            "그래프"
+        ]
+    },
+    {
+        "id": "42861",
+        "title": "섬 연결하기",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42861",
+        "tags": [
+            "그리디",
+            "MST"
+        ]
+    },
+    {
+        "id": "42884",
+        "title": "단속카메라",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42884",
+        "tags": [
+            "그리디"
+        ]
+    },
+    {
+        "id": "12938",
+        "title": "최고의 집합",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12938",
+        "tags": [
+            "수학",
+            "그리디"
+        ]
+    },
+    {
+        "id": "12927",
+        "title": "야근 지수",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12927",
+        "tags": [
+            "힙(Heap)"
+        ]
+    },
+    {
+        "id": "92344",
+        "title": "파괴되지 않은 건물",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/92344",
+        "tags": [
+            "누적합",
+            "2022 Kakao"
+        ]
+    },
+    {
+        "id": "150367",
+        "title": "표현 가능한 이진트리",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150367",
+        "tags": [
+            "트리",
+            "분할정복",
+            "2023 Kakao"
+        ]
     },
     {
         "id": "42897",
         "title": "도둑질",
         "level": 4,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42897"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/42897",
+        "tags": [
+            "DP"
+        ]
+    },
+    {
+        "id": "43236",
+        "title": "징검다리",
+        "level": 4,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/43236",
+        "tags": [
+            "이분탐색"
+        ]
     },
     {
         "id": "12971",
         "title": "스티커 모으기(2)",
         "level": 4,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12971"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/12971",
+        "tags": [
+            "DP"
+        ]
+    },
+    {
+        "id": "1843",
+        "title": "사칙연산",
+        "level": 4,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/1843",
+        "tags": [
+            "DP"
+        ]
+    },
+    {
+        "id": "92345",
+        "title": "사라지는 발판",
+        "level": 4,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/92345",
+        "tags": [
+            "게임이론",
+            "2022 Kakao"
+        ]
+    },
+    {
+        "id": "150365",
+        "title": "미로 탈출 명령어",
+        "level": 3,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/150365",
+        "tags": [
+            "DFS/BFS",
+            "2023 Kakao"
+        ]
     },
     {
         "id": "81305",
         "title": "시험장 나누기",
         "level": 5,
-        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81305"
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/81305",
+        "tags": [
+            "트리",
+            "이분탐색",
+            "2021 카카오 채용연계"
+        ]
+    },
+    {
+        "id": "49190",
+        "title": "방의 개수",
+        "level": 5,
+        "url": "https://school.programmers.co.kr/learn/courses/30/lessons/49190",
+        "tags": [
+            "그래프"
+        ]
     }
 ]
