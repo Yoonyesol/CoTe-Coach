@@ -394,7 +394,7 @@ export const useUserStore = create<UserState>()(
             libraryTotalSize: 0,
             libraryProblems: [],
 
-            fetchLibraryPage: async (userId, page, size, sortBy = 'RECENT') => {
+            fetchLibraryPage: async (userId, page, size, sortBy = 'RECENT', filter) => {
                 const start = (page - 1) * size;
                 const end = start + size - 1;
 
@@ -403,6 +403,24 @@ export const useUserStore = create<UserState>()(
                     .from('review_plans')
                     .select('*', { count: 'exact' })
                     .eq('user_id', userId);
+
+                // --- Apply Filters ---
+                if (filter?.platform) {
+                    query = query.eq('platform', filter.platform);
+                }
+                if (filter?.stage !== undefined && filter?.stage !== null) {
+                    query = query.eq('current_stage', filter.stage);
+                }
+                if (filter?.startDate) {
+                    query = query.gte('last_completed_at', filter.startDate);
+                }
+                if (filter?.endDate) {
+                    query = query.lte('last_completed_at', filter.endDate);
+                }
+                if (filter?.query) {
+                    // Search by Title OR Problem ID
+                    query = query.or(`problem_title.ilike.%${filter.query}%,problem_id.ilike.%${filter.query}%`);
+                }
 
                 // Server-side Sorting
                 if (sortBy === 'DIFFICULTY') {

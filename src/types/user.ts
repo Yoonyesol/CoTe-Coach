@@ -66,11 +66,23 @@ export interface UserState {
     addReviewSession: (problemId: string, log: Omit<StudyLog, 'id' | 'completedAt' | 'stage'>) => Promise<void>;
     fetchReviewPlans: (userId: string) => Promise<void>;
 
-    // Library Pagination
+    // Library Pagination & Filtering
     libraryPage: number;
     libraryTotalSize: number;
-    libraryProblems: StudyLog[]; // Logs associated with the current page's problems
-    fetchLibraryPage: (userId: string, page: number, size: number, sortBy?: 'RECENT' | 'DIFFICULTY') => Promise<void>;
+    libraryProblems: StudyLog[];
+    fetchLibraryPage: (
+        userId: string,
+        page: number,
+        size: number,
+        sortBy?: 'RECENT' | 'DIFFICULTY',
+        filter?: {
+            platform?: string;
+            stage?: number;
+            startDate?: string;
+            endDate?: string;
+            query?: string;
+        }
+    ) => Promise<void>;
 
     // Timer Actions
     startTimer: (problemId: string) => boolean;

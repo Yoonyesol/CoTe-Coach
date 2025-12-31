@@ -35,33 +35,61 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
         libraryTotalSize
     } = useUserStore();
 
-    // Local state only for Search (Client-side filtering within fetched page? OR reset page?)
-    // Note: Search complicates pagination. Ideal: Search updates backend query.
-    // For now, let's keep Search local to the page (User requested page/size logic).
-    // Or better: If user searches, we might need a separate search API.
-    // Given the task "Use page, size", I will assume we paginate strictly. 
-    // Search might just filter the *current page* or we can't implement search easily without backend modification.
-    // I'll keep client search behaving on the current page for now as per "Archive" usually implies standard listing.
-
+    // Note: searchTerm is local input state. filters.query is the actual filter applied to backend.
     const [searchTerm, setSearchTerm] = useState('');
     const [sortBy, setSortBy] = useState<'RECENT' | 'SOLVES' | 'IMPROVEMENT' | 'DIFFICULTY'>('RECENT');
+    const [filters, setFilters] = useState({
+        platform: '',
+        stage: '',
+        year: '',
+        month: '',
+        query: '' // Added query filter
+    });
     const [isLoading, setIsLoading] = useState(false);
 
     const PAGE_SIZE = 12;
+
+    const handleSearch = () => {
+        setFilters(prev => ({ ...prev, query: searchTerm }));
+        useUserStore.setState({ libraryPage: 1 });
+    };
 
     useEffect(() => {
         const load = async () => {
             setIsLoading(true);
             const { data: { user } } = await import('../lib/supabase').then(m => m.supabase.auth.getUser());
             if (user) {
-                // Determine sort param for backend if applicable
                 const backendSort = sortBy === 'DIFFICULTY' ? 'DIFFICULTY' : 'RECENT';
-                await fetchLibraryPage(user.id, libraryPage, PAGE_SIZE, backendSort);
+
+                const queryFilters: any = {};
+                if (filters.platform) queryFilters.platform = filters.platform;
+                if (filters.stage !== '') queryFilters.stage = parseInt(filters.stage);
+                if (filters.query) queryFilters.query = filters.query; // Pass query
+
+                if (filters.year) {
+                    const year = parseInt(filters.year);
+                    if (filters.month) {
+                        // Specific Month
+                        const month = parseInt(filters.month);
+                        const start = new Date(year, month - 1, 1).toISOString();
+                        const end = new Date(year, month, 0, 23, 59, 59).toISOString();
+                        queryFilters.startDate = start;
+                        queryFilters.endDate = end;
+                    } else {
+                        // Full Year
+                        const start = new Date(year, 0, 1).toISOString();
+                        const end = new Date(year, 11, 31, 23, 59, 59).toISOString();
+                        queryFilters.startDate = start;
+                        queryFilters.endDate = end;
+                    }
+                }
+
+                await fetchLibraryPage(user.id, libraryPage, PAGE_SIZE, backendSort, queryFilters);
             }
             setIsLoading(false);
         };
         load();
-    }, [libraryPage, sortBy]); // Trigger on page or sort change
+    }, [libraryPage, sortBy, filters.platform, filters.stage, filters.year, filters.month, filters.query]);
 
     // Handle Page Change
     const handlePageChange = (newPage: number) => {
@@ -116,12 +144,7 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
     const filteredProblems = useMemo(() => {
         let result = problemGroups;
 
-        if (searchTerm) {
-            result = result.filter(p =>
-                p.problemTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.problemId.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+        // Search is now handled by backend. Client-side filtering for search is removed.
 
         // Backend handles primary sort (RECENT/DIFFICULTY), but client applies specific sorts just in case
         return result.sort((a, b) => {
@@ -135,48 +158,136 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                 default: return 0;
             }
         });
-    }, [problemGroups, searchTerm, sortBy]);
+    }, [problemGroups, sortBy]);
 
     const totalPages = Math.ceil(libraryTotalSize / PAGE_SIZE);
 
     return (
         <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Header & Search */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="space-y-1">
-                    <h2 className="text-2xl font-black text-base-900 flex items-center gap-2 font-sans">
-                        문제 보관함 <span className="text-sm font-bold bg-misty-dark px-2 py-0.5 rounded-lg text-white leading-none uppercase tracking-tighter">
-                            {libraryTotalSize} Problems
-                        </span>
-                    </h2>
-                    <p className="text-sm font-medium text-base-400 font-sans">
-                        지금까지 해결한 모든 문제들의 통계와 기록입니다.
-                    </p>
+            <div className="flex flex-col space-y-4">
+                <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                        <h2 className="text-2xl font-black text-base-900 flex items-center gap-2 font-sans">
+                            문제 보관함 <span className="text-sm font-bold bg-misty-dark px-2 py-0.5 rounded-lg text-white leading-none uppercase tracking-tighter">
+                                {libraryTotalSize} Problems
+                            </span>
+                        </h2>
+                        <p className="text-sm font-medium text-base-400 font-sans">
+                            지금까지 해결한 모든 문제들의 통계와 기록입니다.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto">
-                    {/* Search input - acts as filter on current page */}
-                    <div className="relative flex-1 md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-base-300" />
+                {/* Filter Toolbar */}
+                <div className="flex flex-col md:flex-row gap-2 bg-base-50 p-3 rounded-2xl border border-base-100 items-center">
+
+                    {/* Search */}
+                    <div className="relative flex-1 w-full md:w-auto">
+                        <button
+                            onClick={handleSearch}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-base-300 hover:text-misty-dark hover:bg-base-100 rounded-lg transition-colors"
+                        >
+                            <Search className="w-4 h-4" />
+                        </button>
                         <input
                             type="text"
-                            placeholder="Page Search..."
+                            placeholder="제목 또는 ID 검색 (Enter)"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-white border border-base-100 rounded-xl pl-10 pr-4 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSearch();
+                            }}
+                            className="w-full bg-white border border-base-100 rounded-xl pl-12 pr-4 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm"
                         />
                     </div>
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className="bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm appearance-none cursor-pointer"
-                    >
-                        <option value="RECENT">최근 해결순</option>
-                        {/* Note: SOLVES/IMPROVEMENT only sort the current page visually */}
-                        <option value="SOLVES">많이 푼 순 (Page)</option>
-                        <option value="IMPROVEMENT">시간 단축순 (Page)</option>
-                        <option value="DIFFICULTY">난이도순</option>
-                    </select>
+
+                    {/* Platform Filter */}
+                    <div className="min-w-[120px] w-full md:w-auto">
+                        <select
+                            value={filters.platform}
+                            onChange={(e) => {
+                                setFilters({ ...filters, platform: e.target.value });
+                                useUserStore.setState({ libraryPage: 1 });
+                            }}
+                            className="w-full bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm cursor-pointer"
+                        >
+                            <option value="">전체 플랫폼</option>
+                            <option value="BOJ">백준</option>
+                            <option value="PROG">프로그래머스</option>
+                            <option value="LC">LeetCode</option>
+                            <option value="SWEA">SWEA</option>
+                        </select>
+                    </div>
+
+                    {/* Stage Filter */}
+                    <div className="min-w-[100px] w-full md:w-auto">
+                        <select
+                            value={filters.stage}
+                            onChange={(e) => {
+                                setFilters({ ...filters, stage: e.target.value });
+                                useUserStore.setState({ libraryPage: 1 });
+                            }}
+                            className="w-full bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm cursor-pointer"
+                        >
+                            <option value="">전체 진행도</option>
+                            <option value="0">학습 중 (0단계)</option>
+                            <option value="1">1차 복습 대기</option>
+                            <option value="2">2차 복습 대기</option>
+                            <option value="3">3차 복습 대기</option>
+                            <option value="4">4차 복습 대기</option>
+                            <option value="5">졸업 (Completion)</option>
+                        </select>
+                    </div>
+
+                    {/* Year Filter */}
+                    <div className="min-w-[90px] w-full md:w-auto">
+                        <select
+                            value={filters.year}
+                            onChange={(e) => {
+                                setFilters({ ...filters, year: e.target.value, month: e.target.value ? filters.month : '' });
+                                useUserStore.setState({ libraryPage: 1 });
+                            }}
+                            className="w-full bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm cursor-pointer"
+                        >
+                            <option value="">전체 연도</option>
+                            {Array.from({ length: 3 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                                <option key={y} value={y}>{y}년</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Month Filter */}
+                    <div className="min-w-[80px] w-full md:w-auto">
+                        <select
+                            value={filters.month}
+                            onChange={(e) => {
+                                setFilters({ ...filters, month: e.target.value });
+                                useUserStore.setState({ libraryPage: 1 });
+                            }}
+                            disabled={!filters.year}
+                            className="w-full bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm cursor-pointer disabled:bg-base-50 disabled:text-base-300"
+                        >
+                            <option value="">전체 월</option>
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                <option key={m} value={m}>{m}월</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="min-w-[120px] w-full md:w-auto">
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as any)}
+                            className="w-full bg-white border border-base-100 rounded-xl px-3 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm cursor-pointer"
+                        >
+                            <option value="RECENT">최근 해결순</option>
+                            <option value="DIFFICULTY">난이도순</option>
+                            <option value="SOLVES">많이 푼 순(화면)</option>
+                            <option value="IMPROVEMENT">성장폭 순(화면)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
