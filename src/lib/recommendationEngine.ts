@@ -15,6 +15,26 @@ const levelToTierName = (level: number): string => {
 };
 
 /**
+ * 서비스 레벨별 플랫폼 난이도 매핑
+ */
+const serviceLevelToProgLevel = (lv: number): number => {
+    if (lv <= 4) return 0;
+    if (lv <= 10) return 1;
+    if (lv <= 17) return 2;
+    if (lv <= 24) return 3;
+    if (lv <= 28) return 4;
+    return 5;
+};
+
+const serviceLevelToSweaLevel = (lv: number): number => {
+    if (lv <= 5) return 2; // D1, D2
+    if (lv <= 10) return 3; // D3
+    if (lv <= 17) return 4; // D4
+    if (lv <= 24) return 5; // D5
+    return 6; // D6
+};
+
+/**
  * 하이브리드 추천 로직
  * @param userLevel 현재 사용자의 서비스 레벨 (1~100)
  * @param options 설정값 (핸들, 목표 문제 수 등)
@@ -97,24 +117,18 @@ export const getRecommendations = async (
         }
 
         if (p === 'PROG') {
-            const progLv = Math.floor((baseLevel - 1) / 5);
-            const warmUpLv = Math.max(0, progLv - 1);
-            const challengeLv = Math.min(5, progLv + 1);
             return {
-                warmUp: getProgrammersProblems(warmUpLv).map(p => mapToUniversalFormat(p, 'PROG')),
-                main: getProgrammersProblems(progLv).map(p => mapToUniversalFormat(p, 'PROG')),
-                challenge: getProgrammersProblems(challengeLv).map(p => mapToUniversalFormat(p, 'PROG'))
+                warmUp: getProgrammersProblems(serviceLevelToProgLevel(warmUpLevel)).map(p => mapToUniversalFormat(p, 'PROG')),
+                main: getProgrammersProblems(serviceLevelToProgLevel(baseLevel)).map(p => mapToUniversalFormat(p, 'PROG')),
+                challenge: getProgrammersProblems(serviceLevelToProgLevel(challengeLevel)).map(p => mapToUniversalFormat(p, 'PROG'))
             };
         }
 
         if (p === 'SWEA') {
-            const sweaIdx = Math.floor((baseLevel - 1) / 5) + 1;
-            const warmUpIdx = Math.max(1, sweaIdx - 1);
-            const challengeIdx = Math.min(6, sweaIdx + 1);
             return {
-                warmUp: getSweaProblems(`D${warmUpIdx}`).map(p => mapToUniversalFormat(p, 'SWEA')),
-                main: getSweaProblems(`D${sweaIdx}`).map(p => mapToUniversalFormat(p, 'SWEA')),
-                challenge: getSweaProblems(`D${challengeIdx}`).map(p => mapToUniversalFormat(p, 'SWEA'))
+                warmUp: getSweaProblems(`D${serviceLevelToSweaLevel(warmUpLevel)}`).map(p => mapToUniversalFormat(p, 'SWEA')),
+                main: getSweaProblems(`D${serviceLevelToSweaLevel(baseLevel)}`).map(p => mapToUniversalFormat(p, 'SWEA')),
+                challenge: getSweaProblems(`D${serviceLevelToSweaLevel(challengeLevel)}`).map(p => mapToUniversalFormat(p, 'SWEA'))
             };
         }
 
