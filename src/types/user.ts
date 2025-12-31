@@ -52,7 +52,7 @@ export interface UserState {
     saveProfile: (userId: string) => Promise<void>;
 
     // Study Log Actions
-    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt'>) => Promise<void>;
+    addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt' | 'stage'>) => Promise<void>;
     updateStudyLog: (logId: string, updates: Partial<StudyLog>) => Promise<void>;
     deleteStudyLog: (logId: string) => Promise<void>;
 

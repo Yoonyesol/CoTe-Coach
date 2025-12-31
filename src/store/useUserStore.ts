@@ -337,103 +337,10 @@ export const useUserStore = create<UserState>()(
             },
 
             addReviewSession: async (problemId, logData) => {
-                const state = get();
-                const existingPlan = state.reviewPlans.find(p => p.problemId === problemId);
-                const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
-
-                // Ebbinghaus Curve Intervals (days): 1, 3, 7, 15, 30
-                const intervals = [1, 3, 7, 15, 30];
-                const nextInterval = intervals[currentStage] || 30;
-
-                const nextReviewAt = logData.result === 'SUCCESS'
-                    ? new Date(Date.now() + 1000 * 60 * 60 * 24 * nextInterval).toISOString()
-                    : new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString(); // Fail 시 내일 다시
-
-                const ratingContribution = calculateEarnedXp(logData.platform, logData.difficulty, state.level);
-
-                const newLog: StudyLog = {
+                await get().addStudyLog({
                     ...logData,
-                    id: Math.random().toString(36).substr(2, 9),
-                    problemId,
-                    problemTitle: logData.problemTitle || problemId,
-                    completedAt: new Date().toISOString(),
-                    stage: currentStage,
-                    ratingContribution: ratingContribution
-                };
-
-                // Update Local State
-                set(s => {
-                    const nextTimers = { ...s.timer.problemTimers };
-                    delete nextTimers[problemId];
-
-                    let nextPlans = [...s.reviewPlans];
-                    if (existingPlan) {
-                        nextPlans = nextPlans.map(p => p.problemId === problemId ? {
-                            ...p,
-                            currentStage,
-                            nextReviewAt,
-                            lastCompletedAt: newLog.completedAt,
-                            status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE'
-                        } : p);
-                    } else {
-                        nextPlans.push({
-                            id: Math.random().toString(36).substr(2, 9),
-                            problemId,
-                            problemTitle: newLog.problemTitle,
-                            platform: newLog.platform,
-                            difficulty: newLog.difficulty,
-                            currentStage,
-                            nextReviewAt,
-                            status: 'ACTIVE',
-                            lastCompletedAt: newLog.completedAt
-                        });
-                    }
-
-                    return {
-                        studyLogs: [newLog, ...s.studyLogs],
-                        reviewPlans: nextPlans,
-                        timer: { ...s.timer, problemTimers: nextTimers }
-                    };
+                    problemId
                 });
-
-                await get().refreshRating();
-
-                // DB Sync
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    // 1. Save Study Log
-                    await supabase.from('study_logs').insert({
-                        user_id: user.id,
-                        problem_id: newLog.problemId,
-                        problem_title: newLog.problemTitle,
-                        site: newLog.platform,
-                        difficulty: newLog.difficulty,
-                        perceived_difficulty: newLog.perceivedDifficulty,
-                        result: newLog.result,
-                        solving_method: newLog.solvingMethod,
-                        elapsed_time: newLog.elapsedTime,
-                        reflection: newLog.reflection,
-                        approach: newLog.approach,
-                        concepts: newLog.concepts,
-                        stage: newLog.stage,
-                        rating_contribution: newLog.ratingContribution
-                    });
-
-                    // 2. Save/Update Review Plan
-                    await supabase.from('review_plans').upsert({
-                        user_id: user.id,
-                        problem_id: newLog.problemId,
-                        problem_title: newLog.problemTitle,
-                        platform: newLog.platform,
-                        difficulty: newLog.difficulty,
-                        current_stage: currentStage,
-                        next_review_at: nextReviewAt,
-                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
-                        last_completed_at: newLog.completedAt
-                    }, { onConflict: 'user_id,problem_id' });
-
-                    await get().saveProfile(user.id);
-                }
             },
 
             updateStudyLog: async (logId, updates) => {
@@ -460,30 +367,73 @@ export const useUserStore = create<UserState>()(
             },
 
             addStudyLog: async (logData) => {
-                const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, get().level);
+                const state = get();
+                const existingPlan = state.reviewPlans.find(p => p.problemId === logData.problemId);
+                const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
+
+                // Ebbinghaus Curve Intervals (days)
+                const intervals = [1, 3, 7, 15, 30];
+                const nextInterval = intervals[currentStage] || 30;
+
+                const nextReviewAt = logData.result === 'SUCCESS'
+                    ? new Date(Date.now() + 1000 * 60 * 60 * 24 * nextInterval).toISOString()
+                    : new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toISOString();
+
+                const earnedRating = logData.ratingContribution || calculateEarnedXp(logData.platform, logData.difficulty, state.level);
+
                 const newLog: StudyLog = {
                     ...logData,
                     id: Math.random().toString(36).substr(2, 9),
                     completedAt: new Date().toISOString(),
+                    stage: currentStage,
                     ratingContribution: earnedRating
                 };
 
-                set(state => {
-                    const nextTimers = { ...state.timer.problemTimers };
+                // Update Local State
+                set(s => {
+                    const nextTimers = { ...s.timer.problemTimers };
                     delete nextTimers[logData.problemId];
+
+                    let nextPlans = [...s.reviewPlans];
+                    if (existingPlan) {
+                        nextPlans = nextPlans.map(p => p.problemId === logData.problemId ? {
+                            ...p,
+                            currentStage,
+                            nextReviewAt,
+                            lastCompletedAt: newLog.completedAt,
+                            status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE'
+                        } : p);
+                    } else {
+                        nextPlans.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            problemId: logData.problemId,
+                            problemTitle: newLog.problemTitle,
+                            platform: newLog.platform,
+                            difficulty: newLog.difficulty,
+                            currentStage,
+                            nextReviewAt,
+                            status: 'ACTIVE',
+                            lastCompletedAt: newLog.completedAt
+                        });
+                    }
+
                     return {
-                        studyLogs: [newLog, ...state.studyLogs],
-                        timer: { ...state.timer, problemTimers: nextTimers }
+                        studyLogs: [newLog, ...s.studyLogs],
+                        reviewPlans: nextPlans,
+                        timer: { ...s.timer, problemTimers: nextTimers }
                     };
                 });
 
                 await get().refreshRating();
 
+                // DB Sync
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
+                    // 1. Save Study Log
                     await supabase.from('study_logs').insert({
                         user_id: session.user.id,
                         problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
                         site: newLog.platform,
                         difficulty: newLog.difficulty,
                         perceived_difficulty: newLog.perceivedDifficulty,
@@ -491,9 +441,25 @@ export const useUserStore = create<UserState>()(
                         solving_method: newLog.solvingMethod,
                         elapsed_time: newLog.elapsedTime,
                         reflection: newLog.reflection,
+                        approach: newLog.approach,
                         concepts: newLog.concepts,
+                        stage: newLog.stage,
                         rating_contribution: newLog.ratingContribution
                     });
+
+                    // 2. Save/Update Review Plan
+                    await supabase.from('review_plans').upsert({
+                        user_id: session.user.id,
+                        problem_id: newLog.problemId,
+                        problem_title: newLog.problemTitle,
+                        platform: newLog.platform,
+                        difficulty: newLog.difficulty,
+                        current_stage: currentStage,
+                        next_review_at: nextReviewAt,
+                        status: currentStage >= 5 ? 'COMPLETED' : 'ACTIVE',
+                        last_completed_at: newLog.completedAt
+                    }, { onConflict: 'user_id,problem_id' });
+
                     await get().saveProfile(session.user.id);
                 }
             },
