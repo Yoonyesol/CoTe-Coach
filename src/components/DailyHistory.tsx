@@ -78,7 +78,8 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="glass-card p-6 bg-white hover:bg-gradient-to-br hover:from-white hover:to-misty-light/10 border-none shadow-md group transition-all"
+                            onClick={() => onEditLog(log)}
+                            className="glass-card p-6 bg-white hover:bg-gradient-to-br hover:from-white hover:to-misty-light/10 border-none shadow-md group transition-all cursor-pointer active:scale-[0.98]"
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1">
@@ -97,12 +98,6 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                                     </div>
                                     <h4 className="text-base font-black text-base-900 group-hover:text-misty-dark transition-colors">{log.problemId}</h4>
                                 </div>
-                                <button
-                                    onClick={() => onEditLog(log)}
-                                    className="p-2 bg-base-50 text-base-300 hover:bg-misty-dark hover:text-white rounded-xl transition-all cursor-pointer active:scale-90"
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                </button>
                             </div>
 
                             <div className="flex items-center gap-4 text-xs font-black text-base-400 mb-4">
@@ -120,9 +115,9 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                                 </div>
                             </div>
 
-                            {log.feeling && (
+                            {log.reflection && (
                                 <p className="text-xs font-bold text-base-500 line-clamp-2 bg-base-50/50 p-3 rounded-xl italic mb-4">
-                                    "{log.feeling}"
+                                    "{log.reflection}"
                                 </p>
                             )}
 

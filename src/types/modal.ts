@@ -34,7 +34,7 @@ export interface TierGuideModalProps extends CommonModalProps { }
 export interface DifficultyGuideModalProps extends CommonModalProps { }
 export interface ShopModalProps extends CommonModalProps { }
 
-export interface EditStudyLogModalProps extends CommonModalProps {
+export interface StudyLogDetailModalProps extends CommonModalProps {
     log: StudyLog;
 }
 

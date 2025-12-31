@@ -17,12 +17,17 @@ import {
 import { clsx } from 'clsx';
 import { useUserStore } from '../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StudyLog } from '../types/study';
 
 const PLATFORM_ICONS: Record<string, string> = {
     BOJ: 'https://static.solved.ac/logo.json', // Placeholder for concept
 };
 
-const LearningJournal: React.FC = () => {
+interface LearningJournalProps {
+    onLogClick?: (log: StudyLog) => void;
+}
+
+const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
     const {
         dailyTasks,
         studyLogs,
@@ -327,7 +332,11 @@ const LearningJournal: React.FC = () => {
                             </h4>
                             <div className="space-y-2">
                                 {dayLogs.map(log => (
-                                    <div key={log.id} className="p-4 bg-white/50 rounded-2xl border border-white flex gap-4 items-start shadow-sm">
+                                    <div
+                                        key={log.id}
+                                        onClick={() => onLogClick?.(log)}
+                                        className="p-4 bg-white/50 rounded-2xl border border-white flex gap-4 items-start shadow-sm cursor-pointer hover:bg-white/80 transition-all active:scale-[0.98]"
+                                    >
                                         <div className="w-10 h-10 bg-sage/10 rounded-xl flex items-center justify-center shrink-0">
                                             <Trophy className="w-5 h-5 text-sage" />
                                         </div>

@@ -16,7 +16,7 @@ import LandingPage from './components/LandingPage'
 import LearningJournal from './components/LearningJournal'
 import DailyHistory from './components/DailyHistory'
 import ReviewNotifications from './components/ReviewNotifications'
-import EditStudyLogModal from './components/modals/EditStudyLogModal'
+import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
 import { useUserStore } from './store/useUserStore'
@@ -297,7 +297,7 @@ function App() {
               <DailyHistory onEditLog={setEditingLog} />
             </>
           ) : activeTab === 'JOURNAL' ? (
-            <LearningJournal />
+            <LearningJournal onLogClick={setEditingLog} />
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-1">
@@ -343,7 +343,7 @@ function App() {
         />
       )}
       {editingLog && (
-        <EditStudyLogModal
+        <StudyLogDetailModal
           log={editingLog}
           isOpen={!!editingLog}
           onClose={() => setEditingLog(null)}
