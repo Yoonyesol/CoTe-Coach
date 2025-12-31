@@ -5,6 +5,7 @@ import StatsDashboard from './components/StatsDashboard'
 import Heatmap from './components/Heatmap'
 import { motion } from 'framer-motion';
 import ProblemCard from './components/ProblemCard'
+import CustomProblemCard from './components/CustomProblemCard'
 import AddProblemModal from './components/modals/AddProblemModal'
 import AccountSettingsModal from './components/modals/AccountSettingsModal'
 import StudyPlanModal from './components/modals/StudyPlanModal'
@@ -21,7 +22,7 @@ import ProblemLibrary from './components/ProblemLibrary'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
 import { useUserStore } from './store/useUserStore'
-import { StudyLog } from './types/study'
+import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
@@ -41,7 +42,9 @@ function App() {
     getDaysRemaining,
     fetchUserData,
     refreshRating,
-    refreshRecommendations
+    refreshRecommendations,
+    dailyTasks,
+    stopTimer
   } = useUserStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
@@ -328,6 +331,47 @@ function App() {
                   </div>
                 )}
               </section>
+
+              {/* Custom Problem List Section */}
+              {(() => {
+                const today = new Date().toISOString().split('T')[0];
+                const todayTasks = dailyTasks.filter(t => t.targetDate === today && t.status === 'pending');
+
+                if (todayTasks.length === 0) return null;
+
+                const handleCompleteTask = (task: DailyTask) => {
+                  stopTimer();
+                  handleReviewOpen({
+                    title: task.problemTitle,
+                    platform: task.site,
+                    difficulty: task.difficulty,
+                  });
+                };
+
+                return (
+                  <section className="space-y-6">
+                    <div>
+                      <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
+                        오늘의 커스텀 리스트 <span className="text-sm font-bold bg-lavender px-2 py-0.5 rounded-lg text-lavender-dark leading-none">
+                          {todayTasks.length} PROBLEMS
+                        </span>
+                      </h2>
+                      <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+                        직접 추가한 문제들이에요. 카드에서 <span className="text-lavender-dark font-bold">시작</span> 버튼을 눌러 스톱워치를 켜세요!
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                      {todayTasks.map((task) => (
+                        <CustomProblemCard
+                          key={task.id}
+                          task={task}
+                          onComplete={handleCompleteTask}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                );
+              })()}
 
               <DailyHistory onEditLog={setEditingLog} />
             </>

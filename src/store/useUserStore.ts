@@ -256,7 +256,9 @@ export const useUserStore = create<UserState>()(
                             site: t.site as Platform,
                             difficulty: t.difficulty,
                             status: t.status as 'pending' | 'completed',
-                            targetDate: t.target_date
+                            targetDate: t.target_date,
+                            url: t.url || undefined,
+                            tags: t.tags || []
                         }))
                     });
                 }
@@ -275,7 +277,9 @@ export const useUserStore = create<UserState>()(
                         site: taskData.site,
                         difficulty: taskData.difficulty,
                         target_date: taskData.targetDate,
-                        status: 'pending'
+                        status: 'pending',
+                        url: taskData.url || null,
+                        tags: taskData.tags || []
                     })
                     .select()
                     .single();
@@ -289,7 +293,9 @@ export const useUserStore = create<UserState>()(
                             site: data.site as Platform,
                             difficulty: data.difficulty,
                             status: data.status as 'pending' | 'completed',
-                            targetDate: data.target_date
+                            targetDate: data.target_date,
+                            url: data.url || undefined,
+                            tags: data.tags || []
                         }]
                     }));
                 }

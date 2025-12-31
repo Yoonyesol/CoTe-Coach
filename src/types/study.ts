@@ -27,6 +27,8 @@ export interface DailyTask {
     difficulty: string;
     status: 'pending' | 'completed';
     targetDate: string; // YYYY-MM-DD
+    url?: string;
+    tags?: string[];
 }
 
 export interface StudyLog {
