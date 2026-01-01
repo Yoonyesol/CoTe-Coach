@@ -53,6 +53,27 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                 </div>
 
                 <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
+                    {/* Daily Goal Problem Count */}
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">하루 목표 문제 수 (평상시)</label>
+                        <div className="flex items-center gap-4">
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={localSettings.dailyProblemCount || 3}
+                                onChange={(e) => setLocalSettings({ ...localSettings, dailyProblemCount: parseInt(e.target.value) })}
+                                className="flex-1 accent-misty-dark h-1.5 bg-base-100 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <span className="text-sm font-black text-base-800 w-12 text-center bg-base-50 py-1 rounded-lg">
+                                {localSettings.dailyProblemCount || 3}개
+                            </span>
+                        </div>
+                        <p className="text-[10px] text-base-400 font-medium px-1 leading-relaxed">
+                            💡 별도의 학습 목표가 설정되지 않았을 때 적용되는 기본 권장량입니다.
+                        </p>
+                    </div>
+
                     {/* Recommendation Difficulty */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">

@@ -12,8 +12,9 @@ const getTodayDateString = () => {
 };
 
 export const useRecommendations = () => {
-    const { level, bojHandle, studyPlan, recommendationSettings } = useUserStore();
+    const { level, bojHandle, recommendationSettings, getDailyProgress } = useUserStore();
     const todayDate = getTodayDateString();
+    const { goal } = getDailyProgress();
 
     const { difficulty, seedOffset, focusAlgorithms, platforms } = recommendationSettings;
 
@@ -24,16 +25,16 @@ export const useRecommendations = () => {
             todayDate,
             level,
             bojHandle,
-            studyPlan.problemCount,
             difficulty,
             seedOffset,
             focusAlgorithms,
-            platforms
+            platforms,
+            goal
         ],
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
-                problemCount: studyPlan.problemCount,
+                problemCount: goal,
                 difficultyAdjustment: difficulty,
                 seedOffset: seedOffset,
                 focusAlgorithms: focusAlgorithms,

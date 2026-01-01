@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { supabase } from '../lib/supabase';
 
 import { Platform, UserState } from '../types/user';
-import { StudyPlan, RecommendationSettings, StudyLog, StudyGoal } from '../types/study';
+import { RecommendationSettings, StudyLog, StudyGoal } from '../types/study';
 
 import { calculateEarnedXp } from '../lib/xp';
 
@@ -16,17 +16,13 @@ export const useUserStore = create<UserState>()(
             tier: 'Iron 1',
             bojHandle: '',
             bojRating: 0,
-            studyPlan: {
-                targetTier: 'Gold 1',
-                targetDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(), // 30일 뒤
-                dailyIntensity: 'NORMAL',
-                problemCount: 4,
-            },
+
             recommendationSettings: {
                 difficulty: 'NORMAL',
                 seedOffset: 0,
                 focusAlgorithms: [],
                 platforms: ['BOJ'],
+                dailyProblemCount: 3,
             },
             timer: {
                 isRunning: false,
@@ -64,15 +60,7 @@ export const useUserStore = create<UserState>()(
 
             setBojHandle: (handle: string) => set({ bojHandle: handle }),
 
-            setStudyPlan: (plan: Partial<StudyPlan>) => {
-                set((state) => ({
-                    studyPlan: { ...state.studyPlan, ...plan }
-                }));
-                // Use async to not block the UI but ensure sync
-                supabase.auth.getUser().then(({ data: { user } }) => {
-                    if (user) get().saveProfile(user.id);
-                });
-            },
+
 
             setRecommendationSettings: (settings: Partial<RecommendationSettings>) => {
                 set((state) => ({
@@ -171,7 +159,6 @@ export const useUserStore = create<UserState>()(
                         xp: profile.xp || 0,
                         tier: profile.tier || 'Iron 1',
                         points: profile.points || 0,
-                        studyPlan: profile.study_plan || get().studyPlan,
                         recommendationSettings: profile.recommendation_settings || get().recommendationSettings,
                     });
                 }
@@ -234,7 +221,6 @@ export const useUserStore = create<UserState>()(
                         tier: state.tier,
                         points: state.points,
                         xp: state.xp,
-                        study_plan: state.studyPlan,
                         recommendation_settings: state.recommendationSettings,
                         updated_at: new Date().toISOString()
                     });
@@ -791,13 +777,22 @@ export const useUserStore = create<UserState>()(
                     const logDate = new Date(log.completedAt);
                     return getLocalDate(logDate) === today;
                 }).length;
-                return { solved: solvedCount, goal: get().studyPlan.problemCount };
+
+                const activeGoal = get().getActiveGoal();
+                const goalCount = activeGoal ? activeGoal.dailyTarget : get().recommendationSettings.dailyProblemCount;
+
+                return { solved: solvedCount, goal: goalCount };
             },
 
             getDaysRemaining: () => {
-                const target = new Date(get().studyPlan.targetDate).getTime();
-                const today = new Date().setHours(0, 0, 0, 0);
-                return Math.max(0, Math.ceil((target - today) / (1000 * 60 * 60 * 24)));
+                const activeGoal = get().getActiveGoal();
+                if (activeGoal) {
+                    const target = new Date(activeGoal.endDate).getTime();
+                    const today = new Date().setHours(0, 0, 0, 0);
+                    return Math.max(0, Math.ceil((target - today) / (1000 * 60 * 60 * 24)));
+                }
+
+                return 0;
             },
 
             buyItem: (item) => {

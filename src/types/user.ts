@@ -1,4 +1,4 @@
-import { StudyPlan, RecommendationSettings, DailyTask, StudyLog, ReviewPlan, StudyGoal } from './study';
+import { RecommendationSettings, DailyTask, StudyLog, ReviewPlan, StudyGoal } from './study';
 import { ShopItem } from './shop';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
@@ -26,7 +26,7 @@ export interface UserState {
     tier: string;
     bojHandle: string;
     bojRating: number;
-    studyPlan: StudyPlan;
+
     recommendationSettings: RecommendationSettings;
     timer: TimerState;
     studyLogs: StudyLog[];
@@ -40,7 +40,7 @@ export interface UserState {
     addXp: (amount: number) => void;
     addPoints: (amount: number) => void;
     setBojHandle: (handle: string) => void;
-    setStudyPlan: (plan: Partial<StudyPlan>) => void;
+
     setRecommendationSettings: (settings: Partial<RecommendationSettings>) => void;
     calculateTier: (level: number) => string;
     syncSolvedAcTier: (tier: number) => Promise<void>;

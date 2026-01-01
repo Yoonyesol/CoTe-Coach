@@ -5,18 +5,14 @@ export type ReviewResult = 'SUCCESS' | 'FAIL';
 export type SolvingMethod = 'SELF' | 'REFERENCE';
 export type PerceivedDifficulty = 'EASY' | 'NORMAL' | 'HARD';
 
-export interface StudyPlan {
-    targetTier: string;
-    targetDate: string; // ISO String
-    dailyIntensity: 'LOW' | 'NORMAL' | 'HIGH';
-    problemCount: number;
-}
+
 
 export interface RecommendationSettings {
     difficulty: 'EASY' | 'NORMAL' | 'HARD';
     focusAlgorithms: string[];
     seedOffset: number;
     platforms: Platform[];
+    dailyProblemCount: number;
 }
 
 export interface DailyTask {

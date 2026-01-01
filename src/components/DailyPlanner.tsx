@@ -1,10 +1,10 @@
 import React from 'react';
-import { Target, CheckCircle2, Circle, Calendar, ArrowRight, Trophy } from 'lucide-react';
+import { Target, CheckCircle2, Circle, Calendar, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
 import { DailyPlannerProps } from '../types/components';
 
-const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining, onPlanDetailClick }) => {
+const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining }) => {
     const percentage = Math.round((solvedCount / goalCount) * 100);
 
     return (
@@ -61,8 +61,12 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                     <div className="flex flex-wrap justify-center lg:justify-start gap-4">
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/60 rounded-xl border border-white shadow-sm font-sans">
                             <Calendar className="w-4 h-4 text-base-400" />
-                            <span className="text-xs font-black text-base-600 uppercase">티어 승급까지</span>
-                            <span className="text-sm font-black text-misty-dark">D-{daysRemaining}</span>
+                            <span className="text-xs font-black text-base-600 uppercase">
+                                {daysRemaining > 0 ? '목표 기한까지' : '새로운 목표가 필요해요'}
+                            </span>
+                            <span className="text-sm font-black text-misty-dark">
+                                {daysRemaining > 0 ? `D-${daysRemaining}` : 'D-DAY'}
+                            </span>
                         </div>
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/60 rounded-xl border border-white shadow-sm font-sans">
                             <Trophy className="w-4 h-4 text-base-400" />
@@ -71,15 +75,6 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                         </div>
                     </div>
                 </div>
-
-                {/* Call to Action */}
-                <button
-                    onClick={onPlanDetailClick}
-                    className="px-6 py-4 bg-base-900 text-white rounded-2xl font-black text-sm flex items-center gap-2 hover:bg-base-800 transition-all active:scale-95 shadow-lg group font-sans cursor-pointer"
-                >
-                    플랜 상세 보기
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
             </div>
 
             {/* Mini Progress Dots */}

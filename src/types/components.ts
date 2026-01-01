@@ -37,7 +37,6 @@ export interface DailyPlannerProps {
     solvedCount: number;
     goalCount: number;
     daysRemaining: number;
-    onPlanDetailClick: () => void;
 }
 
 export interface DailyHistoryProps {

@@ -8,8 +8,7 @@ import ProblemCard from './components/ProblemCard'
 import CustomProblemCard from './components/CustomProblemCard'
 import AddProblemModal from './components/modals/AddProblemModal'
 import AccountSettingsModal from './components/modals/AccountSettingsModal'
-import StudyPlanModal from './components/modals/StudyPlanModal'
-import StudyPlanDetailModal from './components/modals/StudyPlanDetailModal'
+
 import TierGuideModal from './components/modals/TierGuideModal'
 import ReviewModal from './components/modals/ReviewModal'
 import Stopwatch from './components/Stopwatch'
@@ -108,8 +107,6 @@ function App() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [isPlanDetailModalOpen, setIsPlanDetailModalOpen] = useState(false);
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
@@ -197,13 +194,7 @@ function App() {
                     </p>
                   </div>
                   <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsPlanModalOpen(true)}
-                      className="p-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm outline-none"
-                      title="학습 플랜 설정"
-                    >
-                      <Settings2 className="w-6 h-6" />
-                    </button>
+
                     <button
                       onClick={() => setIsAddModalOpen(true)}
                       className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans"
@@ -264,7 +255,6 @@ function App() {
                   solvedCount={dailyProgress.solved}
                   goalCount={dailyProgress.goal}
                   daysRemaining={daysRemaining}
-                  onPlanDetailClick={() => setIsPlanDetailModalOpen(true)}
                 />
               )}
 
@@ -415,12 +405,7 @@ function App() {
       {/* Global Modals & Overlays (Outside for true 100% viewport coverage) */}
       <AddProblemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
       <AccountSettingsModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
-      <StudyPlanModal isOpen={isPlanModalOpen} onClose={() => setIsPlanModalOpen(false)} />
-      <StudyPlanDetailModal
-        isOpen={isPlanDetailModalOpen}
-        onClose={() => setIsPlanDetailModalOpen(false)}
-        onEditPlan={() => setIsPlanModalOpen(true)}
-      />
+
       <TierGuideModal
         isOpen={isTierGuideModalOpen}
         onClose={() => setIsTierGuideModalOpen(false)}
