@@ -732,7 +732,6 @@ export const useUserStore = create<UserState>()(
                     // Update local log with real DB ID
                     newLog.id = dbLog.id;
 
-                    // 2. Save/Update Review Plan
                     await supabase.from('review_plans').upsert({
                         user_id: session.user.id,
                         problem_id: newLog.problemId,
@@ -744,8 +743,6 @@ export const useUserStore = create<UserState>()(
                         status: (logData.isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE',
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
-
-                    await get().saveProfile(session.user.id);
                 }
 
                 // Update Local State (Only if DB sync succeeded)
@@ -779,11 +776,16 @@ export const useUserStore = create<UserState>()(
                     return {
                         studyLogs: [newLog, ...s.studyLogs],
                         reviewPlans: nextPlans,
-                        timer: { ...s.timer, problemTimers: nextTimers }
+                        timer: { ...s.timer, problemTimers: nextTimers },
+                        points: s.points + earnedRating
                     };
                 });
 
                 await get().refreshRating();
+
+                if (session?.user) {
+                    await get().saveProfile(session.user.id);
+                }
             },
 
             refreshRating: async () => {
