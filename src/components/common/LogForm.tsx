@@ -84,7 +84,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             type="button"
                             onClick={() => setResult('SUCCESS')}
                             className={clsx(
-                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
                                 result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-400"
                             )}
                         >
@@ -94,7 +94,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             type="button"
                             onClick={() => setResult('FAIL')}
                             className={clsx(
-                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
+                                "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
                                 result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-400"
                             )}
                         >
@@ -113,7 +113,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             type="button"
                             onClick={() => setSolvingMethod('SELF')}
                             className={clsx(
-                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
                                 solvingMethod === 'SELF' ? "bg-white text-misty-dark shadow-sm" : "text-base-400"
                             )}
                         >
@@ -123,7 +123,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             type="button"
                             onClick={() => setSolvingMethod('REFERENCE')}
                             className={clsx(
-                                "flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
+                                "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
                                 solvingMethod === 'REFERENCE' ? "bg-white text-amber-600 shadow-sm" : "text-base-400"
                             )}
                         >
@@ -143,7 +143,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             type="button"
                             onClick={() => setPerceivedDifficulty(level)}
                             className={clsx(
-                                "py-2.5 rounded-xl text-[11px] font-black transition-all border-2",
+                                "cursor-pointer py-2.5 rounded-xl text-[11px] font-black transition-all border-2",
                                 perceivedDifficulty === level
                                     ? (level === 'EASY' ? "bg-sage-light border-sage text-sage-dark" :
                                         level === 'NORMAL' ? "bg-misty-light border-misty text-misty-dark" :
@@ -266,14 +266,14 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-6 py-4 text-base-400 font-black text-sm hover:text-base-600 transition-colors rounded-2xl hover:bg-base-100"
+                        className="cursor-pointer px-6 py-4 text-base-400 font-black text-sm hover:text-base-600 transition-colors rounded-2xl hover:bg-base-100"
                     >
                         취소
                     </button>
                 )}
                 <button
                     type="submit"
-                    className="flex-1 py-4 bg-base-900 text-white rounded-2xl text-sm font-black hover:bg-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                    className="cursor-pointer flex-1 py-4 bg-base-900 text-white rounded-2xl text-sm font-black hover:bg-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
                 >
                     <Archive className="w-4 h-4" />
                     {submitLabel}

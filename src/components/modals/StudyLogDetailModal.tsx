@@ -334,10 +334,10 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         {/* Actions Footer (Only visible in View Mode, LogForm has its own buttons) */}
                         {!isEditing && (
                             <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100">
-                                <button onClick={handleDelete} className="p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
+                                <button onClick={handleDelete} className="cursor-pointer p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
                                     <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                 </button>
-                                <button onClick={() => setIsEditing(true)} className="flex-1 bg-misty-dark text-white py-4 rounded-2xl font-black text-sm hover:bg-misty-dark/90 transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
+                                <button onClick={() => setIsEditing(true)} className="cursor-pointer flex-1 bg-misty-dark text-white py-4 rounded-2xl font-black text-sm hover:bg-misty-dark/90 transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
                                     <Edit3 className="w-4 h-4" /> 이 기록 수정하기
                                 </button>
                             </div>
@@ -350,7 +350,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                             <h4 className="text-[11px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
                                 <History className="w-4 h-4" /> Challenge History
                             </h4>
-                            <button onClick={onClose} className="p-2 hover:bg-base-100 rounded-xl transition-all hidden md:block">
+                            <button onClick={onClose} className="cursor-pointer p-2 hover:bg-base-100 rounded-xl transition-all hidden md:block">
                                 <X className="w-5 h-5 text-base-300" />
                             </button>
                         </div>
@@ -360,7 +360,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                     key={h.id}
                                     onClick={() => setCurrentLog(h)}
                                     className={clsx(
-                                        "w-full p-4 rounded-2xl text-left transition-all border-2 relative group",
+                                        "cursor-pointer w-full p-4 rounded-2xl text-left transition-all border-2 relative group",
                                         h.id === currentLog.id
                                             ? "bg-white border-misty-dark shadow-md"
                                             : "bg-transparent border-transparent hover:bg-white/50"
