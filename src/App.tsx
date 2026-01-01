@@ -247,19 +247,22 @@ function App() {
                 )}
               </div>
 
-              {/* Daily Planner Section */}
-              {isDataLoading ? (
-                <DailyPlannerSkeleton />
-              ) : (
-                <DailyPlanner
-                  solvedCount={dailyProgress.solved}
-                  goalCount={dailyProgress.goal}
-                  daysRemaining={daysRemaining}
-                />
-              )}
+              {/* Main Activity Row: Planner & Reviews */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                {/* Daily Planner Section */}
+                {isDataLoading ? (
+                  <DailyPlannerSkeleton />
+                ) : (
+                  <DailyPlanner
+                    solvedCount={dailyProgress.solved}
+                    goalCount={dailyProgress.goal}
+                    daysRemaining={daysRemaining}
+                  />
+                )}
 
-              {/* Review Notifications Section */}
-              <ReviewNotifications onReviewClick={handleReviewOpen} />
+                {/* Review Notifications Section */}
+                <ReviewNotifications onReviewClick={handleReviewOpen} />
+              </div>
 
               {/* Recommendation Section */}
               <section className="space-y-6">
@@ -438,7 +441,7 @@ function App() {
         editGoal={getActiveGoal()}
       />
     </>
-  )
+  );
 }
 
 export default App
