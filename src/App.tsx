@@ -250,44 +250,6 @@ function App() {
               {/* Goal Banner */}
               <GoalBanner onOpenGoalModal={() => setIsGoalModalOpen(true)} />
 
-              {/* Summary Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {isDataLoading ? (
-                  <>
-                    <StatSkeleton />
-                    <StatSkeleton />
-                    <StatSkeleton />
-                    <StatSkeleton />
-                  </>
-                ) : (
-                  <>
-                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🎯</div>
-                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">오늘의 목표</p>
-                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{dailyProgress.solved} / {dailyProgress.goal}</p>
-                    </div>
-
-                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">📆</div>
-                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">목표 달성 D-Day</p>
-                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">D-{daysRemaining}</p>
-                    </div>
-
-                    <div onClick={() => setIsTierGuideModalOpen(true)} className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group flex flex-col justify-center">
-                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">🏆</div>
-                      <p className="text-xs font-bold text-base-400 mb-0.5 tracking-wider uppercase font-sans">현재 티어</p>
-                      <p className="text-xl font-black text-base-800 font-sans leading-none">{tier}</p>
-                    </div>
-
-                    <div className="glass-card p-6 border-none hover:translate-y-[-4px] transition-transform cursor-pointer relative overflow-hidden group">
-                      <div className="absolute -right-2 -bottom-2 text-6xl opacity-5 group-hover:scale-110 transition-transform">💰</div>
-                      <p className="text-xs font-bold text-base-400 mb-1 tracking-wider uppercase relative z-10 font-sans">누적 포인트</p>
-                      <p className="text-2xl font-black text-base-800 relative z-10 font-sans">{points.toLocaleString()}G</p>
-                    </div>
-                  </>
-                )}
-              </div>
-
               {/* Main Activity Row: Planner & Reviews */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
                 {/* Daily Planner Section */}

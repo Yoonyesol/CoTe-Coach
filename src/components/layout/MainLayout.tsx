@@ -114,8 +114,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                 <div className="p-8 flex flex-col h-full">
                     <div className="flex justify-between items-center mb-12">
                         <span className="text-xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
-                        <div className="glass-card px-3 py-1.5 text-xs font-black text-wheat-dark border-none shadow-sm flex items-center gap-1.5">
-                            <span className="text-sm">💰</span> {points.toLocaleString()}G
+                        <div className="flex gap-2">
+                            <div className="w-8 h-8 rounded-lg bg-white/50 border border-white flex items-center justify-center text-base-400 hover:text-misty-dark transition-colors cursor-pointer">
+                                <Settings size={14} />
+                            </div>
                         </div>
                     </div>
 
@@ -126,7 +128,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         )}
 
                         {/* Character Container */}
-                        <div className="relative">
+                        <div className="relative mb-8">
                             <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20">
                                 {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
                                     equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
@@ -147,35 +149,52 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                             </div>
                         </div>
 
-                        <div className="mt-12 text-center space-y-2">
-                            <p className="text-xl font-black text-base-900 font-sans">
-                                {
-                                    level >= 42 ? '전설의' :
-                                        level >= 41 ? '초월적인' :
-                                            level >= 39 ? '알고리즘 마스터' :
-                                                level >= 36 ? '코딩 챔피언' :
-                                                    level >= 29 ? '코딩 전문가' :
-                                                        level >= 19 ? '코딩 해결사' :
-                                                            level >= 9 ? '코딩 유망주' :
-                                                                level >= 4 ? '코딩 새싹' : '코딩 입문자'
-                                } 펭군
-                            </p>
-                            <div className="flex items-center gap-2 px-3 py-1 bg-white/60 rounded-full border border-white shadow-sm">
-                                <span className="text-[10px] font-black text-misty-dark uppercase tracking-tighter shrink-0">Lv. {level}</span>
-                                <div className="w-24 h-2 bg-base-100 rounded-full overflow-hidden">
-                                    <div className="h-full bg-misty" style={{ width: `${progress}%` }} />
-                                </div>
-                                <span className="text-[10px] font-black text-base-400 shrink-0">{progress}%</span>
+                        <div className="w-full space-y-6">
+                            <div className="text-center space-y-1">
+                                <p className="text-[10px] font-black text-misty-dark uppercase tracking-[0.2em] opacity-60">Your Identity</p>
+                                <p className="text-2xl font-black text-base-900 font-sans tracking-tight">
+                                    {
+                                        level >= 42 ? '전설의' :
+                                            level >= 41 ? '초월적인' :
+                                                level >= 39 ? '알고리즘 마스터' :
+                                                    level >= 36 ? '코딩 챔피언' :
+                                                        level >= 29 ? '코딩 전문가' :
+                                                            level >= 19 ? '코딩 해결사' :
+                                                                level >= 9 ? '코딩 유망주' :
+                                                                    level >= 4 ? '코딩 새싹' : '코딩 입문자'
+                                    } <span className="text-misty-dark">펭군</span>
+                                </p>
                             </div>
-                            <div className="flex justify-center w-full">
-                                <button
-                                    onClick={onTierClick}
-                                    className="group relative flex items-center justify-center gap-2 px-4 py-2 hover:bg-white/40 rounded-xl transition-all cursor-pointer"
-                                >
-                                    <TierBadge tier={tier} size="sm" />
-                                    <span className="text-sm font-black text-base-700 group-hover:text-misty-dark transition-colors">{tier}</span>
-                                    <Info className="w-3 h-3 text-base-300 group-hover:text-misty transition-colors opacity-0 group-hover:opacity-100" />
-                                </button></div>
+
+                            <div className="grid grid-cols-2 gap-3">
+                                <div onClick={onTierClick} className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
+                                    <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Current Tier</p>
+                                    <div className="flex items-center gap-2">
+                                        <TierBadge tier={tier} size="sm" />
+                                        <span className="text-sm font-black text-base-800 group-hover:text-misty-dark transition-colors">{tier}</span>
+                                    </div>
+                                </div>
+                                <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
+                                    <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Total Gold</p>
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="text-base">💰</span>
+                                        <span className="text-sm font-black text-base-800 group-hover:text-wheat-dark transition-colors">{points.toLocaleString()}G</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5 px-1">
+                                <div className="flex justify-between items-end">
+                                    <span className="text-[10px] font-black text-base-400 uppercase tracking-tighter">Level {level}</span>
+                                    <span className="text-[10px] font-black text-misty-dark">{progress}%</span>
+                                </div>
+                                <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden border border-white/20">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-misty to-lavender-dark transition-all duration-1000"
+                                        style={{ width: `${progress}%` }}
+                                    />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
