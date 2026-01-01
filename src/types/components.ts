@@ -31,6 +31,7 @@ export interface MainLayoutProps {
     onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
+    isLoading?: boolean;
 }
 
 export interface DailyPlannerProps {

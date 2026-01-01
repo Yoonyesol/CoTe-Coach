@@ -8,15 +8,23 @@ import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link
 import TierBadge from '../TierBadge';
 import BojTierBadge from '../BojTierBadge';
 import { clsx } from 'clsx';
+import { SidebarSkeleton } from '../common/Skeleton';
 
 const ITEM_EMOJIS: Record<string, string> = {
     'item_1': '🕶️', 'item_2': '🧢', 'item_3': '👑',
     'item_4': '🛋️', 'item_5': '🖥️', 'item_6': '💰', 'item_7': '✨'
 };
 
-import { MainLayoutProps } from '../../types/components';
+export interface MainLayoutProps {
+    children: React.ReactNode;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => void;
+    onAccountSettingsOpen: () => void;
+    onTierClick?: () => void;
+    isLoading?: boolean;
+}
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen, onTierClick }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen, onTierClick, isLoading }) => {
     const level = useUserStore((state) => state.level);
     const xp = useUserStore((state) => state.xp);
     const tier = useUserStore((state) => state.tier);
@@ -26,11 +34,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
     const { signOut } = useAuthStore();
     const { showConfirm } = useModalStore();
-
-    // We'll manage the internal state for the modal here or use the prop
-    // To satisfy the user's request of "gear icon opens it", we should handle the modal visibility.
-    // However, if App.tsx also has a settings button, it's better to lift the state or use onSettingsOpen.
-    // Let's assume MainLayout receives the state if it's already in App.tsx.
 
     const [isShopOpen, setIsShopOpen] = useState(false);
     const progress = xp % 100;
@@ -111,156 +114,160 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
             {/* 2. Character Sidebar */}
             <aside className="w-full md:w-[320px] lg:w-[360px] h-[400px] md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0">
-                <div className="p-8 flex flex-col h-full">
-                    <div className="flex justify-between items-center mb-12">
-                        <span className="text-xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
-                        <div className="flex gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-white/50 border border-white flex items-center justify-center text-base-400 hover:text-misty-dark transition-colors cursor-pointer">
-                                <Settings size={14} />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col items-center justify-center relative">
-                        {/* Equipped Decoration (Aura) */}
-                        {equippedItems.includes('item_7') && (
-                            <div className="absolute w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-pulse" />
-                        )}
-
-                        {/* Character Container */}
-                        <div className="relative mb-8">
-                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20">
-                                {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
-                                    equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
-                            </div>
-                            <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xl z-20 ml-1">
-                                {equippedItems.includes('item_1') ? ITEM_EMOJIS['item_1'] : ''}
-                            </div>
-                            <div className="text-9xl mb-4 animate-bounce-soft relative z-10 drop-shadow-2xl">🐧</div>
-
-                            <div className="absolute -right-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                                {equippedItems.includes('item_5') ? ITEM_EMOJIS['item_5'] : ''}
-                            </div>
-                            <div className="absolute -left-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                                {equippedItems.includes('item_4') ? ITEM_EMOJIS['item_4'] : ''}
-                            </div>
-                            <div className="absolute -bottom-8 left-12 text-3xl animate-in zoom-in duration-500">
-                                {equippedItems.includes('item_6') ? ITEM_EMOJIS['item_6'] : ''}
-                            </div>
-                        </div>
-
-                        <div className="w-full space-y-6">
-                            <div className="text-center space-y-1">
-                                <p className="text-[10px] font-black text-misty-dark uppercase tracking-[0.2em] opacity-60">Your Identity</p>
-                                <p className="text-2xl font-black text-base-900 font-sans tracking-tight">
-                                    {
-                                        level >= 42 ? '전설의' :
-                                            level >= 41 ? '초월적인' :
-                                                level >= 39 ? '알고리즘 마스터' :
-                                                    level >= 36 ? '코딩 챔피언' :
-                                                        level >= 29 ? '코딩 전문가' :
-                                                            level >= 19 ? '코딩 해결사' :
-                                                                level >= 9 ? '코딩 유망주' :
-                                                                    level >= 4 ? '코딩 새싹' : '코딩 입문자'
-                                    } <span className="text-misty-dark">펭군</span>
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div onClick={onTierClick} className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
-                                    <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Current Tier</p>
-                                    <div className="flex items-center gap-2">
-                                        <TierBadge tier={tier} size="sm" />
-                                        <span className="text-sm font-black text-base-800 group-hover:text-misty-dark transition-colors">{tier}</span>
-                                    </div>
-                                </div>
-                                <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
-                                    <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Total Gold</p>
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-base">💰</span>
-                                        <span className="text-sm font-black text-base-800 group-hover:text-wheat-dark transition-colors">{points.toLocaleString()}G</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-1.5 px-1">
-                                <div className="flex justify-between items-end">
-                                    <span className="text-[10px] font-black text-base-400 uppercase tracking-tighter">Level {level}</span>
-                                    <span className="text-[10px] font-black text-misty-dark">{progress}%</span>
-                                </div>
-                                <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden border border-white/20">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-misty to-lavender-dark transition-all duration-1000"
-                                        style={{ width: `${progress}%` }}
-                                    />
+                {isLoading ? (
+                    <SidebarSkeleton />
+                ) : (
+                    <div className="p-8 flex flex-col h-full">
+                        <div className="flex justify-between items-center mb-12">
+                            <span className="text-xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
+                            <div className="flex gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-white/50 border border-white flex items-center justify-center text-base-400 hover:text-misty-dark transition-colors cursor-pointer">
+                                    <Settings size={14} />
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="mt-8 space-y-4">
-                        {/* Solved.ac Integration Badge */}
-                        <div
-                            onClick={onAccountSettingsOpen}
-                            className="p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/60 transition-colors group"
-                        >
-                            {bojHandle ? (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <BojTierBadge
-                                            level={solvedAcData?.tier || 0}
-                                            size="md"
-                                            className="transform scale-95 origin-left"
-                                        />
-                                        <div>
-                                            <p className="text-[9px] font-black text-misty-dark uppercase tracking-tighter mb-0.5">Solved.ac</p>
-                                            <p className="text-sm font-black text-base-800">{bojHandle}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[9px] font-black text-base-400 uppercase">Tier</p>
-                                        <p className="text-xs font-black text-misty-dark">
-                                            {(() => {
-                                                const lv = solvedAcData?.tier || 0;
-                                                const tiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'];
-                                                const tierIdx = Math.floor((lv - 1) / 5);
-                                                const subTier = 5 - ((lv - 1) % 5);
-                                                const tierName = tierIdx >= tiers.length ? 'Master' : tiers[tierIdx];
-                                                return `${tierName} ${subTier}`;
-                                            })()}
-                                            <span className="text-[9px] text-base-400 ml-1">(Lv.{solvedAcData?.tier || '?'})</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm shadow-sm border border-base-100">
-                                            <LinkIcon size={16} className="text-base-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-black text-base-400 uppercase tracking-tighter">Solved.ac</p>
-                                            <p className="text-xs font-black text-base-800">연동 필요</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={onAccountSettingsOpen}
-                                        className="px-3 py-1.5 bg-misty-dark text-white rounded-lg text-[10px] font-black hover:bg-misty transition-all active:scale-95 cursor-pointer"
-                                    >
-                                        연동하기
-                                    </button>
-                                </div>
+                        <div className="flex-1 flex flex-col items-center justify-center relative">
+                            {/* Equipped Decoration (Aura) */}
+                            {equippedItems.includes('item_7') && (
+                                <div className="absolute w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-pulse" />
                             )}
+
+                            {/* Character Container */}
+                            <div className="relative mb-8">
+                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20">
+                                    {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
+                                        equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
+                                </div>
+                                <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xl z-20 ml-1">
+                                    {equippedItems.includes('item_1') ? ITEM_EMOJIS['item_1'] : ''}
+                                </div>
+                                <div className="text-9xl mb-4 animate-bounce-soft relative z-10 drop-shadow-2xl">🐧</div>
+
+                                <div className="absolute -right-16 bottom-4 text-4xl animate-in zoom-in duration-500">
+                                    {equippedItems.includes('item_5') ? ITEM_EMOJIS['item_5'] : ''}
+                                </div>
+                                <div className="absolute -left-16 bottom-4 text-4xl animate-in zoom-in duration-500">
+                                    {equippedItems.includes('item_4') ? ITEM_EMOJIS['item_4'] : ''}
+                                </div>
+                                <div className="absolute -bottom-8 left-12 text-3xl animate-in zoom-in duration-500">
+                                    {equippedItems.includes('item_6') ? ITEM_EMOJIS['item_6'] : ''}
+                                </div>
+                            </div>
+
+                            <div className="w-full space-y-6">
+                                <div className="text-center space-y-1">
+                                    <p className="text-[10px] font-black text-misty-dark uppercase tracking-[0.2em] opacity-60">Your Identity</p>
+                                    <p className="text-2xl font-black text-base-900 font-sans tracking-tight">
+                                        {
+                                            level >= 42 ? '전설의' :
+                                                level >= 41 ? '초월적인' :
+                                                    level >= 39 ? '알고리즘 마스터' :
+                                                        level >= 36 ? '코딩 챔피언' :
+                                                            level >= 29 ? '코딩 전문가' :
+                                                                level >= 19 ? '코딩 해결사' :
+                                                                    level >= 9 ? '코딩 유망주' :
+                                                                        level >= 4 ? '코딩 새싹' : '코딩 입문자'
+                                        } <span className="text-misty-dark">펭군</span>
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div onClick={onTierClick} className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
+                                        <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Current Tier</p>
+                                        <div className="flex items-center gap-2">
+                                            <TierBadge tier={tier} size="sm" />
+                                            <span className="text-sm font-black text-base-800 group-hover:text-misty-dark transition-colors">{tier}</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
+                                        <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Total Gold</p>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-base">💰</span>
+                                            <span className="text-sm font-black text-base-800 group-hover:text-wheat-dark transition-colors">{points.toLocaleString()}G</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5 px-1">
+                                    <div className="flex justify-between items-end">
+                                        <span className="text-[10px] font-black text-base-400 uppercase tracking-tighter">Level {level}</span>
+                                        <span className="text-[10px] font-black text-misty-dark">{progress}%</span>
+                                    </div>
+                                    <div className="w-full h-2 bg-white/40 rounded-full overflow-hidden border border-white/20">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-misty to-lavender-dark transition-all duration-1000"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="flex justify-center">
-                            <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6">
-                                <Briefcase className="w-3 h-3 text-base-400 group-hover:text-misty transition-colors" />
-                                가방 확인
-                            </button>
+                        <div className="mt-8 space-y-4">
+                            {/* Solved.ac Integration Badge */}
+                            <div
+                                onClick={onAccountSettingsOpen}
+                                className="p-4 bg-white/40 rounded-2xl border border-white/60 shadow-sm backdrop-blur-sm cursor-pointer hover:bg-white/60 transition-colors group"
+                            >
+                                {bojHandle ? (
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <BojTierBadge
+                                                level={solvedAcData?.tier || 0}
+                                                size="md"
+                                                className="transform scale-95 origin-left"
+                                            />
+                                            <div>
+                                                <p className="text-[9px] font-black text-misty-dark uppercase tracking-tighter mb-0.5">Solved.ac</p>
+                                                <p className="text-sm font-black text-base-800">{bojHandle}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-black text-base-400 uppercase">Tier</p>
+                                            <p className="text-xs font-black text-misty-dark">
+                                                {(() => {
+                                                    const lv = solvedAcData?.tier || 0;
+                                                    const tiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'];
+                                                    const tierIdx = Math.floor((lv - 1) / 5);
+                                                    const subTier = 5 - ((lv - 1) % 5);
+                                                    const tierName = tierIdx >= tiers.length ? 'Master' : tiers[tierIdx];
+                                                    return `${tierName} ${subTier}`;
+                                                })()}
+                                                <span className="text-[9px] text-base-400 ml-1">(Lv.{solvedAcData?.tier || '?'})</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-sm shadow-sm border border-base-100">
+                                                <LinkIcon size={16} className="text-base-400" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[9px] font-black text-base-400 uppercase tracking-tighter">Solved.ac</p>
+                                                <p className="text-xs font-black text-base-800">연동 필요</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={onAccountSettingsOpen}
+                                            className="px-3 py-1.5 bg-misty-dark text-white rounded-lg text-[10px] font-black hover:bg-misty transition-all active:scale-95 cursor-pointer"
+                                        >
+                                            연동하기
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="flex justify-center">
+                                <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6">
+                                    <Briefcase className="w-3 h-3 text-base-400 group-hover:text-misty transition-colors" />
+                                    가방 확인
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <ShopModal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} />
             </aside>

@@ -29,14 +29,19 @@ import { useModalStore } from './store/useModalStore'
 import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
-import { Plus, Settings2, Loader2, RefreshCw, Target } from 'lucide-react';
+import {
+  Search, TrendingUp, Calendar, RefreshCw, Settings2, Plus, Target, Loader2, Target as TargetIcon
+} from 'lucide-react';
 import { getLocalDateString } from './lib/dateUtils'
 import clsx from 'clsx';
 import {
-  ProblemCardSkeleton,
-  StatSkeleton,
   ProfileHeaderSkeleton,
-  DailyPlannerSkeleton
+  DailyPlannerSkeleton,
+  ProblemCardSkeleton,
+  GoalBannerSkeleton,
+  ReviewNotificationsSkeleton,
+  DailyHistorySkeleton,
+  SectionHeaderSkeleton
 } from './components/common/Skeleton';
 
 function App() {
@@ -216,6 +221,7 @@ function App() {
         onTabChange={handleTabChange}
         onAccountSettingsOpen={() => setIsAccountModalOpen(true)}
         onTierClick={() => setIsTierGuideModalOpen(true)}
+        isLoading={isDataLoading}
       >
         <motion.div
           key={activeTab}
@@ -265,7 +271,11 @@ function App() {
               )}
 
               {/* Goal Banner */}
-              <GoalBanner onOpenGoalModal={() => setIsGoalModalOpen(true)} />
+              {isDataLoading ? (
+                <GoalBannerSkeleton />
+              ) : (
+                <GoalBanner onOpenGoalModal={() => setIsGoalModalOpen(true)} />
+              )}
 
               {/* Main Activity Row: Planner & Reviews */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -281,49 +291,57 @@ function App() {
                 )}
 
                 {/* Review Notifications Section */}
-                <ReviewNotifications onPlanClick={handleReviewDetailOpen} />
+                {isDataLoading ? (
+                  <ReviewNotificationsSkeleton />
+                ) : (
+                  <ReviewNotifications onPlanClick={handleReviewDetailOpen} />
+                )}
               </div>
 
               {/* Recommendation Section */}
               <section className="space-y-6">
-                <div className="flex justify-between items-end">
-                  <div>
-                    <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
-                      오늘의 추천 리스트 <span className="text-sm font-bold bg-wheat px-2 py-0.5 rounded-lg text-wheat-dark leading-none">
-                        {recommendations?.length || 0} PROBLEMS
-                      </span>
-                    </h2>
-                    <p className="text-sm font-medium text-base-400 mt-1 font-sans">
-                      사용자님의 레벨에 맞춰 <span className="text-base-600 font-bold">워밍업부터 챌린지까지</span> 준비했어요!
-                    </p>
+                {isDataLoading || isRecsLoading ? (
+                  <SectionHeaderSkeleton />
+                ) : (
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
+                        오늘의 추천 리스트 <span className="text-sm font-bold bg-wheat px-2 py-0.5 rounded-lg text-wheat-dark leading-none">
+                          {recommendations?.length || 0} PROBLEMS
+                        </span>
+                      </h2>
+                      <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+                        사용자님의 레벨에 맞춰 <span className="text-base-600 font-bold">워밍업부터 챌린지까지</span> 준비했어요!
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setIsRecoModalOpen(true)}
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
+                        title="추천 필터 설정"
+                      >
+                        <Settings2 className="w-4 h-4" />
+                        필터
+                      </button>
+                      <button
+                        onClick={async () => {
+                          setIsRefreshing(true);
+                          await refreshRecommendations();
+                          await refetch();
+                          setIsRefreshing(false);
+                        }}
+                        disabled={isRefreshing}
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group disabled:opacity-50"
+                      >
+                        <RefreshCw className={clsx(
+                          "w-4 h-4 transition-transform duration-500",
+                          isRefreshing ? "animate-spin" : "group-hover:rotate-180"
+                        )} />
+                        {isRefreshing ? '섞는 중...' : '다른 문제 보기'}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => setIsRecoModalOpen(true)}
-                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
-                      title="추천 필터 설정"
-                    >
-                      <Settings2 className="w-4 h-4" />
-                      필터
-                    </button>
-                    <button
-                      onClick={async () => {
-                        setIsRefreshing(true);
-                        await refreshRecommendations();
-                        await refetch();
-                        setIsRefreshing(false);
-                      }}
-                      disabled={isRefreshing}
-                      className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group disabled:opacity-50"
-                    >
-                      <RefreshCw className={clsx(
-                        "w-4 h-4 transition-transform duration-500",
-                        isRefreshing ? "animate-spin" : "group-hover:rotate-180"
-                      )} />
-                      {isRefreshing ? '섞는 중...' : '다른 문제 보기'}
-                    </button>
-                  </div>
-                </div>
+                )}
 
                 {isRecsLoading || isRecsFetching || isRefreshing ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
@@ -396,7 +414,11 @@ function App() {
                 );
               })()}
 
-              <DailyHistory onEditLog={setEditingLog} />
+              {isDataLoading ? (
+                <DailyHistorySkeleton />
+              ) : (
+                <DailyHistory onEditLog={setEditingLog} />
+              )}
             </>
           ) : activeTab === 'JOURNAL' ? (
             <LearningJournal

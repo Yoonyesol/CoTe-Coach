@@ -6,6 +6,7 @@ import { useUserStore } from '../store/useUserStore';
 import { StudyLog } from '../types/study';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
+import { ProblemCardSkeleton } from './common/Skeleton';
 
 interface ProblemStats {
     problemId: string;
@@ -292,78 +293,84 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
             </div>
 
             {/* Problem List */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-                <AnimatePresence mode="popLayout">
-                    {filteredProblems.map((problem) => (
-                        <motion.div
-                            key={problem.problemId}
-                            layout
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            onClick={() => onProblemClick(problem.logs[problem.logs.length - 1])}
-                            className="glass-card p-6 bg-white hover:bg-gradient-to-br hover:from-white hover:to-lavender-light/5 border-none shadow-md group transition-all cursor-pointer active:scale-[0.98] flex flex-col justify-between h-full"
-                        >
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-center gap-2">
-                                        <span className="px-2 py-0.5 bg-base-100 text-base-400 rounded-[4px] text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
-                                            {problem.platform}
-                                        </span>
-                                        <span className="px-2 py-0.5 bg-lavender-light text-lavender-dark rounded-[4px] text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
-                                            Stage {problem.currentStage}
-                                        </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {isLoading ? (
+                    Array.from({ length: 9 }).map((_, i) => (
+                        <ProblemCardSkeleton key={`skeleton-${i}`} />
+                    ))
+                ) : (
+                    <AnimatePresence mode="popLayout">
+                        {filteredProblems.map((problem) => (
+                            <motion.div
+                                key={problem.problemId}
+                                layout
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                onClick={() => onProblemClick(problem.logs[problem.logs.length - 1])}
+                                className="glass-card p-6 bg-white hover:bg-gradient-to-br hover:from-white hover:to-lavender-light/5 border-none shadow-md group transition-all cursor-pointer active:scale-[0.98] flex flex-col justify-between h-full"
+                            >
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2 py-0.5 bg-base-100 text-base-400 rounded-[4px] text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                                                {problem.platform}
+                                            </span>
+                                            <span className="px-2 py-0.5 bg-lavender-light text-lavender-dark rounded-[4px] text-[9px] font-black uppercase tracking-widest whitespace-nowrap">
+                                                Stage {problem.currentStage}
+                                            </span>
+                                        </div>
+                                        <div className="p-1.5 bg-base-50 text-base-200 group-hover:text-misty-dark rounded-lg transition-colors">
+                                            <ChevronRight className="w-4 h-4" />
+                                        </div>
                                     </div>
-                                    <div className="p-1.5 bg-base-50 text-base-200 group-hover:text-misty-dark rounded-lg transition-colors">
-                                        <ChevronRight className="w-4 h-4" />
+
+                                    <div>
+                                        <h4 className="text-base font-black text-base-900 group-hover:text-misty-dark transition-colors line-clamp-2 leading-tight">
+                                            {problem.problemTitle}
+                                        </h4>
+                                        <p className="text-[10px] font-bold text-base-300 mt-1 uppercase tracking-tighter">ID: {problem.problemId}</p>
+                                    </div>
+
+                                    {/* Stats Mini-Dashboard */}
+                                    <div className="grid grid-cols-3 gap-2 py-3 border-y border-base-50">
+                                        <div className="text-center">
+                                            <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Solves</p>
+                                            <p className="text-xs font-black text-base-800">{problem.totalSolves}회</p>
+                                        </div>
+                                        <div className="text-center border-x border-base-50">
+                                            <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Best</p>
+                                            <p className="text-xs font-black text-sage-dark">{Math.round(problem.bestTime / 60000)}분</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Improve</p>
+                                            <p className={clsx(
+                                                "text-xs font-black",
+                                                problem.improvement > 0 ? "text-coral" : "text-base-400"
+                                            )}>
+                                                {problem.improvement > 0 ? `-${Math.round(problem.improvement)}%` : '-'}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <h4 className="text-base font-black text-base-900 group-hover:text-misty-dark transition-colors line-clamp-2 leading-tight">
-                                        {problem.problemTitle}
-                                    </h4>
-                                    <p className="text-[10px] font-bold text-base-300 mt-1 uppercase tracking-tighter">ID: {problem.problemId}</p>
+                                <div className="mt-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-base-400">
+                                        <Calendar className="w-3 h-3" />
+                                        <span>최근: {new Date(problem.lastSolvedAt).toLocaleDateString()}</span>
+                                    </div>
+                                    {problem.improvement > 15 && (
+                                        <div className="flex items-center gap-1 text-coral text-[10px] font-black italic">
+                                            <TrendingDown className="w-3 h-3" /> Growth!
+                                        </div>
+                                    )}
                                 </div>
+                            </motion.div>
+                        ))}
+                    </AnimatePresence>
+                )}
 
-                                {/* Stats Mini-Dashboard */}
-                                <div className="grid grid-cols-3 gap-2 py-3 border-y border-base-50">
-                                    <div className="text-center">
-                                        <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Solves</p>
-                                        <p className="text-xs font-black text-base-800">{problem.totalSolves}회</p>
-                                    </div>
-                                    <div className="text-center border-x border-base-50">
-                                        <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Best</p>
-                                        <p className="text-xs font-black text-sage-dark">{Math.round(problem.bestTime / 60000)}분</p>
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Improve</p>
-                                        <p className={clsx(
-                                            "text-xs font-black",
-                                            problem.improvement > 0 ? "text-coral" : "text-base-400"
-                                        )}>
-                                            {problem.improvement > 0 ? `-${Math.round(problem.improvement)}%` : '-'}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-4 flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 text-[10px] font-bold text-base-400">
-                                    <Calendar className="w-3 h-3" />
-                                    <span>최근: {new Date(problem.lastSolvedAt).toLocaleDateString()}</span>
-                                </div>
-                                {problem.improvement > 15 && (
-                                    <div className="flex items-center gap-1 text-coral text-[10px] font-black italic">
-                                        <TrendingDown className="w-3 h-3" /> Growth!
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    ))}
-                </AnimatePresence>
-
-                {filteredProblems.length === 0 && (
+                {!isLoading && filteredProblems.length === 0 && (
                     <div className="col-span-full py-20 bg-white/40 rounded-3xl border-2 border-dashed border-white flex flex-col items-center justify-center space-y-4">
                         <div className="w-16 h-16 bg-base-50 rounded-full flex items-center justify-center text-3xl opacity-50 grayscale">📚</div>
                         <div className="text-center">
