@@ -126,7 +126,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
             result: data.result,
             solvingMethod: data.solvingMethod,
             elapsedTime: data.elapsedTime,
-            concepts: data.concepts
+            concepts: data.concepts,
+            isFinished: data.isFinished
         };
         setCurrentLog(updatedLog);
         setIsEditing(false);
@@ -216,7 +217,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                             approach: currentLog.approach,
                                             reflection: currentLog.reflection,
                                             concepts: currentLog.concepts,
-                                            isFinished: false // Default to false when editing unless retrieved from log (if we store it on log)
+                                            isFinished: currentLog.isFinished
                                         }}
                                         onSubmit={handleFormSubmit}
                                         onCancel={() => setIsEditing(false)}

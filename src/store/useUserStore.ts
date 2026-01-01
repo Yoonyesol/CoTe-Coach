@@ -199,7 +199,8 @@ export const useUserStore = create<UserState>()(
                             concepts: l.concepts || [],
                             completedAt: l.created_at,
                             stage: l.stage || 0,
-                            ratingContribution: l.rating_contribution || 0
+                            ratingContribution: l.rating_contribution || 0,
+                            isFinished: l.is_finished || false
                         }))
                     });
                 }
@@ -448,6 +449,7 @@ export const useUserStore = create<UserState>()(
                 if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
                 if (updates.elapsedTime !== undefined) dbUpdates.elapsed_time = updates.elapsedTime;
                 if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
+                if (updates.isFinished !== undefined) dbUpdates.is_finished = updates.isFinished;
 
                 const { error } = await supabase.from('study_logs').update(dbUpdates).eq('id', logId);
 
@@ -468,7 +470,24 @@ export const useUserStore = create<UserState>()(
                             studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l),
                             reviewPlans: state.reviewPlans.map(p =>
                                 p.problemId === targetLog.problemId
-                                    ? { ...p, status: 'COMPLETED' }
+                                    ? { ...p, status: updates.isFinished ? 'COMPLETED' : 'ACTIVE' }
+                                    : p
+                            )
+                        }));
+                    } else if (targetLog && updates.isFinished === false) {
+                        // Handle un-finishing from library or detail view
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (session?.user) {
+                            await supabase.from('review_plans').update({ status: 'ACTIVE' })
+                                .eq('user_id', session.user.id)
+                                .eq('problem_id', targetLog.problemId);
+                        }
+
+                        set(state => ({
+                            studyLogs: state.studyLogs.map(l => l.id === logId ? { ...l, ...updates } : l),
+                            reviewPlans: state.reviewPlans.map(p =>
+                                p.problemId === targetLog.problemId
+                                    ? { ...p, status: 'ACTIVE' }
                                     : p
                             )
                         }));
@@ -701,7 +720,8 @@ export const useUserStore = create<UserState>()(
                         approach: newLog.approach,
                         concepts: newLog.concepts,
                         stage: newLog.stage,
-                        rating_contribution: newLog.ratingContribution
+                        rating_contribution: newLog.ratingContribution,
+                        is_finished: logData.isFinished || false
                     }).select().single();
 
                     if (logError || !dbLog) {
