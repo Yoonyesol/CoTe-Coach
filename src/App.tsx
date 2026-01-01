@@ -46,8 +46,6 @@ import {
 
 function App() {
   const {
-    tier,
-    points,
     getDailyProgress,
     getDaysRemaining,
     fetchUserData,
@@ -58,7 +56,8 @@ function App() {
     timer,
     startTimer,
     fetchGoals,
-    getActiveGoal
+    getActiveGoal,
+    getStreak
   } = useUserStore();
   const { showAlert } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
@@ -287,6 +286,7 @@ function App() {
                     solvedCount={dailyProgress.solved}
                     goalCount={dailyProgress.goal}
                     daysRemaining={daysRemaining}
+                    streak={getStreak()}
                   />
                 )}
 

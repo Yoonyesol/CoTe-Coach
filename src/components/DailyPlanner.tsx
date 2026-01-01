@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 
 import { DailyPlannerProps } from '../types/components';
 
-const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining }) => {
+const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining, streak }) => {
     const percentage = Math.round((solvedCount / goalCount) * 100);
 
     return (
@@ -71,7 +71,7 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/60 rounded-xl border border-white shadow-sm font-sans">
                             <Trophy className="w-4 h-4 text-base-400" />
                             <span className="text-xs font-black text-base-600 uppercase">연속 달성</span>
-                            <span className="text-sm font-black text-sage-dark">7일째</span>
+                            <span className="text-sm font-black text-sage-dark">{streak}일째</span>
                         </div>
                     </div>
                 </div>

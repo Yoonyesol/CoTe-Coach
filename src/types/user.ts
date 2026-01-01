@@ -109,4 +109,5 @@ export interface UserState {
     // Helper to force recalculation
     refreshRating: () => Promise<void>;
     refreshRecommendations: () => Promise<void>;
+    getStreak: () => number;
 }

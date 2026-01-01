@@ -882,6 +882,61 @@ export const useUserStore = create<UserState>()(
                 return 0;
             },
 
+            getStreak: () => {
+                const logs = get().studyLogs;
+                const goals = get().studyGoals;
+                const fallback = get().recommendationSettings.dailyTargetFallback;
+
+                const getLocalDate = (date: Date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                const checkAchievement = (date: Date) => {
+                    const dateStr = getLocalDate(date);
+                    const solved = logs.filter(log => {
+                        const logDate = new Date(log.completedAt);
+                        return getLocalDate(logDate) === dateStr && (log.stage === 0 || !log.stage);
+                    }).length;
+
+                    const goal = goals.find(g => dateStr >= g.startDate && dateStr <= g.endDate)?.dailyTarget ?? fallback;
+                    return solved >= goal;
+                };
+
+                let streak = 0;
+                const today = new Date();
+
+                // If today is achieved, start from today
+                if (checkAchievement(today)) {
+                    streak = 1;
+                    const d = new Date(today);
+                    while (true) {
+                        d.setDate(d.getDate() - 1);
+                        if (checkAchievement(d)) streak++;
+                        else break;
+                        if (streak > 365) break; // Safety break
+                    }
+                } else {
+                    // Check if streak is alive at yesterday
+                    const yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    if (checkAchievement(yesterday)) {
+                        streak = 1;
+                        const d = new Date(yesterday);
+                        while (true) {
+                            d.setDate(d.getDate() - 1);
+                            if (checkAchievement(d)) streak++;
+                            else break;
+                            if (streak > 365) break;
+                        }
+                    }
+                }
+
+                return streak;
+            },
+
             buyItem: (item) => {
                 if (get().points < item.price || get().inventory.includes(item.id)) return false;
                 set(state => ({ points: state.points - item.price, inventory: [...state.inventory, item.id] }));

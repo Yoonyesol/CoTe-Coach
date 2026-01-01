@@ -38,6 +38,7 @@ export interface DailyPlannerProps {
     solvedCount: number;
     goalCount: number;
     daysRemaining: number;
+    streak: number;
 }
 
 export interface DailyHistoryProps {
