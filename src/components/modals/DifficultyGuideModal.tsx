@@ -14,7 +14,7 @@ const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onC
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-base-900/40 backdrop-blur-md"
+                        className="absolute inset-0 bg-base-900/40 backdrop-blur-md cursor-pointer"
                     />
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9, y: 30 }}

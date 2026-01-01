@@ -33,7 +33,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-base-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="absolute inset-0" onClick={onClose} />
+            <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -92,7 +92,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                     key={level}
                                     onClick={() => setLocalSettings({ ...localSettings, difficulty: level })}
                                     className={clsx(
-                                        "py-2.5 rounded-xl text-[11px] font-black transition-all",
+                                        "py-2.5 rounded-xl text-[11px] font-black transition-all cursor-pointer",
                                         localSettings.difficulty === level
                                             ? "bg-white text-base-900 shadow-sm"
                                             : "text-base-400 hover:text-base-600"
@@ -141,7 +141,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                             }
                                         }}
                                         className={clsx(
-                                            "px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-1.5",
+                                            "px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-1.5 cursor-pointer",
                                             isSelected
                                                 ? "bg-misty/10 border-misty text-misty-dark"
                                                 : "bg-white border-base-100 text-base-400 hover:border-base-200"
@@ -181,7 +181,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                             }
                                         }}
                                         className={clsx(
-                                            "px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-2",
+                                            "px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-2 cursor-pointer",
                                             isSelected
                                                 ? "bg-base-900 border-base-900 text-white"
                                                 : "bg-white border-base-100 border-2 text-base-400 hover:border-base-200"

@@ -111,7 +111,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-base-900/60 backdrop-blur-sm animate-in fade-in duration-200">
             {/* Click backdrop to close */}
-            <div className="absolute inset-0" onClick={onClose} />
+            <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
             <div className="glass-card w-full max-w-md bg-white border-none shadow-2xl animate-in zoom-in-95 duration-200 relative z-10">
                 <div className="flex justify-between items-center p-6 border-b border-base-100">

@@ -30,7 +30,7 @@ const DailyGoalSettingsModal: React.FC<DailyGoalSettingsModalProps> = ({ isOpen,
 
     return (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-base-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="absolute inset-0" onClick={onClose} />
+            <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
 
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}

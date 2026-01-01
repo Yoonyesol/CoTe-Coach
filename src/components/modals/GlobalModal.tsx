@@ -47,7 +47,7 @@ const GlobalModal: React.FC = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={handleCancel}
-                        className="absolute inset-0 bg-base-900/40 backdrop-blur-[2px]"
+                        className="absolute inset-0 bg-base-900/40 backdrop-blur-[2px] cursor-pointer"
                     />
 
                     {/* Modal Content */}

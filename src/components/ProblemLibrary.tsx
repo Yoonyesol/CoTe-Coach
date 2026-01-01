@@ -382,7 +382,7 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                     <button
                         onClick={() => handlePageChange(libraryPage - 1)}
                         disabled={libraryPage === 1}
-                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all"
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all cursor-pointer"
                     >
                         Previous
                     </button>
@@ -394,7 +394,7 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                     <button
                         onClick={() => handlePageChange(libraryPage + 1)}
                         disabled={libraryPage === totalPages}
-                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all"
+                        className="px-4 py-2 bg-white border border-base-200 rounded-xl text-xs font-black disabled:opacity-30 hover:bg-base-50 transition-all cursor-pointer"
                     >
                         Next
                     </button>

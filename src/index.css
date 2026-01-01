@@ -45,6 +45,11 @@
   .dark body {
     @apply bg-base-900 text-base-100;
   }
+  button,
+  a,
+  [role="button"] {
+    cursor: pointer;
+  }
 }
 
 @layer components {

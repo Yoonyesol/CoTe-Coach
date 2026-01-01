@@ -247,14 +247,15 @@ function App() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setIsDailyGoalModalOpen(true)}
-                      className="flex items-center gap-2 px-4 py-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm font-sans text-sm"
+                      className="flex items-center gap-2 px-4 py-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm font-sans text-sm cursor-pointer"
+                      title="클릭하여 목표 변경"
                     >
                       <Target className="w-4 h-4 text-misty-dark" />
                       하루 목표
                     </button>
                     <button
                       onClick={() => setIsAddModalOpen(true)}
-                      className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans"
+                      className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans cursor-pointer"
                     >
                       <Plus className="w-5 h-5" />
                       문제 추가
