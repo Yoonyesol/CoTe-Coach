@@ -27,9 +27,10 @@ const PLATFORM_ICONS: Record<string, string> = {
 interface LearningJournalProps {
     onLogClick?: (log: StudyLog) => void;
     onGoalClick?: () => void;
+    onReviewPlanClick?: (plan: any) => void;
 }
 
-const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalClick }) => {
+const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalClick, onReviewPlanClick }) => {
     const {
         dailyTasks,
         studyLogs,
@@ -397,14 +398,18 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalCli
                             </h4>
                             <div className="space-y-2">
                                 {dayReviews.map(plan => (
-                                    <div key={plan.id} className="p-4 bg-lavender-light/10 rounded-2xl border border-lavender/10 flex gap-4 items-center shadow-sm">
+                                    <div
+                                        key={plan.id}
+                                        onClick={() => onReviewPlanClick?.(plan)}
+                                        className="p-4 bg-lavender-light/10 rounded-2xl border border-lavender/10 flex gap-4 items-center shadow-sm cursor-pointer hover:bg-lavender-light/20 hover:border-lavender/30 transition-all active:scale-[0.98]"
+                                    >
                                         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shrink-0 border border-lavender/10 text-lg">
                                             {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded uppercase">
-                                                    {plan.currentStage + 1}회차 복습
+                                                    {plan.currentStage === 0 ? '복습 내역 없음' : plan.currentStage === 1 ? '기본 풀이 완료' : `${plan.currentStage - 1}회차 복습`}
                                                 </span>
                                             </div>
                                             <p className="text-sm font-black text-base-700 leading-tight mt-1">{plan.problemTitle}</p>
