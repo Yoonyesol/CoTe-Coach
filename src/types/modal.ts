@@ -46,4 +46,11 @@ export interface ReviewModalProps extends CommonModalProps {
     };
 }
 
+export interface ReviewDetailModalProps extends CommonModalProps {
+    plan: any; // ReviewPlan type
+    onStartReview: (plan: any) => void;
+    onQuickLog: (plan: any) => void;
+    onViewFullDetail: (log: StudyLog) => void;
+}
+
 export interface RecommendationSettingsModalProps extends CommonModalProps { }

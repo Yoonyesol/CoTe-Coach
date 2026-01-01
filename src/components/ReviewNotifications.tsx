@@ -5,11 +5,11 @@ import { Bell, ArrowRight, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface ReviewNotificationsProps {
-    onReviewClick: (problem: { title: string, platform: string, difficulty: string }) => void;
+    onPlanClick: (plan: any) => void;
 }
 
-const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onReviewClick }) => {
-    const { reviewPlans } = useUserStore();
+const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }) => {
+    const { reviewPlans, timer } = useUserStore();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -47,44 +47,49 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onReviewClick
                 <div className="h-full max-h-[400px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
                     <AnimatePresence mode="popLayout">
                         {dueReviews.length > 0 ? (
-                            dueReviews.map((plan, index) => (
-                                <motion.div
-                                    key={plan.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, scale: 0.95 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    className="bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-white/40 flex items-center justify-between group/item hover:bg-white hover:border-lavender/30 hover:shadow-md transition-all"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-lg flex-shrink-0 animate-in fade-in zoom-in">
-                                            {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <div className="flex items-center gap-2 mb-0.5">
-                                                <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded-md uppercase">
-                                                    {plan.currentStage + 1}회차
-                                                </span>
-                                                <span className="text-[9px] font-bold text-base-400 truncate">{plan.platform} • {plan.difficulty}</span>
-                                            </div>
-                                            <h3 className="font-black text-base-800 text-sm truncate max-w-[150px] group-hover/item:text-lavender-dark transition-colors">
-                                                {plan.problemTitle}
-                                            </h3>
-                                        </div>
-                                    </div>
-
-                                    <button
-                                        onClick={() => onReviewClick({
-                                            title: plan.problemTitle,
-                                            platform: plan.platform,
-                                            difficulty: plan.difficulty
-                                        })}
-                                        className="p-2.5 bg-white text-lavender-dark rounded-xl shadow-sm hover:bg-lavender hover:text-white transition-all active:scale-90 border border-lavender/10"
+                            dueReviews.map((plan, index) => {
+                                const isTiming = timer.currentProblemId === plan.problemTitle && timer.isRunning;
+                                return (
+                                    <motion.div
+                                        key={plan.id}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        onClick={() => onPlanClick(plan)}
+                                        className={clsx(
+                                            "p-4 rounded-2xl border flex items-center justify-between group/item transition-all cursor-pointer",
+                                            isTiming
+                                                ? "bg-lavender-light/30 border-lavender shadow-md ring-1 ring-lavender/20"
+                                                : "bg-white/50 backdrop-blur-sm border-white/40 hover:bg-white hover:border-lavender/30 hover:shadow-md"
+                                        )}
                                     >
-                                        <ArrowRight className="w-4 h-4" />
-                                    </button>
-                                </motion.div>
-                            ))
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-lg flex-shrink-0 animate-in fade-in zoom-in">
+                                                {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2 mb-0.5">
+                                                    <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded-md uppercase">
+                                                        {plan.currentStage + 1}회차
+                                                    </span>
+                                                    <span className="text-[9px] font-bold text-base-400 truncate">{plan.platform} • {plan.difficulty}</span>
+                                                    {isTiming && (
+                                                        <span className="flex h-1.5 w-1.5 rounded-full bg-coral animate-ping" />
+                                                    )}
+                                                </div>
+                                                <h3 className="font-black text-base-800 text-sm truncate max-w-[200px] group-hover/item:text-lavender-dark transition-colors">
+                                                    {plan.problemTitle}
+                                                </h3>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-2.5 bg-white text-base-300 group-hover/item:text-lavender-dark group-hover/item:bg-lavender-light/50 rounded-xl transition-all">
+                                            <ArrowRight className="w-4 h-4" />
+                                        </div>
+                                    </motion.div>
+                                );
+                            })
                         ) : (
                             <motion.div
                                 initial={{ opacity: 0 }}

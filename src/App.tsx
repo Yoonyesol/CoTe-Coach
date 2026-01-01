@@ -11,6 +11,7 @@ import AccountSettingsModal from './components/modals/AccountSettingsModal'
 
 import TierGuideModal from './components/modals/TierGuideModal'
 import ReviewModal from './components/modals/ReviewModal'
+import ReviewDetailModal from './components/modals/ReviewDetailModal'
 import Stopwatch from './components/Stopwatch'
 import LandingPage from './components/LandingPage'
 import LearningJournal from './components/LearningJournal'
@@ -23,6 +24,7 @@ import GlobalModal from './components/modals/GlobalModal'
 import GoalBanner from './components/GoalBanner'
 import GoalModal from './components/modals/GoalModal'
 import { useUserStore } from './store/useUserStore'
+import { useModalStore } from './store/useModalStore'
 import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
@@ -47,9 +49,12 @@ function App() {
     refreshRecommendations,
     dailyTasks,
     stopTimer,
+    timer,
+    startTimer,
     fetchGoals,
     getActiveGoal
   } = useUserStore();
+  const { showAlert } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
   const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -109,7 +114,9 @@ function App() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
+  const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>(() => {
     if (typeof window === 'undefined') return 'HOME';
     const params = new URLSearchParams(window.location.search);
@@ -152,6 +159,40 @@ function App() {
   const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
     setSelectedProblem(problem);
     setIsReviewModalOpen(true);
+  };
+
+  const handleReviewDetailOpen = (plan: any) => {
+    setSelectedReviewPlan(plan);
+    setIsReviewDetailModalOpen(true);
+  };
+
+  const handleStartReview = (plan: any) => {
+    if (timer.currentProblemId === plan.problemTitle && timer.isRunning) {
+      stopTimer();
+    } else {
+      if (timer.isRunning && timer.currentProblemId !== plan.problemTitle) {
+        showAlert(
+          "타이머 중복",
+          "이미 다른 문제를 풀이 중입니다. 현재 진행 중인 타이머를 먼저 중단해주세요!"
+        );
+        return;
+      }
+      startTimer(plan.problemTitle);
+    }
+    setIsReviewDetailModalOpen(false);
+  };
+
+  const handleQuickLog = (plan: any) => {
+    // If this problem was being timed, stop it first
+    if (timer.currentProblemId === plan.problemTitle && timer.isRunning) {
+      stopTimer();
+    }
+    setIsReviewDetailModalOpen(false);
+    handleReviewOpen({
+      title: plan.problemTitle,
+      platform: plan.platform,
+      difficulty: plan.difficulty
+    });
   };
 
   if (isAuthLoading) {
@@ -261,7 +302,7 @@ function App() {
                 )}
 
                 {/* Review Notifications Section */}
-                <ReviewNotifications onReviewClick={handleReviewOpen} />
+                <ReviewNotifications onPlanClick={handleReviewDetailOpen} />
               </div>
 
               {/* Recommendation Section */}
@@ -432,6 +473,18 @@ function App() {
       <RecommendationSettingsModal
         isOpen={isRecoModalOpen}
         onClose={() => setIsRecoModalOpen(false)}
+      />
+
+      <ReviewDetailModal
+        isOpen={isReviewDetailModalOpen}
+        onClose={() => setIsReviewDetailModalOpen(false)}
+        plan={selectedReviewPlan}
+        onStartReview={handleStartReview}
+        onQuickLog={handleQuickLog}
+        onViewFullDetail={(log) => {
+          setIsReviewDetailModalOpen(false);
+          setEditingLog(log);
+        }}
       />
 
       <GlobalModal />
