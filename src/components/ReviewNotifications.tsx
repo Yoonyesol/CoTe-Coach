@@ -1,7 +1,7 @@
 import React from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, ArrowRight, Trophy } from 'lucide-react';
+import { Bell, ArrowRight, Trophy, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface ReviewNotificationsProps {
@@ -18,6 +18,13 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
         const nextReviewDate = new Date(plan.nextReviewAt);
         nextReviewDate.setHours(0, 0, 0, 0);
         return nextReviewDate <= today;
+    });
+
+    const completedToday = reviewPlans.filter(plan => {
+        if (!plan.lastCompletedAt) return false;
+        const lastDate = new Date(plan.lastCompletedAt);
+        lastDate.setHours(0, 0, 0, 0);
+        return lastDate.getTime() === today.getTime() && (plan.status === 'COMPLETED' || (plan.nextReviewAt && new Date(plan.nextReviewAt) > today));
     });
 
     return (
@@ -118,6 +125,40 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                     <p className="text-[10px] font-bold text-sage-dark">
                         누적 {reviewPlans.filter(p => p.status === 'COMPLETED').length}개 정복 완료
                     </p>
+                </div>
+            )}
+
+            {/* Completed Today Section */}
+            {completedToday.length > 0 && (
+                <div className="mt-6 pt-6 border-t border-base-100 relative z-10">
+                    <div className="flex items-center gap-2 mb-4">
+                        <CheckCircle2 className="w-4 h-4 text-base-300" />
+                        <h3 className="text-[10px] font-black text-base-300 uppercase tracking-widest">Completed Today</h3>
+                    </div>
+                    <div className="space-y-3 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                        {completedToday.map((plan) => (
+                            <div
+                                key={plan.id}
+                                onClick={() => onPlanClick(plan)}
+                                className="p-3 bg-base-50/50 border border-base-100 rounded-xl flex items-center justify-between group/item cursor-pointer hover:bg-base-100 transition-all opacity-60"
+                            >
+                                <div className="flex items-center gap-3 min-w-0">
+                                    <span className="text-sm">✅</span>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[8px] font-black px-1 py-0.5 bg-base-200 text-base-400 rounded uppercase">
+                                                {plan.currentStage}차 완료
+                                            </span>
+                                            <h4 className="text-xs font-bold text-base-400 truncate max-w-[150px]">
+                                                {plan.problemTitle}
+                                            </h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ArrowRight className="w-3 h-3 text-base-200 group-hover/item:text-base-400 transition-colors" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
         </section>

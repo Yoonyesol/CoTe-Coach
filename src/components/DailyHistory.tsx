@@ -108,6 +108,11 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-base-100 text-base-500`}>
                                             {log.platform}
                                         </span>
+                                        {log.stage > 0 && (
+                                            <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-lavender/10 text-lavender-dark">
+                                                {log.stage}차 복습
+                                            </span>
+                                        )}
                                     </div>
                                     <h4 className="text-base font-black text-base-900 group-hover:text-misty-dark transition-colors">{log.problemId}</h4>
                                 </div>
