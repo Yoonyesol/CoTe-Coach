@@ -11,8 +11,11 @@ import { StudyLog } from '../../types/study';
 import { StudyLogDetailModalProps } from '../../types/modal';
 import LogForm from '../common/LogForm';
 
+import { useModalStore } from '../../store/useModalStore';
+
 const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialLog, isOpen, onClose }) => {
     const { updateStudyLog, deleteStudyLog, studyLogs } = useUserStore();
+    const { showConfirm, showAlert } = useModalStore();
 
     // CURRENT VIEW STATE
     const [currentLog, setCurrentLog] = useState<StudyLog>(initialLog);
@@ -115,9 +118,6 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
             isFinished: data.isFinished
         });
 
-        // Optimistic UI Update (or re-fetch logic)
-        // Since we update the store, and we select from store, it should auto-update eventually.
-        // But for smoother transition, update local state:
         const updatedLog = {
             ...currentLog,
             reflection: data.reflection,
@@ -132,17 +132,23 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
         setIsEditing(false);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm('정말 이 기록을 삭제하시겠습니까? 관련 XP나 포인트는 회수되지 않습니다.')) {
-            await deleteStudyLog(currentLog.id);
-            if (historyLogs.length > 1) {
-                // If there are other logs, switch to the next one
-                const nextLog = historyLogs.find(l => l.id !== currentLog.id) || historyLogs[0];
-                setCurrentLog(nextLog);
-            } else {
-                onClose();
+    const handleDelete = () => {
+        showConfirm(
+            '기록 삭제',
+            '정말 이 기록을 삭제하시겠습니까? 삭제 시 복습 진행도가 이전 상태로 되돌아갈 수 있습니다.',
+            async () => {
+                await deleteStudyLog(currentLog.id);
+                showAlert('삭제 완료', '학습 기록이 삭제되었습니다.');
+
+                if (historyLogs.length > 1) {
+                    const remainingHistory = historyLogs.filter(l => l.id !== currentLog.id);
+                    const nextLog = remainingHistory[remainingHistory.length - 1]; // Use last remaining
+                    setCurrentLog(nextLog);
+                } else {
+                    onClose();
+                }
             }
-        }
+        );
     };
 
     if (!isOpen) return null;

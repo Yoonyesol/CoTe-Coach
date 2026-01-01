@@ -468,10 +468,66 @@ export const useUserStore = create<UserState>()(
             },
 
             deleteStudyLog: async (logId) => {
-                const { error } = await supabase.from('study_logs').delete().eq('id', logId);
-                if (!error) {
-                    set(state => ({ studyLogs: state.studyLogs.filter(l => l.id !== logId) }));
+                const state = get();
+                const logToDelete = state.studyLogs.find(l => l.id === logId);
+                if (!logToDelete) return;
+
+                const { error: deleteError } = await supabase.from('study_logs').delete().eq('id', logId);
+                if (deleteError) {
+                    console.error('Failed to delete study log:', deleteError);
+                    return;
                 }
+
+                // Local filter
+                const remainingLogs = state.studyLogs.filter(l => l.id !== logId);
+                const problemLogs = remainingLogs.filter(l => l.problemId === logToDelete.problemId);
+
+                if (problemLogs.length > 0) {
+                    // Recalculate based on the latest remaining log
+                    const latestLog = problemLogs.sort((a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime())[0];
+
+                    const intervals = [1, 3, 7, 15, 30];
+                    const nextStage = latestLog.stage + 1;
+                    const nextInterval = intervals[nextStage] || 30;
+                    const nextReviewAt = latestLog.result === 'SUCCESS'
+                        ? new Date(new Date(latestLog.completedAt).getTime() + 1000 * 60 * 60 * 24 * nextInterval).toISOString()
+                        : new Date(new Date(latestLog.completedAt).getTime() + 1000 * 60 * 60 * 24 * 1).toISOString();
+
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.user) {
+                        await supabase.from('review_plans').update({
+                            current_stage: latestLog.stage, // Status represents completion of this stage
+                            next_review_at: nextReviewAt,
+                            status: 'ACTIVE', // Fallback to active when any completion log is removed
+                            last_completed_at: latestLog.completedAt
+                        }).eq('user_id', session.user.id).eq('problem_id', logToDelete.problemId);
+                    }
+
+                    set(s => ({
+                        studyLogs: remainingLogs,
+                        reviewPlans: s.reviewPlans.map(p => p.problemId === logToDelete.problemId ? {
+                            ...p,
+                            currentStage: latestLog.stage,
+                            nextReviewAt,
+                            status: 'ACTIVE',
+                            lastCompletedAt: latestLog.completedAt
+                        } : p)
+                    }));
+                } else {
+                    // No logs left -> Remove review plan
+                    const { data: { session } } = await supabase.auth.getSession();
+                    if (session?.user) {
+                        await supabase.from('review_plans').delete()
+                            .eq('user_id', session.user.id)
+                            .eq('problem_id', logToDelete.problemId);
+                    }
+                    set(s => ({
+                        studyLogs: remainingLogs,
+                        reviewPlans: s.reviewPlans.filter(p => p.problemId !== logToDelete.problemId)
+                    }));
+                }
+
+                await get().refreshRating();
             },
 
             // Pagination Logic
@@ -568,14 +624,12 @@ export const useUserStore = create<UserState>()(
                 // Ebbinghaus Curve Intervals (days): 1 -> 3 -> 7 -> 15 -> 30
                 const intervals = [1, 3, 7, 15, 30];
                 let nextStage = 0;
-                let isEarlyReview = false;
 
                 if (!existingPlan) {
                     // 1. New Problem
                     nextStage = 0;
                 } else if (logData.isFinished) {
                     // 2-a. Manual Finish (Graduation)
-                    isEarlyReview = false;
                     nextStage = existingPlan ? existingPlan.currentStage : 0;
                     // Will force status COMPLETED later
                 } else if (logData.result === 'FAIL') {
@@ -589,7 +643,6 @@ export const useUserStore = create<UserState>()(
 
                     // Threshold: If more than 12 hours remains until review, it's "Early"
                     if (diffHours > 12) {
-                        isEarlyReview = true;
                         nextStage = existingPlan.currentStage; // Maintain Stage
                     } else {
                         // Regular Review (Due or Overdue)
@@ -623,7 +676,7 @@ export const useUserStore = create<UserState>()(
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
                     // 1. Save Study Log
-                    const { error: logError } = await supabase.from('study_logs').insert({
+                    const { data: dbLog, error: logError } = await supabase.from('study_logs').insert({
                         user_id: session.user.id,
                         problem_id: newLog.problemId,
                         problem_title: newLog.problemTitle,
@@ -638,12 +691,15 @@ export const useUserStore = create<UserState>()(
                         concepts: newLog.concepts,
                         stage: newLog.stage,
                         rating_contribution: newLog.ratingContribution
-                    });
+                    }).select().single();
 
-                    if (logError) {
+                    if (logError || !dbLog) {
                         console.error('Failed to save study log:', logError);
-                        throw new Error(logError.message || '학습 생성에 실패했습니다.');
+                        throw new Error(logError?.message || '학습 생성에 실패했습니다.');
                     }
+
+                    // Update local log with real DB ID
+                    newLog.id = dbLog.id;
 
                     // 2. Save/Update Review Plan
                     await supabase.from('review_plans').upsert({
