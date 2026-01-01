@@ -25,10 +25,8 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
 
     // Stage Label Logic
     const stageLabel = plan.currentStage === 0
-        ? "복습 내역 없음"
-        : plan.currentStage === 1
-            ? "기본 풀이 완료"
-            : `${plan.currentStage - 1}회차 복습 완료`;
+        ? "기본 풀이 완료"
+        : `${plan.currentStage}차 복습 완료`;
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-base-900/60 backdrop-blur-sm animate-in fade-in duration-300">

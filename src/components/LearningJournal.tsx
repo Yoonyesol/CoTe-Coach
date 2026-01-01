@@ -409,7 +409,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalCli
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded uppercase">
-                                                    {plan.currentStage === 0 ? '복습 내역 없음' : plan.currentStage === 1 ? '기본 풀이 완료' : `${plan.currentStage - 1}회차 복습`}
+                                                    {plan.currentStage + 1}회차 복습
                                                 </span>
                                             </div>
                                             <p className="text-sm font-black text-base-700 leading-tight mt-1">{plan.problemTitle}</p>

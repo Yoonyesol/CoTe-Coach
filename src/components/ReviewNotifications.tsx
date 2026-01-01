@@ -147,7 +147,7 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className="text-[8px] font-black px-1 py-0.5 bg-base-200 text-base-400 rounded uppercase">
-                                                {plan.currentStage}차 완료
+                                                {plan.currentStage === 0 ? '기본 완료' : `${plan.currentStage}차 완료`}
                                             </span>
                                             <h4 className="text-xs font-bold text-base-400 truncate max-w-[150px]">
                                                 {plan.problemTitle}
