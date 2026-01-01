@@ -386,7 +386,7 @@ function App() {
               <DailyHistory onEditLog={setEditingLog} />
             </>
           ) : activeTab === 'JOURNAL' ? (
-            <LearningJournal onLogClick={setEditingLog} />
+            <LearningJournal onLogClick={setEditingLog} onGoalClick={() => setIsGoalModalOpen(true)} />
           ) : activeTab === 'LIBRARY' ? (
             <ProblemLibrary onProblemClick={setEditingLog} />
           ) : (

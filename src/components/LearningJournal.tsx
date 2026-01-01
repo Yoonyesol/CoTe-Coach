@@ -26,16 +26,18 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 interface LearningJournalProps {
     onLogClick?: (log: StudyLog) => void;
+    onGoalClick?: () => void;
 }
 
-const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
+const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalClick }) => {
     const {
         dailyTasks,
         studyLogs,
         addDailyTask,
         toggleTaskStatus,
         deleteDailyTask,
-        reviewPlans
+        reviewPlans,
+        studyGoals
     } = useUserStore();
 
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -64,7 +66,7 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                 month: month - 1,
                 year,
                 isCurrentMonth: false,
-                dateStr: getLocalDateString(new Date(year, month - 1, prevMonthLastDay - i + 1))
+                dateStr: getLocalDateString(new Date(year, month - 1, prevMonthLastDay - i))
             });
         }
         // Current month
@@ -155,9 +157,18 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                             ))}
                             {calendarDays.map((dayObj, idx) => {
                                 const isSelected = dayObj.dateStr === selectedDate;
-                                const hasLogs = studyLogs.some(l => l.completedAt.startsWith(dayObj.dateStr));
+                                const hasLogs = studyLogs.some(l => {
+                                    const logDate = getLocalDateString(new Date(l.completedAt));
+                                    return logDate === dayObj.dateStr;
+                                });
                                 const hasPendingTasks = dailyTasks.some(t => t.targetDate === dayObj.dateStr && t.status === 'pending');
                                 const hasReviews = reviewPlans.some(p => p.nextReviewAt && p.nextReviewAt.startsWith(dayObj.dateStr) && p.status === 'ACTIVE');
+
+                                // Check if this day is part of an active goal period
+                                const activeGoal = studyGoals.find(g => g.status === 'ACTIVE');
+                                const isInGoalPeriod = activeGoal && dayObj.dateStr >= activeGoal.startDate && dayObj.dateStr <= activeGoal.endDate;
+                                const isGoalStart = activeGoal && dayObj.dateStr === activeGoal.startDate;
+                                const isGoalEnd = activeGoal && dayObj.dateStr === activeGoal.endDate;
 
                                 return (
                                     <button
@@ -170,11 +181,42 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                                         )}
                                     >
                                         <span className={clsx(
-                                            "text-sm font-black transition-colors",
+                                            "absolute top-2 left-3 text-xs font-black transition-colors",
                                             isSelected ? "text-misty-dark" : "text-base-400 group-hover:text-base-900"
                                         )}>
                                             {dayObj.day}
                                         </span>
+
+                                        {/* Goal Period Indicator Bar - Samsung Calendar Style */}
+                                        {isInGoalPeriod && (() => {
+                                            const weekIndex = Math.floor(idx / 7);
+                                            const weekDays = calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7);
+                                            const goalDaysInWeek = weekDays.filter(d =>
+                                                activeGoal && d.dateStr >= activeGoal.startDate && d.dateStr <= activeGoal.endDate
+                                            );
+
+                                            const middleDayIndex = Math.floor((goalDaysInWeek.length - 1) / 2);
+                                            const isMiddleDay = goalDaysInWeek[middleDayIndex]?.dateStr === dayObj.dateStr;
+
+                                            return (
+                                                <div
+                                                    className={clsx(
+                                                        "absolute bottom-8 h-6 bg-coral-light border-y border-coral/10 flex items-center justify-center z-10",
+                                                        isGoalStart && isGoalEnd ? "left-1 right-1 rounded-md" :
+                                                            isGoalStart ? "left-1 -right-1 rounded-l-md" :
+                                                                isGoalEnd ? "-left-1 right-1 rounded-r-md" :
+                                                                    "-left-1 -right-1"
+                                                    )}
+                                                    title={activeGoal?.name}
+                                                >
+                                                    {isMiddleDay && (
+                                                        <span className="text-[11px] font-black text-base-900 px-1 whitespace-nowrap z-20 pointer-events-none">
+                                                            {activeGoal?.name}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })()}
 
                                         {/* Status Indicators */}
                                         <div className="absolute bottom-2 right-2 flex gap-1">
@@ -204,6 +246,10 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                             <div className="w-3 h-3 rounded-full bg-lavender" />
                             <span className="text-xs font-black text-base-600">복습 예정일</span>
                         </div>
+                        <div className="glass-card p-4 bg-white shadow-md flex items-center gap-3 border-none">
+                            <div className="w-6 h-2 rounded-full bg-gradient-to-r from-coral to-misty" />
+                            <span className="text-xs font-black text-base-600">목표 기간</span>
+                        </div>
                     </div>
                 </div>
 
@@ -216,6 +262,54 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick }) => {
                             </div>
                             <h3 className="text-2xl font-black text-base-900 font-sans">{new Date(selectedDate).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}</h3>
                         </div>
+
+                        {/* Active Goal Info (if selected date is in goal period) */}
+                        {(() => {
+                            const activeGoal = studyGoals.find(g => g.status === 'ACTIVE');
+                            const isInGoalPeriod = activeGoal && selectedDate >= activeGoal.startDate && selectedDate <= activeGoal.endDate;
+
+                            if (!isInGoalPeriod || !activeGoal) return null;
+
+                            const endDate = new Date(activeGoal.endDate);
+                            const selected = new Date(selectedDate);
+                            const diffDays = Math.ceil((endDate.getTime() - selected.getTime()) / (1000 * 60 * 60 * 24));
+
+                            return (
+                                <div
+                                    onClick={onGoalClick}
+                                    className="mb-6 p-4 bg-gradient-to-r from-coral-light/20 to-misty-light/20 rounded-2xl border border-coral/10 cursor-pointer hover:shadow-md transition-all"
+                                >
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Target className="w-4 h-4 text-coral" />
+                                        <span className="text-xs font-black text-coral uppercase tracking-widest">현재 진행 중인 목표</span>
+                                    </div>
+                                    <h4 className="text-lg font-black text-base-800 mb-2">{activeGoal.name}</h4>
+                                    <div className="flex flex-wrap gap-2 text-xs font-bold text-base-500">
+                                        <span className="px-2 py-1 bg-white/50 rounded-lg">
+                                            📅 {activeGoal.startDate} ~ {activeGoal.endDate}
+                                        </span>
+                                        <span className="px-2 py-1 bg-white/50 rounded-lg">
+                                            🎯 하루 {activeGoal.dailyTarget}문제
+                                        </span>
+                                        <span className={clsx(
+                                            "px-2 py-1 rounded-lg",
+                                            diffDays <= 7 ? "bg-coral/10 text-coral" : "bg-misty-light text-misty-dark"
+                                        )}>
+                                            {diffDays >= 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`}
+                                        </span>
+                                    </div>
+                                    {activeGoal.focusTags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-3">
+                                            {activeGoal.focusTags.map(tag => (
+                                                <span key={tag} className="px-2 py-0.5 bg-misty/10 text-misty-dark text-[10px] font-black rounded">
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })()}
 
                         {/* Planned Tasks (TODO) */}
                         <div className="space-y-4 mb-8">
