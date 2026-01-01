@@ -19,10 +19,11 @@ export const useUserStore = create<UserState>()(
 
             recommendationSettings: {
                 difficulty: 'NORMAL',
-                seedOffset: 0,
                 focusAlgorithms: [],
+                seedOffset: 0,
                 platforms: ['BOJ'],
-                dailyProblemCount: 3,
+                recommendationCount: 5,
+                dailyTargetFallback: 3
             },
             timer: {
                 isRunning: false,
@@ -62,13 +63,20 @@ export const useUserStore = create<UserState>()(
 
 
 
-            setRecommendationSettings: (settings: Partial<RecommendationSettings>) => {
+            setRecommendationSettings: async (settings: Partial<RecommendationSettings>) => {
                 set((state) => ({
                     recommendationSettings: { ...state.recommendationSettings, ...settings }
                 }));
-                supabase.auth.getUser().then(({ data: { user } }) => {
-                    if (user) get().saveProfile(user.id);
-                });
+
+                try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        await get().saveProfile(user.id);
+                        console.log('Profile settings saved to DB');
+                    }
+                } catch (err) {
+                    console.error('Failed to sync settings to DB:', err);
+                }
             },
 
             refreshRecommendations: async () => {
@@ -156,10 +164,13 @@ export const useUserStore = create<UserState>()(
                         bojHandle: profile.boj_handle || '',
                         bojRating: profile.boj_rating || 0,
                         level: profile.level || 1,
-                        xp: profile.xp || 0,
-                        tier: profile.tier || 'Iron 1',
+                        tier: profile.tier || 'Bronze 5',
                         points: profile.points || 0,
-                        recommendationSettings: profile.recommendation_settings || get().recommendationSettings,
+                        xp: profile.xp || 0,
+                        recommendationSettings: {
+                            ...get().recommendationSettings,
+                            ...(profile.recommendation_settings || {})
+                        },
                     });
                 }
 
@@ -835,7 +846,7 @@ export const useUserStore = create<UserState>()(
                 }).length;
 
                 const activeGoal = get().getActiveGoal();
-                const goalCount = activeGoal ? activeGoal.dailyTarget : get().recommendationSettings.dailyProblemCount;
+                const goalCount = activeGoal ? activeGoal.dailyTarget : get().recommendationSettings.dailyTargetFallback;
 
                 return { solved: solvedCount, goal: goalCount };
             },

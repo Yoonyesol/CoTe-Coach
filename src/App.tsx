@@ -23,12 +23,13 @@ import RecommendationSettingsModal from './components/modals/RecommendationSetti
 import GlobalModal from './components/modals/GlobalModal'
 import GoalBanner from './components/GoalBanner'
 import GoalModal from './components/modals/GoalModal'
+import DailyGoalSettingsModal from './components/modals/DailyGoalSettingsModal'
 import { useUserStore } from './store/useUserStore'
 import { useModalStore } from './store/useModalStore'
 import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
-import { Plus, Settings2, Loader2, RefreshCw } from 'lucide-react';
+import { Plus, Settings2, Loader2, RefreshCw, Target } from 'lucide-react';
 import { getLocalDateString } from './lib/dateUtils'
 import clsx from 'clsx';
 import {
@@ -117,6 +118,7 @@ function App() {
   const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
+  const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>(() => {
     if (typeof window === 'undefined') return 'HOME';
     const params = new URLSearchParams(window.location.search);
@@ -230,12 +232,26 @@ function App() {
                 <header className="flex justify-between items-center">
                   <div>
                     <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{user.email?.split('@')[0]}님!</span></h1>
-                    <p className="text-sm font-medium text-base-400 mt-1 font-sans">
-                      오늘의 목표인 <span className="text-base-800 font-bold">{dailyProgress.goal}문제</span> 중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}
-                    </p>
+                    <div className="text-sm font-medium text-base-400 mt-2 font-sans flex items-center gap-1.5 flex-wrap">
+                      <span>오늘의 목표인</span>
+                      <button
+                        onClick={() => setIsDailyGoalModalOpen(true)}
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-base-50 text-base-600 rounded-md font-sans font-black hover:bg-misty-dark hover:text-white transition-all cursor-pointer border border-base-100/50 group"
+                        title="클릭하여 목표 변경"
+                      >
+                        <span>{dailyProgress.goal}문제</span>
+                      </button>
+                      <span>중 {dailyProgress.solved}문제를 해결하셨어요! {dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}</span>
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIsDailyGoalModalOpen(true)}
+                      className="flex items-center gap-2 px-4 py-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm font-sans text-sm"
+                    >
+                      <Target className="w-4 h-4 text-misty-dark" />
+                      하루 목표
+                    </button>
                     <button
                       onClick={() => setIsAddModalOpen(true)}
                       className="flex items-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans"
@@ -280,7 +296,7 @@ function App() {
                       사용자님의 레벨에 맞춰 <span className="text-base-600 font-bold">워밍업부터 챌린지까지</span> 준비했어요!
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <button
                       onClick={() => setIsRecoModalOpen(true)}
                       className="px-4 py-2 bg-white border border-base-200 rounded-xl text-sm font-black text-base-600 hover:bg-base-50 transition-all active:scale-95 flex items-center gap-2 shadow-sm cursor-pointer group"
@@ -451,6 +467,11 @@ function App() {
           setIsReviewDetailModalOpen(false);
           setEditingLog(log);
         }}
+      />
+
+      <DailyGoalSettingsModal
+        isOpen={isDailyGoalModalOpen}
+        onClose={() => setIsDailyGoalModalOpen(false)}
       />
 
       <GlobalModal />

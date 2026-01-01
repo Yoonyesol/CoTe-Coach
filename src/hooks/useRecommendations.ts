@@ -34,7 +34,7 @@ export const useRecommendations = () => {
         queryFn: async () => {
             const recommendations = await getRecommendations(level, {
                 handle: bojHandle,
-                problemCount: goal,
+                problemCount: recommendationSettings.recommendationCount,
                 difficultyAdjustment: difficulty,
                 seedOffset: seedOffset,
                 focusAlgorithms: focusAlgorithms,

@@ -12,7 +12,8 @@ export interface RecommendationSettings {
     focusAlgorithms: string[];
     seedOffset: number;
     platforms: Platform[];
-    dailyProblemCount: number;
+    recommendationCount: number; // AI 추천 문제 개수
+    dailyTargetFallback: number; // 학습 목표 없을 때의 하루 권장 풀이량
 }
 
 export interface DailyTask {

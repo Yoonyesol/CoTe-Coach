@@ -52,30 +52,30 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                     </button>
                 </div>
 
-                <div className="p-6 space-y-8 overflow-y-auto max-h-[70vh]">
-                    {/* Daily Goal Problem Count */}
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">하루 목표 문제 수 (평상시)</label>
+                <div className="p-6 pt-2 space-y-6">
+                    {/* AI Recommendation Count */}
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">1일 추천 문제 개수</label>
                         <div className="flex items-center gap-4">
                             <input
                                 type="range"
                                 min="1"
                                 max="10"
-                                value={localSettings.dailyProblemCount || 3}
-                                onChange={(e) => setLocalSettings({ ...localSettings, dailyProblemCount: parseInt(e.target.value) })}
-                                className="flex-1 accent-misty-dark h-1.5 bg-base-100 rounded-lg appearance-none cursor-pointer"
+                                value={localSettings.recommendationCount || 5}
+                                onChange={(e) => setLocalSettings({ ...localSettings, recommendationCount: parseInt(e.target.value) })}
+                                className="flex-1 accent-lavender h-1.5 bg-base-100 rounded-lg appearance-none cursor-pointer"
                             />
                             <span className="text-sm font-black text-base-800 w-12 text-center bg-base-50 py-1 rounded-lg">
-                                {localSettings.dailyProblemCount || 3}개
+                                {localSettings.recommendationCount || 5}개
                             </span>
                         </div>
                         <p className="text-[10px] text-base-400 font-medium px-1 leading-relaxed">
-                            💡 별도의 학습 목표가 설정되지 않았을 때 적용되는 기본 권장량입니다.
+                            💡 추천 리스트에 노출될 오늘의 알고리즘 문항 개수입니다.
                         </p>
                     </div>
 
                     {/* Recommendation Difficulty */}
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 문제 난이도</label>
                             <button
@@ -110,7 +110,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                     </div>
 
                     {/* Focus Algorithms */}
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">집중 학습 알고리즘</label>
                             <span className="text-[10px] font-bold text-base-300 uppercase tracking-tight">
@@ -141,7 +141,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                             }
                                         }}
                                         className={clsx(
-                                            "px-3 py-2 rounded-xl text-[11px] font-bold transition-all border-2 flex items-center gap-1.5",
+                                            "px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-1.5",
                                             isSelected
                                                 ? "bg-misty/10 border-misty text-misty-dark"
                                                 : "bg-white border-base-100 text-base-400 hover:border-base-200"
@@ -156,8 +156,8 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                     </div>
 
                     {/* Preferred Platforms */}
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 대상 플랫폼</label>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 플랫폼</label>
                         <div className="flex flex-wrap gap-2">
                             {[
                                 { id: 'BOJ', name: '백준' },
@@ -181,10 +181,10 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                                             }
                                         }}
                                         className={clsx(
-                                            "px-4 py-2.5 rounded-xl text-[11px] font-bold transition-all border-2 flex items-center gap-2",
+                                            "px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-2",
                                             isSelected
                                                 ? "bg-base-900 border-base-900 text-white"
-                                                : "bg-white border-base-100 text-base-400 hover:border-base-200"
+                                                : "bg-white border-base-100 border-2 text-base-400 hover:border-base-200"
                                         )}
                                     >
                                         {isSelected && <Check className="w-3 h-3 text-white" />}
@@ -197,7 +197,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
 
                     <button
                         onClick={handleSave}
-                        className="w-full py-4 bg-base-900 text-white rounded-2xl font-black shadow-lg hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                        className="w-full py-4 bg-base-900 text-white rounded-2xl font-black shadow-lg hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <span>적용하기</span>
                         <Check className="w-5 h-5" />
