@@ -54,7 +54,7 @@ const StatsDashboard: React.FC = () => {
 
             const dayLogs = studyLogs.filter(log => {
                 const logDate = new Date(log.completedAt);
-                return getLocalDateString(logDate) === dateStr;
+                return getLocalDateString(logDate) === dateStr && (log.stage === 0 || !log.stage);
             });
             result.push({
                 date: label,

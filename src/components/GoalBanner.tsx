@@ -36,12 +36,12 @@ const GoalBanner: React.FC<GoalBannerProps> = ({ onOpenGoalModal }) => {
         // Count logs in goal period
         const logsInPeriod = studyLogs.filter(log => {
             const logDate = getLocalDateString(new Date(log.completedAt));
-            return logDate >= activeGoal.startDate && logDate <= activeGoal.endDate;
+            return logDate >= activeGoal.startDate && logDate <= activeGoal.endDate && (log.stage === 0 || !log.stage);
         });
 
         const todayLogs = studyLogs.filter(log => {
             const logDate = getLocalDateString(new Date(log.completedAt));
-            return logDate === today;
+            return logDate === today && (log.stage === 0 || !log.stage);
         });
 
         return {

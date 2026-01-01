@@ -862,7 +862,7 @@ export const useUserStore = create<UserState>()(
                 const today = getLocalDate(new Date());
                 const solvedCount = get().studyLogs.filter(log => {
                     const logDate = new Date(log.completedAt);
-                    return getLocalDate(logDate) === today;
+                    return getLocalDate(logDate) === today && (log.stage === 0 || !log.stage);
                 }).length;
 
                 const activeGoal = get().getActiveGoal();
