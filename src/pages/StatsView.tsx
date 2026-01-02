@@ -32,7 +32,7 @@ const StatsView: React.FC = () => {
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Tab Navigation */}
-            <div className="flex gap-2 p-1 bg-base-100/50 rounded-2xl w-fit self-center lg:self-start">
+            <div className="flex gap-1.5 sm:gap-2 p-1 bg-base-100/50 rounded-2xl w-full sm:w-fit self-center lg:self-start">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -41,14 +41,14 @@ const StatsView: React.FC = () => {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={clsx(
-                                "flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm transition-all duration-300 cursor-pointer",
+                                "flex items-center justify-center gap-2 px-3 sm:px-6 py-2.5 rounded-xl font-black text-sm transition-all duration-300 cursor-pointer flex-1 sm:flex-initial",
                                 isActive
                                     ? `bg-white shadow-lg ${tab.color} scale-105`
                                     : "text-base-400 hover:text-base-600 hover:bg-white/50"
                             )}
                         >
                             <Icon className={clsx("w-4 h-4", isActive ? tab.color : "text-base-300")} />
-                            {tab.label}
+                            <span className="hidden sm:inline">{tab.label}</span>
                         </button>
                     );
                 })}
