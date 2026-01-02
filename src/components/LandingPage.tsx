@@ -72,12 +72,15 @@ const LandingPage: React.FC = () => {
             if (!isLoginMode) {
                 setIsSignUpSuccess(true);
             }
-        } catch (err: unknown) {
-            if (err instanceof AuthError) {
-                setError(err.message);
-            } else {
-                setError(isLoginMode ? '로그인 중 오류가 발생했습니다.' : '회원가입 중 오류가 발생했습니다.');
+        } catch (err: any) {
+            let message = err?.message || (isLoginMode ? '로그인 중 오류가 발생했습니다.' : '회원가입 중 오류가 발생했습니다.');
+
+            // Translate specific auth errors to user-friendly messages
+            if (message === 'Invalid login credentials') {
+                message = '아이디와 비밀번호를 확인해 주세요.';
             }
+
+            setError(message);
         } finally {
             setIsLoading(false);
         }
@@ -240,7 +243,7 @@ const LandingPage: React.FC = () => {
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-coral hover:text-coral-dark transition-colors z-20"
                                         >
-                                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                                         </button>
                                     </div>
                                     <AnimatePresence>
@@ -279,7 +282,7 @@ const LandingPage: React.FC = () => {
                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-coral hover:text-coral-dark transition-colors z-20"
                                                 >
-                                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                                    {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                                                 </button>
                                             </div>
                                             {confirmError && (

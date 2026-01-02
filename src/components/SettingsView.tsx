@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
-import { User, Lock, Trash2, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { validatePassword } from '../lib/validation';
+import DeleteAccountModal from './modals/DeleteAccountModal';
 
 const SettingsView: React.FC = () => {
     const { nickname, setNickname } = useUserStore();
     const { verifyCurrentPassword, updatePassword } = useAuthStore();
-    const { showAlert, showConfirm } = useModalStore();
+    const { showAlert } = useModalStore();
 
     // 1. Nickname State
     const [nicknameInput, setNicknameInput] = useState(nickname || '');
@@ -32,6 +33,9 @@ const SettingsView: React.FC = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    // 3. Deletion State
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const handleChangePassword = async () => {
         // 1. Validate new password format
@@ -79,14 +83,7 @@ const SettingsView: React.FC = () => {
 
     // 3. Account Deletion
     const handleDeleteAccount = () => {
-        showConfirm(
-            "회원 탈퇴",
-            "정말로 탈퇴하시겠습니까? 모든 학습 기록과 포인트가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.",
-            () => {
-                // TODO: Implement actual delete logic
-                showAlert("준비 중", "회원 탈퇴 기능은 곧 업데이트될 예정입니다.");
-            }
-        );
+        setIsDeleteModalOpen(true);
     };
 
     return (
@@ -171,7 +168,7 @@ const SettingsView: React.FC = () => {
                                             onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
                                         >
-                                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            {showCurrentPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                                         </button>
                                     </div>
                                 </div>
@@ -192,7 +189,7 @@ const SettingsView: React.FC = () => {
                                             onClick={() => setShowNewPassword(!showNewPassword)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
                                         >
-                                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            {showNewPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                                         </button>
                                     </div>
                                     {newPassword && !validatePassword(newPassword) && (
@@ -216,7 +213,7 @@ const SettingsView: React.FC = () => {
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
                                         >
-                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            {showConfirmPassword ? <Eye size={18} /> : <EyeOff size={18} />}
                                         </button>
                                     </div>
                                     {confirmPassword && newPassword !== confirmPassword && (
@@ -236,30 +233,14 @@ const SettingsView: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* 3. Danger Zone */}
-                    <div className="bg-red-50/30 rounded-3xl p-8 shadow-sm border border-red-100/50">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
-                                <Trash2 size={20} />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-black text-red-600">Danger Zone</h3>
-                                <p className="text-xs text-red-400 font-medium">계정 삭제는 되돌릴 수 없습니다.</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-red-100">
-                            <div>
-                                <p className="text-sm font-bold text-base-800">계정 삭제</p>
-                                <p className="text-xs text-base-400">모든 데이터가 영구적으로 삭제됩니다.</p>
-                            </div>
-                            <button
-                                onClick={handleDeleteAccount}
-                                className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-xs font-black hover:bg-red-100 transition-colors cursor-pointer"
-                            >
-                                회원 탈퇴
-                            </button>
-                        </div>
+                    {/* 3. Account Deletion - Simple Link */}
+                    <div className="pt-4 border-t border-base-100">
+                        <button
+                            onClick={handleDeleteAccount}
+                            className="text-xs text-base-400 hover:text-red-500 underline underline-offset-2 transition-colors cursor-pointer"
+                        >
+                            회원 탈퇴
+                        </button>
                     </div>
                 </div>
 
@@ -282,6 +263,11 @@ const SettingsView: React.FC = () => {
                 </div>
 
             </div>
+
+            <DeleteAccountModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+            />
         </div>
     );
 };

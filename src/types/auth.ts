@@ -14,4 +14,5 @@ export interface AuthState {
     initialize: () => Promise<void>;
     verifyCurrentPassword: (password: string) => Promise<{ error: AuthError | null }>;
     updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
+    deleteAccount: (reason: string) => Promise<{ error: any }>;
 }
