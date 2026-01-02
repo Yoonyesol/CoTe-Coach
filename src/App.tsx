@@ -20,6 +20,7 @@ import { StudyLog } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import DeleteAccountModal from './components/modals/DeleteAccountModal'
 import ContactModal from './components/modals/ContactModal'
+import ShopModal from './components/modals/ShopModal'
 
 // Page Components
 import HomeView from './pages/HomeView'
@@ -41,7 +42,7 @@ function App() {
     fetchGoals,
     getActiveGoal
   } = useUserStore();
-  const { showAlert } = useModalStore();
+  const { showAlert, isShopOpen, shopInitialCategory, closeShop } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -299,6 +300,11 @@ function App() {
       <ContactModal
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
+      />
+      <ShopModal
+        isOpen={isShopOpen}
+        onClose={closeShop}
+        initialCategory={shopInitialCategory}
       />
     </>
   );

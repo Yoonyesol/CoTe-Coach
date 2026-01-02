@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
-import ShopModal from '../modals/ShopModal';
+
 import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library } from 'lucide-react';
 import TierBadge from '../common/TierBadge';
 import BojTierBadge from '../common/BojTierBadge';
@@ -31,10 +31,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const bojHandle = useUserStore((state) => state.bojHandle);
 
     const { signOut } = useAuthStore();
-    const { showConfirm, showAlert } = useModalStore();
+    const { showConfirm, showAlert, openShop } = useModalStore();
 
-    const [isShopOpen, setIsShopOpen] = useState(false);
-    const [shopInitialCategory, setShopInitialCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'INVENTORY' | undefined>();
     const progress = xp % 100;
 
     const { data: solvedAcData } = useSolvedAcUser(bojHandle);
@@ -80,7 +78,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
                 <div className="mt-auto flex flex-col gap-6">
                     <button
-                        onClick={() => setIsShopOpen(true)}
+                        onClick={() => openShop()}
                         className="p-3 rounded-2xl text-white/40 hover:text-wheat hover:bg-white/5 transition-all outline-none cursor-pointer"
                         title="상점"
                     >
@@ -287,10 +285,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
 
                             <div className="flex justify-center">
                                 <button
-                                    onClick={() => {
-                                        setShopInitialCategory('INVENTORY');
-                                        setIsShopOpen(true);
-                                    }}
+                                    onClick={() => openShop('INVENTORY')}
                                     className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6"
                                 >
                                     <Briefcase className="w-3 h-3 text-base-400 group-hover:text-misty transition-colors" />
@@ -301,14 +296,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     </div>
                 )}
 
-                <ShopModal
-                    isOpen={isShopOpen}
-                    onClose={() => {
-                        setIsShopOpen(false);
-                        setShopInitialCategory(undefined);
-                    }}
-                    initialCategory={shopInitialCategory}
-                />
+
             </aside>
 
             {/* 3. Main Content */}

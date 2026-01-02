@@ -11,10 +11,14 @@ export interface ModalOptions {
 }
 
 export interface ModalState {
-    isOpen: boolean;
+    isOpen: boolean; // Alert/Confirm modal
     options: ModalOptions | null;
+    isShopOpen: boolean;
+    shopInitialCategory?: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY';
     showAlert: (title: string, message: string, onConfirm?: () => void) => void;
     showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => void;
+    openShop: (category?: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY') => void;
+    closeShop: () => void;
     closeModal: () => void;
 }
 
