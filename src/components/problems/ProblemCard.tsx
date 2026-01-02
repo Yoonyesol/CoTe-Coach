@@ -87,35 +87,35 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
         isCompleted && "opacity-80 grayscale-[0.3]"
       )}
     >
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {/* Card Header: Type Label */}
         <div className="flex justify-between items-center">
-          <div className={cn("flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black",
+          <div className={cn("flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-black",
             isCompleted ? "bg-sage-light text-sage-dark" : style.bg,
             isCompleted ? "text-sage-dark" : style.textColor
           )}>
-            {isCompleted ? <CheckCircle className="w-4 h-4" /> : (isCurrent && timer.isRunning ? <Flame className="w-4 h-4 animate-pulse" /> : style.icon)}
-            {isCompleted ? '풀이 완료' : (isCurrent && timer.isRunning ? '문제 풀이 중...' : style.label)}
+            {isCompleted ? <CheckCircle className="w-3.5 h-3.5 md:w-4 md:h-4" /> : (isCurrent && timer.isRunning ? <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 animate-pulse" /> : style.icon)}
+            <span className="truncate">{isCompleted ? '풀이 완료' : (isCurrent && timer.isRunning ? '풀이 중...' : style.label)}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 md:gap-2">
             {elapsed > 0 && (
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-base-100 rounded-lg text-[10px] font-black text-base-500">
-                <TimerIcon className="w-3 h-3" />
+              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-base-100 rounded-lg text-[9px] md:text-[10px] font-black text-base-500">
+                <TimerIcon className="w-2.5 h-2.5 md:w-3 md:h-3" />
                 {formatTime(elapsed)}
               </div>
             )}
-            <span className="text-xs font-bold text-base-400">{platform}</span>
+            <span className="text-[10px] md:text-xs font-bold text-base-400">{platform}</span>
           </div>
         </div>
 
         {/* Card Body: Problem Info */}
-        <div className="space-y-2">
+        <div className="space-y-1.5 md:space-y-2">
           <div className="flex items-start justify-between gap-4">
-            <h3 className="text-xl font-black text-base-800 line-clamp-2 leading-tight group-hover:text-misty-dark transition-colors">
+            <h3 className="text-lg md:text-xl font-black text-base-800 line-clamp-2 leading-tight group-hover:text-misty-dark transition-colors">
               {title}
             </h3>
           </div>
-          <p className="text-sm font-bold text-base-500">{difficulty} (Lv.{level})</p>
+          <p className="text-xs md:text-sm font-bold text-base-500">{difficulty} (Lv.{level})</p>
         </div>
 
         {/* Tags */}

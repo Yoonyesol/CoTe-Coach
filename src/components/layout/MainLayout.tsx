@@ -53,9 +53,49 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     ] as const;
 
     return (
-        <div className="min-h-screen flex flex-col md:flex-row bg-base-100 overflow-hidden font-sans">
-            {/* 1. Navigation Rail (Leftmost) */}
-            <nav className="w-20 bg-base-900 flex flex-col items-center py-8 gap-6 z-30 shrink-0">
+        <div className="min-h-screen flex flex-col md:flex-row bg-base-100 overflow-x-hidden font-sans">
+            {/* 1. Mobile Top Navigation Bar (Visible only on mobile) */}
+            <nav className="md:hidden sticky top-0 bg-base-900 z-[100] px-4 py-3 flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm overflow-hidden p-1">
+                        <img src={`${import.meta.env.BASE_URL}assets/nav_logo.png`} alt="CoTe Coach" className="w-full h-full object-contain" />
+                    </div>
+                    <span className="text-white font-black text-lg tracking-tighter">CoTe Coach</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => openShop()}
+                        className="p-2 text-white/60 hover:text-wheat"
+                    >
+                        <ShoppingBag className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={() => onTabChange('SETTINGS')}
+                        className={clsx("p-2 rounded-xl transition-all", activeTab === 'SETTINGS' ? "text-white" : "text-white/60")}
+                    >
+                        <Settings className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={() => {
+                            showConfirm(
+                                '로그아웃',
+                                '정말 로그아웃 하시겠습니까?',
+                                () => signOut()
+                            );
+                        }}
+                        className="p-2 text-white/60"
+                    >
+                        <LogOut className="w-6 h-6" />
+                    </button>
+                </div>
+            </nav>
+
+            {/* 1.5 Mobile Bottom Tab Bar (Optional - User requested TOP, but icons need placement) */}
+            {/* Let's put the main nav icons in the top bar or a separate sub-bar if needed. 
+                For now, we'll keep the core navigation items in a simplified header or below the character. */}
+
+            {/* 1. Navigation Rail (Desktop Only) */}
+            <nav className="hidden md:flex w-20 bg-base-900 flex-col items-center py-8 gap-6 z-30 shrink-0 h-screen sticky top-0">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm overflow-hidden p-1">
                     <img src={`${import.meta.env.BASE_URL}assets/nav_logo.png`} alt="CoTe Coach" className="w-full h-full object-contain" />
                 </div>
@@ -119,25 +159,42 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                 </div>
             </nav>
 
-            {/* 2. Character Sidebar */}
-            <aside className="w-full md:w-[320px] lg:w-[360px] h-[400px] md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0">
+            {/* Mobile Sub-Navigation (Icons that were in the rail) */}
+            <div className="md:hidden bg-white border-b border-base-100 px-4 py-2 flex justify-around items-center z-20 sticky top-[64px]">
+                {navItems.map((item) => (
+                    <button
+                        key={item.id}
+                        onClick={() => onTabChange(item.id)}
+                        className={clsx(
+                            "flex flex-col items-center gap-1 p-2 rounded-xl transition-all",
+                            activeTab === item.id ? "text-base-900 bg-base-50" : "text-base-300"
+                        )}
+                    >
+                        {React.cloneElement(item.icon as React.ReactElement, { className: "w-5 h-5" })}
+                        <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
+                    </button>
+                ))}
+            </div>
+
+            {/* 2. Character Sidebar (Responsive height/width) */}
+            <aside className="w-full md:w-[320px] lg:w-[360px] h-auto md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0">
                 {isLoading ? (
                     <SidebarSkeleton />
                 ) : (
-                    <div className="p-8 flex flex-col h-full">
-                        <div className="flex justify-center">
+                    <div className="p-6 md:p-8 flex flex-col h-full">
+                        <div className="hidden md:flex justify-center">
                             <img src={`${import.meta.env.BASE_URL}assets/logo-row.png`} alt="CoTe Coach" className="h-16 object-contain drop-shadow-sm" />
                         </div>
 
-                        <div className="flex-1 flex flex-col items-center justify-center relative">
+                        <div className="flex-1 flex flex-col items-center justify-center relative py-4 md:py-0">
                             {/* Character Container with Layers */}
-                            <div className="relative mb-8 flex items-center justify-center w-64 h-64 isolate">
+                            <div className="relative mb-6 md:mb-8 flex items-center justify-center w-48 h-48 md:w-64 md:h-64 isolate">
                                 {getBackgroundItems(equippedItems).map((asset: AvatarAsset) => {
                                     let positionClass = "absolute z-0";
-                                    if (asset.id === 'item_sofa') positionClass = "absolute -bottom-11 w-[720px] h-[400px] z-[5]";
-                                    if (asset.id === 'item_monitor') positionClass = "absolute right-12 top-1/2 w-28 h-24 z-10 translate-y-[-20%] scale-x-[-1]";
-                                    if (asset.id === 'item_treasure') positionClass = "absolute left-6 bottom-20 w-24 h-20 z-10";
-                                    if (asset.id === 'item_safe') positionClass = "absolute right-6 bottom-20 w-20 h-28 z-10";
+                                    if (asset.id === 'item_sofa') positionClass = "absolute -bottom-8 md:-bottom-11 w-[360px] md:w-[720px] h-[200px] md:h-[400px] z-[5]";
+                                    if (asset.id === 'item_monitor') positionClass = "absolute right-6 md:right-12 top-1/2 w-20 md:w-28 h-16 md:h-24 z-10 translate-y-[-20%] scale-x-[-1]";
+                                    if (asset.id === 'item_treasure') positionClass = "absolute left-4 md:left-6 bottom-16 md:bottom-20 w-16 md:w-24 h-12 md:h-20 z-10";
+                                    if (asset.id === 'item_safe') positionClass = "absolute right-4 md:right-6 bottom-16 md:bottom-20 w-14 md:w-20 h-20 md:h-28 z-10";
                                     if (asset.slot === 'wallpaper') positionClass = "absolute inset-0 z-[-1]";
 
                                     if (asset.svgIcon) {
@@ -300,7 +357,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             </aside>
 
             {/* 3. Main Content */}
-            <main className="flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-8 bg-white/30 backdrop-blur-sm z-10 scrollbar-hide">
+            <main className="flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 bg-white/30 backdrop-blur-sm z-10 scrollbar-hide pb-20 md:pb-8">
                 {children}
             </main>
         </div>

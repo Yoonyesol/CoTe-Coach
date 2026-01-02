@@ -1,206 +1,263 @@
 import React, { useState, useEffect } from 'react';
-import { X, BarChart3, HelpCircle, Check } from 'lucide-react';
+import { X, Check, Save, Info, Zap, HelpCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '../../store/useUserStore';
-import { RecommendationSettings } from '../../types/study';
 import { Platform } from '../../types/user';
-import { motion } from 'framer-motion';
+import { RecommendationSettings } from '../../types/study';
 import { clsx } from 'clsx';
 import DifficultyGuideModal from './DifficultyGuideModal';
 
-import { RecommendationSettingsModalProps } from '../../types/modal';
+const ALGORITHMS = [
+    { id: 'Greedy', name: '그리디' },
+    { id: 'Implementation', name: '구현' },
+    { id: 'DFS/BFS', name: 'DFS/BFS' },
+    { id: 'Search', name: '탐색' },
+    { id: 'DP', name: 'DP' },
+    { id: 'Dijkstra', name: '다익스트라' },
+    { id: 'Floyd-Warshall', name: '플로이드' },
+    { id: 'Union-Find', name: '유니온 파인드' },
+    { id: 'MST', name: '최소 스패닝 트리' },
+    { id: 'Tree', name: '트리' },
+    { id: 'Math', name: '수학' },
+    { id: 'String', name: '문자열' },
+    { id: 'Two Pointers', name: '투 포인터' }
+];
+
+const PLATFORMS: { id: Platform, label: string }[] = [
+    { id: 'BOJ', label: '백준' },
+    { id: 'PROG', label: '프로그래머스' },
+    { id: 'LC', label: '릿코드' },
+    { id: 'SWEA', label: 'SWEA' }
+];
+
+interface RecommendationSettingsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
 
 const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = ({ isOpen, onClose }) => {
     const { recommendationSettings, setRecommendationSettings } = useUserStore();
-    const [localSettings, setLocalSettings] = useState<RecommendationSettings>({
-        ...recommendationSettings
-    });
+    const [settings, setSettings] = useState<RecommendationSettings>(recommendationSettings);
     const [showGuide, setShowGuide] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
-            setLocalSettings({
-                ...recommendationSettings
-            });
+            setSettings(recommendationSettings);
         }
     }, [isOpen, recommendationSettings]);
 
-    const handleSave = () => {
-        setRecommendationSettings(localSettings);
+    const handleSave = async () => {
+        await setRecommendationSettings(settings);
         onClose();
+    };
+
+    const toggleAlgorithm = (algo: string) => {
+        setSettings((prev: RecommendationSettings) => ({
+            ...prev,
+            focusAlgorithms: prev.focusAlgorithms.includes(algo)
+                ? prev.focusAlgorithms.filter((a: string) => a !== algo)
+                : [...prev.focusAlgorithms, algo]
+        }));
+    };
+
+    const togglePlatform = (platform: Platform) => {
+        setSettings((prev: RecommendationSettings) => ({
+            ...prev,
+            platforms: prev.platforms.includes(platform)
+                ? (prev.platforms.length > 1 ? prev.platforms.filter((p: Platform) => p !== platform) : prev.platforms)
+                : [...prev.platforms, platform]
+        }));
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-base-900/40 backdrop-blur-[2px] animate-in fade-in duration-200">
-            <div className="absolute inset-0 cursor-pointer" onClick={onClose} />
+        <div className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-base-900/60 backdrop-blur-sm"
+            />
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="glass-card w-full max-w-sm bg-white border-none shadow-2xl relative z-10 overflow-hidden rounded-[2rem] flex flex-col"
+                initial={isMobile ? { y: "100%", opacity: 0.5 } : { scale: 0.95, opacity: 0 }}
+                animate={isMobile ? { y: 0, opacity: 1 } : { scale: 1, opacity: 1 }}
+                exit={isMobile ? { y: "100%", opacity: 0.5 } : { scale: 0.95, opacity: 0 }}
+                transition={isMobile
+                    ? { type: "spring", damping: 25, stiffness: 300 }
+                    : { duration: 0.15, ease: "easeOut" }
+                }
+                className="relative w-full max-w-lg bg-white sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
             >
-                <div className="p-6 border-b border-base-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-misty/10 rounded-xl">
-                            <BarChart3 className="w-5 h-5 text-misty-dark" />
-                        </div>
-                        <h3 className="text-lg font-black font-sans uppercase tracking-tight">추천 필터 설정</h3>
+                {/* Header */}
+                <div className="p-6 border-b border-base-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                    <div>
+                        <h2 className="text-xl font-black text-base-800 flex items-center gap-2">
+                            <Zap className="w-5 h-5 text-misty-dark" />
+                            추천 필터 설정
+                        </h2>
+                        <p className="text-xs font-bold text-base-400 mt-1">나에게 딱 맞는 문제를 골라줄게요!</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-base-50 rounded-xl transition-colors text-base-400 cursor-pointer">
-                        <X className="w-5 h-5" />
+                    <button onClick={onClose} className="p-2 hover:bg-base-50 rounded-xl transition-colors">
+                        <X className="w-6 h-6 text-base-300" />
                     </button>
                 </div>
 
-                <div className="p-6 pt-2 space-y-6">
-                    {/* AI Recommendation Count */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">1일 추천 문제 개수</label>
-                        <div className="flex items-center gap-4">
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide">
+                    {/* Recommendation Count (Slider) */}
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-black text-base-700 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-misty" />
+                                추천 문제 개수
+                            </label>
+                            <span className="text-sm font-black text-misty-dark bg-misty-light/20 px-3 py-1 rounded-full">
+                                {settings.recommendationCount}개
+                            </span>
+                        </div>
+                        <div className="px-2">
                             <input
                                 type="range"
                                 min="1"
                                 max="10"
-                                value={localSettings.recommendationCount || 5}
-                                onChange={(e) => setLocalSettings({ ...localSettings, recommendationCount: parseInt(e.target.value) })}
-                                className="flex-1 accent-lavender h-1.5 bg-base-100 rounded-lg appearance-none cursor-pointer"
+                                step="1"
+                                value={settings.recommendationCount}
+                                onChange={(e) => setSettings(prev => ({ ...prev, recommendationCount: parseInt(e.target.value) }))}
+                                className="w-full accent-misty-dark h-2 bg-base-100 rounded-lg appearance-none cursor-pointer"
                             />
-                            <span className="text-sm font-black text-base-800 w-12 text-center bg-base-50 py-1 rounded-lg">
-                                {localSettings.recommendationCount || 5}개
-                            </span>
+                            <div className="flex justify-between mt-2 text-[10px] font-bold text-base-300">
+                                <span>1개</span>
+                                <span>5개</span>
+                                <span>10개</span>
+                            </div>
                         </div>
-                        <p className="text-[10px] text-base-400 font-medium px-1 leading-relaxed">
-                            💡 추천 리스트에 노출될 오늘의 알고리즘 문항 개수입니다.
-                        </p>
                     </div>
 
-                    {/* Recommendation Difficulty */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 문제 난이도</label>
+                    {/* Difficulty Adjustment */}
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-black text-base-700 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-coral" />
+                                난이도 선호도
+                            </label>
                             <button
                                 onClick={() => setShowGuide(true)}
-                                className="text-[10px] font-bold text-misty-dark hover:underline flex items-center gap-1 cursor-pointer"
+                                className="text-[10px] font-bold text-misty-dark hover:underline flex items-center gap-1"
                             >
                                 <HelpCircle className="w-3 h-3" />
-                                가이드
+                                난이도 가이드
                             </button>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 p-1 bg-base-50 rounded-2xl">
-                            {(['EASY', 'NORMAL', 'HARD'] as const).map((level) => (
+                        <div className="grid grid-cols-3 gap-2">
+                            {(['EASY', 'NORMAL', 'HARD'] as const).map(diff => (
                                 <button
-                                    key={level}
-                                    onClick={() => setLocalSettings({ ...localSettings, difficulty: level })}
+                                    key={diff}
+                                    onClick={() => setSettings((prev: RecommendationSettings) => ({ ...prev, difficulty: diff }))}
                                     className={clsx(
-                                        "py-2.5 rounded-xl text-[11px] font-black transition-all cursor-pointer",
-                                        localSettings.difficulty === level
-                                            ? "bg-white text-base-900 shadow-sm"
-                                            : "text-base-400 hover:text-base-600"
+                                        "py-3 rounded-2xl text-[11px] font-black border-2 transition-all flex flex-col items-center gap-1",
+                                        settings.difficulty === diff
+                                            ? "bg-misty-light/30 border-misty-dark text-misty-dark shadow-sm"
+                                            : "bg-white border-base-100 text-base-400 hover:border-base-200"
                                     )}
                                 >
-                                    {level === 'EASY' ? '쉬움' : level === 'NORMAL' ? '보통' : '어려움'}
+                                    <span className="text-lg">
+                                        {diff === 'EASY' ? '🌱' : diff === 'NORMAL' ? '🌿' : '🌳'}
+                                    </span>
+                                    {diff === 'EASY' ? '쉽게' : diff === 'NORMAL' ? '적절히' : '도전적'}
                                 </button>
                             ))}
                         </div>
-                        <p className="text-[10px] text-base-400 font-medium px-1 leading-relaxed">
-                            {localSettings.difficulty === 'EASY' && "🐢 내 티어보다 낮은 문제를 추천받아 기초를 다집니다."}
-                            {localSettings.difficulty === 'NORMAL' && "⚖️ 현재 내 티어에 가장 적합한 문제를 추천받습니다."}
-                            {localSettings.difficulty === 'HARD' && "🔥 내 티어보다 높고 도전적인 문제를 추천받습니다."}
-                        </p>
+                    </div>
+
+                    {/* Platforms */}
+                    <div className="space-y-4">
+                        <label className="text-sm font-black text-base-700 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-lavender" />
+                            선호 플랫폼
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                            {PLATFORMS.map(p => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => togglePlatform(p.id)}
+                                    className={clsx(
+                                        "px-4 py-2.5 rounded-xl text-xs font-black transition-all border-2 flex items-center gap-2",
+                                        settings.platforms.includes(p.id)
+                                            ? "bg-lavender-light border-lavender-dark text-lavender-dark"
+                                            : "bg-white border-base-100 text-base-400"
+                                    )}
+                                >
+                                    {p.label}
+                                    {settings.platforms.includes(p.id) && <Check className="w-3.5 h-3.5" />}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Focus Algorithms */}
-                    <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">집중 학습 알고리즘</label>
-                            <span className="text-[10px] font-bold text-base-300 uppercase tracking-tight">
-                                {localSettings.focusAlgorithms.length}/3 선택
-                            </span>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-black text-base-700 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-sage" />
+                                집중 학습 테마 (알고리즘)
+                            </label>
+                            <span className="text-[10px] font-bold text-base-300 italic">복수 선택 가능</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {[
-                                { id: 'dp', name: 'DP' },
-                                { id: 'graphs', name: '그래프' },
-                                { id: 'greedy', name: '그리디' },
-                                { id: 'bfs', name: 'BFS/DFS' },
-                                { id: 'string', name: '문자열' },
-                                { id: 'data_structures', name: '자료구조' },
-                                { id: 'backtracking', name: '백트래킹' },
-                                { id: 'math', name: '수학' },
-                            ].map((tag) => {
-                                const isSelected = localSettings.focusAlgorithms.includes(tag.id);
+                            {ALGORITHMS.map(algo => {
+                                const isActive = settings.focusAlgorithms.includes(algo.id);
                                 return (
                                     <button
-                                        key={tag.id}
-                                        onClick={() => {
-                                            const current = localSettings.focusAlgorithms;
-                                            if (isSelected) {
-                                                setLocalSettings({ ...localSettings, focusAlgorithms: current.filter(id => id !== tag.id) });
-                                            } else if (current.length < 3) {
-                                                setLocalSettings({ ...localSettings, focusAlgorithms: [...current, tag.id] });
-                                            }
-                                        }}
+                                        key={algo.id}
+                                        onClick={() => toggleAlgorithm(algo.id)}
                                         className={clsx(
-                                            "px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-1.5 cursor-pointer",
-                                            isSelected
-                                                ? "bg-misty/10 border-misty text-misty-dark"
-                                                : "bg-white border-base-100 text-base-400 hover:border-base-200"
+                                            "px-3 py-1.5 rounded-lg text-[10px] font-black transition-all border-2",
+                                            isActive
+                                                ? "bg-sage-light border-sage text-sage-dark shadow-sm"
+                                                : "bg-white border-base-50 text-base-300 hover:border-base-100"
                                         )}
                                     >
-                                        {isSelected && <Check className="w-3 h-3" />}
-                                        {tag.name}
+                                        #{algo.name}
                                     </button>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {/* Preferred Platforms */}
-                    <div className="space-y-3">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-base-400 font-sans">추천 플랫폼</label>
-                        <div className="flex flex-wrap gap-2">
-                            {[
-                                { id: 'BOJ', name: '백준' },
-                                { id: 'PROG', name: '프로그래머스' },
-                                { id: 'SWEA', name: 'SWEA' },
-                                { id: 'LC', name: '릿코드' },
-                            ].map((platform) => {
-                                const isSelected = localSettings.platforms?.includes(platform.id as Platform);
-                                return (
-                                    <button
-                                        key={platform.id}
-                                        onClick={() => {
-                                            const current = localSettings.platforms || ['BOJ'];
-                                            if (isSelected) {
-                                                // Prevent removing all platforms
-                                                if (current.length > 1) {
-                                                    setLocalSettings({ ...localSettings, platforms: current.filter(id => id !== platform.id) });
-                                                }
-                                            } else {
-                                                setLocalSettings({ ...localSettings, platforms: [...current, platform.id as Platform] });
-                                            }
-                                        }}
-                                        className={clsx(
-                                            "px-3 py-2 rounded-xl text-[10px] font-bold transition-all border-2 flex items-center gap-2 cursor-pointer",
-                                            isSelected
-                                                ? "bg-base-900 border-base-900 text-white"
-                                                : "bg-white border-base-100 border-2 text-base-400 hover:border-base-200"
-                                        )}
-                                    >
-                                        {isSelected && <Check className="w-3 h-3 text-white" />}
-                                        {platform.name}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                    {/* Info Note */}
+                    <div className="bg-blue-50/50 p-4 rounded-2xl flex gap-3">
+                        <Info className="w-5 h-5 text-blue-400 shrink-0" />
+                        <p className="text-[10px] md:text-xs font-bold text-blue-600 leading-relaxed">
+                            필터 적용 후 메인 화면의 <strong className="underline">대시보드 섞기</strong> 버튼을 누르면 새로운 추천 목록이 생성됩니다.
+                        </p>
                     </div>
+                </div>
 
+                {/* Footer Actions */}
+                <div className="p-6 border-t border-base-100 bg-white sticky bottom-0 z-10 flex gap-3">
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-4 bg-base-50 text-base-500 rounded-2xl font-black text-sm hover:bg-base-100 transition-all active:scale-95"
+                    >
+                        취소
+                    </button>
                     <button
                         onClick={handleSave}
-                        className="w-full py-4 bg-base-900 text-white rounded-2xl font-black shadow-lg hover:bg-base-800 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-[2] py-4 bg-base-900 text-white rounded-2xl font-black text-sm hover:bg-base-800 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-xl shadow-base-900/20"
                     >
-                        <span>적용하기</span>
-                        <Check className="w-5 h-5" />
+                        <Save className="w-4 h-4" />
+                        설정 저장하기
                     </button>
                 </div>
             </motion.div>

@@ -100,31 +100,31 @@ const GoalBanner: React.FC<GoalBannerProps> = ({ onOpenGoalModal }) => {
         <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 border-none bg-gradient-to-r from-misty-light/50 to-coral-light/30 shadow-lg mb-8"
+            className="glass-card p-4 md:p-6 border-none bg-gradient-to-r from-misty-light/50 to-coral-light/30 shadow-lg mb-6 md:mb-8"
         >
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+            <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 md:gap-6">
                 {/* Left: Goal Info */}
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-coral-light rounded-2xl">
-                        <Target className="w-6 h-6 text-coral" />
+                <div className="flex items-center gap-3 md:gap-4 w-full xl:w-auto">
+                    <div className="p-2.5 md:p-3 bg-coral-light rounded-2xl shrink-0">
+                        <Target className="w-5 h-5 md:w-6 md:h-6 text-coral" />
                     </div>
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-lg font-black text-base-800 font-sans">{activeGoal.name}</h3>
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="text-base md:text-lg font-black text-base-800 font-sans truncate">{activeGoal.name}</h3>
                             <span className={clsx(
-                                "px-2 py-0.5 rounded-lg text-xs font-black",
+                                "px-2 py-0.5 rounded-lg text-[10px] md:text-xs font-black",
                                 dDay !== null && dDay <= 7 ? "bg-coral/10 text-coral" : "bg-misty-light text-misty-dark"
                             )}>
                                 D{dDay !== null && dDay >= 0 ? `-${dDay}` : (dDay !== null ? `+${Math.abs(dDay)}` : '')}
                             </span>
                         </div>
-                        <div className="flex items-center gap-3 text-xs font-bold text-base-400">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-[10px] md:text-xs font-bold text-base-400">
                             <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
                                 {activeGoal.startDate} ~ {activeGoal.endDate}
                             </span>
                             {activeGoal.focusTags.length > 0 && (
-                                <span className="px-2 py-0.5 bg-white/50 rounded text-[10px] font-black">
+                                <span className="px-2 py-0.5 bg-white/50 rounded text-[9px] md:text-[10px] font-black w-fit">
                                     {activeGoal.focusTags.slice(0, 3).join(', ')}
                                 </span>
                             )}
@@ -133,12 +133,12 @@ const GoalBanner: React.FC<GoalBannerProps> = ({ onOpenGoalModal }) => {
                 </div>
 
                 {/* Center: Progress */}
-                <div className="flex-1 max-w-md">
-                    <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-black text-base-500">
+                <div className="w-full xl:flex-1 xl:max-w-md">
+                    <div className="flex justify-between items-center mb-1.5 md:mb-2">
+                        <span className="text-[10px] md:text-xs font-black text-base-500">
                             오늘 <span className="text-misty-dark">{progress.todaySolved}/{progress.todayGoal}</span>
                         </span>
-                        <span className="text-xs font-black text-base-500">
+                        <span className="text-[10px] md:text-xs font-black text-base-500">
                             누적 <span className={isAhead ? "text-sage" : "text-coral"}>{progress.totalSolved}</span>/{progress.expectedTotal} 문제
                         </span>
                     </div>
@@ -156,17 +156,17 @@ const GoalBanner: React.FC<GoalBannerProps> = ({ onOpenGoalModal }) => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full xl:w-auto mt-2 xl:mt-0 pt-3 xl:pt-0 border-t border-base-100 xl:border-none">
                     <button
                         onClick={onOpenGoalModal}
-                        className="p-2 bg-white/50 text-base-500 rounded-xl hover:bg-white hover:text-misty-dark transition-all cursor-pointer"
+                        className="flex-1 xl:flex-none p-2 md:p-2.5 bg-white/50 text-base-500 rounded-xl hover:bg-white hover:text-misty-dark transition-all cursor-pointer flex justify-center"
                         title="관리"
                     >
                         <Settings className="w-5 h-5" />
                     </button>
                     <button
                         onClick={handleComplete}
-                        className="px-4 py-2 bg-sage-light text-sage-dark font-black text-sm rounded-xl hover:bg-sage hover:text-white transition-all flex items-center gap-2 cursor-pointer"
+                        className="flex-[3] xl:flex-none px-4 py-2 md:py-2.5 bg-sage-light text-sage-dark font-black text-xs md:text-sm rounded-xl hover:bg-sage hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <CheckCircle className="w-4 h-4" />
                         완료

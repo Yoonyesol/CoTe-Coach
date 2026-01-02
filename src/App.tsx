@@ -42,7 +42,15 @@ function App() {
     fetchGoals,
     getActiveGoal
   } = useUserStore();
-  const { showAlert, isShopOpen, shopInitialCategory, closeShop } = useModalStore();
+  const {
+    showAlert,
+    isShopOpen,
+    shopInitialCategory,
+    closeShop,
+    isRecommendationSettingsOpen,
+    openRecommendationSettings,
+    closeRecommendationSettings
+  } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
 
   const [isHydrated, setIsHydrated] = useState(false);
@@ -142,7 +150,6 @@ function App() {
   }, []);
 
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
-  const [isRecoModalOpen, setIsRecoModalOpen] = useState(false);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
   const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
@@ -218,6 +225,7 @@ function App() {
               onDailyGoalOpen={() => setIsDailyGoalModalOpen(true)}
               onAddModalOpen={() => setIsAddModalOpen(true)}
               onGoalModalOpen={() => setIsGoalModalOpen(true)}
+              onRecommendationSettingsOpen={openRecommendationSettings}
               onReviewOpen={handleReviewOpen}
               onReviewDetailOpen={handleReviewDetailOpen}
               onEditLog={setEditingLog}
@@ -266,8 +274,8 @@ function App() {
       )}
       <Stopwatch />
       <RecommendationSettingsModal
-        isOpen={isRecoModalOpen}
-        onClose={() => setIsRecoModalOpen(false)}
+        isOpen={isRecommendationSettingsOpen}
+        onClose={closeRecommendationSettings}
       />
 
       <ReviewDetailModal

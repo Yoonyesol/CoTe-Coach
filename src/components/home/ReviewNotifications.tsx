@@ -75,17 +75,17 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-lg flex-shrink-0 animate-in fade-in zoom-in">
                                                 {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
                                             </div>
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2 mb-0.5">
-                                                    <span className="text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded-md uppercase">
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                                    <span className="text-[8px] md:text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded-md uppercase shrink-0">
                                                         {plan.currentStage + 1}회차
                                                     </span>
-                                                    <span className="text-[9px] font-bold text-base-400 truncate">{plan.platform} • {plan.difficulty}</span>
+                                                    <span className="text-[8px] md:text-[9px] font-bold text-base-400 truncate max-w-[120px]">{plan.platform} • {plan.difficulty}</span>
                                                     {isTiming && (
-                                                        <span className="flex h-1.5 w-1.5 rounded-full bg-coral animate-ping" />
+                                                        <span className="flex h-1.5 w-1.5 rounded-full bg-coral animate-ping shrink-0" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-black text-base-800 text-sm truncate max-w-[200px] group-hover/item:text-lavender-dark transition-colors">
+                                                <h3 className="font-black text-base-800 text-xs md:text-sm truncate group-hover/item:text-lavender-dark transition-colors">
                                                     {plan.problemTitle}
                                                 </h3>
                                             </div>

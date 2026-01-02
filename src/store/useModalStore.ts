@@ -6,6 +6,7 @@ export const useModalStore = create<ModalState>((set) => ({
     isOpen: false,
     options: null,
     isShopOpen: false,
+    isRecommendationSettingsOpen: false,
     shopInitialCategory: undefined,
     showAlert: (title, message, onConfirm) => set({
         isOpen: true,
@@ -25,5 +26,7 @@ export const useModalStore = create<ModalState>((set) => ({
     }),
     openShop: (category) => set({ isShopOpen: true, shopInitialCategory: category }),
     closeShop: () => set({ isShopOpen: false, shopInitialCategory: undefined }),
+    openRecommendationSettings: () => set({ isRecommendationSettingsOpen: true }),
+    closeRecommendationSettings: () => set({ isRecommendationSettingsOpen: false }),
     closeModal: () => set({ isOpen: false, options: null })
 }));

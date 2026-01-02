@@ -95,45 +95,45 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${log.result === 'SUCCESS' ? 'bg-sage/10 text-sage' : 'bg-coral/10 text-coral'
                                             }`}>
-                                            {log.result === 'SUCCESS' ? '해결함' : '못 끝냄'}
+                                            {log.result === 'SUCCESS' ? '해결' : '미달성'}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${log.solvingMethod === 'SELF' ? 'bg-misty/10 text-misty-dark' : 'bg-amber-100 text-amber-700'
                                             }`}>
-                                            {log.solvingMethod === 'SELF' ? '스스로' : '답지참고'}
+                                            {log.solvingMethod === 'SELF' ? '독학' : '참고'}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-base-100 text-base-500`}>
                                             {log.platform}
                                         </span>
                                         {log.stage > 0 && (
                                             <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-lavender/10 text-lavender-dark">
-                                                {log.stage}차 복습
+                                                {log.stage}차
                                             </span>
                                         )}
                                     </div>
-                                    <h4 className="text-base font-black text-base-900 group-hover:text-misty-dark transition-colors">{log.problemId}</h4>
+                                    <h4 className="text-sm md:text-base font-black text-base-900 group-hover:text-misty-dark transition-colors leading-snug">{log.problemId}</h4>
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-4 text-xs font-black text-base-400 mb-4">
-                                <div className="flex items-center gap-1.5 bg-base-50 px-2 py-1 rounded-lg">
-                                    <Clock className="w-3.5 h-3.5" />
+                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-xs font-black text-base-400 mb-4">
+                                <div className="flex items-center gap-1 md:gap-1.5 bg-base-50 px-2 py-1 rounded-lg">
+                                    <Clock className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                     {Math.round(log.elapsedTime / 60000)}분
                                 </div>
-                                <div className="flex items-center gap-1.5 bg-base-50 px-2 py-1 rounded-lg text-amber-600">
-                                    <Trophy className="w-3.5 h-3.5" />
+                                <div className="flex items-center gap-1 md:gap-1.5 bg-base-50 px-2 py-1 rounded-lg text-amber-600">
+                                    <Trophy className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                     {log.difficulty || 'Unknown'}
                                 </div>
-                                <div className="flex items-center gap-1.5 bg-base-50 px-2 py-1 rounded-lg text-misty-dark">
-                                    <History className="w-3.5 h-3.5" />
+                                <div className="flex items-center gap-1 md:gap-1.5 bg-base-50 px-2 py-1 rounded-lg text-misty-dark">
+                                    <History className="w-3 md:w-3.5 h-3 md:h-3.5" />
                                     {log.perceivedDifficulty}
                                 </div>
                             </div>
 
                             {log.reflection && (
-                                <p className="text-xs font-bold text-base-500 line-clamp-2 bg-base-50/50 p-3 rounded-xl italic mb-4">
+                                <p className="text-xs font-bold text-base-500 line-clamp-2 bg-base-50/50 p-2.5 md:p-3 rounded-xl italic mb-4">
                                     "{log.reflection}"
                                 </p>
                             )}
@@ -141,8 +141,8 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                             {log.concepts.length > 0 && (
                                 <div className="flex flex-wrap gap-1">
                                     <div className="w-full flex items-center gap-1 mb-1">
-                                        <Tag className="w-3 h-3 text-base-300" />
-                                        <span className="text-[9px] font-black text-base-300 uppercase">Tags</span>
+                                        <Tag className="w-2.5 h-2.5 text-base-300" />
+                                        <span className="text-[8px] md:text-[9px] font-black text-base-300 uppercase">Tags</span>
                                     </div>
                                     {log.concepts.map(concept => (
                                         <span key={concept} className="px-2 py-0.5 bg-lavender/10 text-lavender-dark text-[9px] font-black rounded uppercase">
