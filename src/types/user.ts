@@ -104,7 +104,7 @@ export interface UserState {
 
     // Shop Actions
     buyItem: (item: ShopItem) => boolean;
-    toggleEquip: (itemId: string) => void;
+    toggleEquip: (itemId: string, slot?: string, category?: string) => void;
 
     // Helper to force recalculation
     refreshRating: () => Promise<void>;

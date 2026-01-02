@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 
 import { Platform, UserState } from '../types/user';
 import { RecommendationSettings, StudyLog, StudyGoal } from '../types/study';
+import { AVATAR_ASSETS } from '../components/avatar/AvatarAssets';
+import { SHOP_ITEMS } from '../constants/shop';
 
 import { calculateEarnedXp } from '../lib/xp';
 
@@ -951,21 +953,75 @@ export const useUserStore = create<UserState>()(
                 return true;
             },
 
-            toggleEquip: (itemId) => {
-                set(state => {
-                    const isEquipped = state.equippedItems.includes(itemId);
-                    const nextEquipped = isEquipped ? state.equippedItems.filter(id => id !== itemId) : [...state.equippedItems, itemId];
-                    supabase.auth.getUser().then(({ data: { user } }) => {
-                        if (user) supabase.from('user_assets').update({ is_equipped: !isEquipped }).eq('user_id', user.id).eq('asset_id', itemId).then();
+            toggleEquip: (itemId, slot, category) => {
+                const state = get();
+                const isCurrentlyEquipped = state.equippedItems.includes(itemId);
+
+                const itemAsset = AVATAR_ASSETS[itemId];
+                const targetSlot = slot || itemAsset?.slot;
+                const targetCategory = category || SHOP_ITEMS.find(i => i.id === itemId)?.category;
+
+                let nextEquipped: string[];
+
+                if (isCurrentlyEquipped) {
+                    // 해제하기
+                    nextEquipped = state.equippedItems.filter(id => id !== itemId);
+                } else {
+                    // 착용하기: 같은 카테고리의 다른 아이템들 제거
+                    nextEquipped = state.equippedItems.filter(id => {
+                        // 1. 같은 카테고리면 제거 (사용자 요청: 한 카테고리에서 하나만)
+                        if (targetCategory) {
+                            const otherItemCategory = SHOP_ITEMS.find(i => i.id === id)?.category;
+                            if (otherItemCategory === targetCategory) return false;
+                        }
+
+                        // 2. 같은 슬롯이면 제거 (슬롯이 head, clothes인 경우만 강제)
+                        // 가구(FURNITURE)와 장식(DECO)은 위치가 다르므로 같은 ground 슬롯이라도 허용
+                        const asset = AVATAR_ASSETS[id];
+                        if (targetSlot && asset?.slot === targetSlot) {
+                            if (['head', 'clothes'].includes(targetSlot)) return false;
+                        }
+
+                        return true;
                     });
-                    return { equippedItems: nextEquipped };
+                    nextEquipped.push(itemId);
+                }
+
+                // DB 동기화
+                supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user) {
+                        const toEquip = nextEquipped.filter(id => !state.equippedItems.includes(id));
+                        const toUnequip = state.equippedItems.filter(id => !nextEquipped.includes(id));
+
+                        if (toUnequip.length > 0) {
+                            supabase.from('user_assets')
+                                .update({ is_equipped: false })
+                                .eq('user_id', user.id)
+                                .in('asset_id', toUnequip)
+                                .then();
+                        }
+                        if (toEquip.length > 0) {
+                            supabase.from('user_assets')
+                                .update({ is_equipped: true })
+                                .eq('user_id', user.id)
+                                .in('asset_id', toEquip)
+                                .then();
+                        }
+                    }
                 });
+
+                set({ equippedItems: nextEquipped });
             }
         }),
         {
             name: 'cote-coach-user-storage',
             version: 7, // Plan & Settings Separation
-            partialize: (state) => ({ timer: state.timer }), // Only keep timer persisted locally
+            partialize: (state) => ({
+                timer: state.timer,
+                inventory: state.inventory,
+                equippedItems: state.equippedItems,
+                points: state.points
+            }),
             migrate: (_persistedState: any, _version: number) => {
                 // Migration logic if needed
                 return _persistedState;
