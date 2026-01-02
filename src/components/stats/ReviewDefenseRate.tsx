@@ -29,7 +29,7 @@ const ReviewDefenseRate: React.FC = () => {
     }, [studyLogs, reviewPlans]);
 
     return (
-        <div className="glass-card p-6 border-none flex flex-col justify-between h-[400px]">
+        <div className="glass-card p-6 border-none flex flex-col justify-between h-[460px]">
             <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-sage-light rounded-lg">
                     <ShieldCheck className="w-4 h-4 text-sage-dark" />

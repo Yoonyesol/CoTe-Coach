@@ -33,7 +33,7 @@ const MaturityChart: React.FC = () => {
     }, [reviewPlans]);
 
     return (
-        <div className="glass-card p-6 border-none flex flex-col h-[400px]">
+        <div className="glass-card p-6 border-none flex flex-col h-[460px]">
             <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-coral-light rounded-lg">
                     <BrainCircuit className="w-4 h-4 text-coral-dark" />
