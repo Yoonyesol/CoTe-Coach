@@ -4,7 +4,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library, User } from 'lucide-react';
 import TierBadge from '../common/TierBadge';
 import BojTierBadge from '../common/BojTierBadge';
 import { clsx } from 'clsx';
@@ -23,6 +23,8 @@ export interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChange, onAccountSettingsOpen, onTierClick, isLoading }) => {
+    const [showMobileSidebar, setShowMobileSidebar] = React.useState(true);
+    const isMounted = React.useRef(false);
     const level = useUserStore((state) => state.level);
     const xp = useUserStore((state) => state.xp);
     const tier = useUserStore((state) => state.tier);
@@ -44,6 +46,18 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             syncSolvedAcTier(solvedAcData.rating);
         }
     }, [solvedAcData?.rating, syncSolvedAcTier]);
+
+    // Reset mobile sidebar when tab changes effectively
+    useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+        // If the user clicks a tab from the rail or bottom nav, we generally want to see content.
+        // But we handle explicit clicks in the JSX below. 
+        // This effect ensures if external props change, we default to content.
+        setShowMobileSidebar(false);
+    }, [activeTab]);
 
     const navItems = [
         { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },
@@ -160,14 +174,29 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             </nav>
 
             {/* Mobile Sub-Navigation (Icons that were in the rail) */}
-            <div className="md:hidden bg-white border-b border-base-100 px-4 py-2 flex justify-around items-center z-20 sticky top-[64px]">
+            <div className="md:hidden bg-white border-b border-base-100 px-4 py-2 flex justify-between items-center z-20 sticky top-[64px]">
+                {/* 'MY' Tab for Mobile */}
+                <button
+                    onClick={() => setShowMobileSidebar(true)}
+                    className={clsx(
+                        "flex flex-col items-center gap-1 p-2 rounded-xl transition-all",
+                        showMobileSidebar ? "text-base-900 bg-base-50" : "text-base-300"
+                    )}
+                >
+                    <User className="w-5 h-5" />
+                    <span className="text-[10px] font-black uppercase tracking-tighter">내 정보</span>
+                </button>
+
                 {navItems.map((item) => (
                     <button
                         key={item.id}
-                        onClick={() => onTabChange(item.id)}
+                        onClick={() => {
+                            onTabChange(item.id);
+                            setShowMobileSidebar(false);
+                        }}
                         className={clsx(
                             "flex flex-col items-center gap-1 p-2 rounded-xl transition-all",
-                            activeTab === item.id ? "text-base-900 bg-base-50" : "text-base-300"
+                            !showMobileSidebar && activeTab === item.id ? "text-base-900 bg-base-50" : "text-base-300"
                         )}
                     >
                         {React.cloneElement(item.icon as any, { className: "w-5 h-5" })}
@@ -177,7 +206,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             </div>
 
             {/* 2. Character Sidebar (Responsive height/width) */}
-            <aside className="w-full md:w-[320px] lg:w-[360px] h-auto md:h-screen bg-sage-light/50 border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0">
+            <aside className={clsx(
+                "w-full md:w-[320px] lg:w-[360px] h-auto md:h-screen bg-sage-light/50 md:border-r border-base-200 relative overflow-hidden flex flex-col z-20 shrink-0",
+                showMobileSidebar ? "flex" : "hidden md:flex"
+            )}>
                 {isLoading ? (
                     <SidebarSkeleton />
                 ) : (
@@ -357,7 +389,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             </aside>
 
             {/* 3. Main Content */}
-            <main className="flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 bg-white/30 backdrop-blur-sm z-10 scrollbar-hide pb-20 md:pb-8">
+            <main className={clsx(
+                "flex-1 h-screen overflow-y-auto p-4 md:p-8 space-y-6 md:space-y-8 bg-white/30 backdrop-blur-sm z-10 scrollbar-hide pb-20 md:pb-8",
+                showMobileSidebar ? "hidden md:block" : "block"
+            )}>
                 {children}
             </main>
         </div>
