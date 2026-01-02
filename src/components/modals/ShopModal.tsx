@@ -130,15 +130,15 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                             </div>
                         </div>
 
-                        <div className="flex flex-1 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row flex-1 overflow-hidden">
                             {/* Left: Fitting Room */}
-                            <div className="w-[35%] bg-base-50/50 border-r border-base-100 flex flex-col items-center justify-center p-8 relative">
-                                <div className="absolute top-4 left-4 flex items-center gap-2">
+                            <div className="w-full sm:w-[35%] bg-base-50/50 border-b sm:border-b-0 sm:border-r border-base-100 flex flex-col items-center justify-center pt-2 pb-0 px-4 sm:p-8 relative shrink-0">
+                                <div className="relative w-full sm:w-auto sm:absolute sm:top-4 sm:left-4 flex items-center justify-start gap-2 mb-2 sm:mb-0 z-10">
                                     <span className="px-3 py-1 bg-misty-dark text-white rounded-full text-[10px] font-black uppercase tracking-tight">Fitting Room</span>
                                 </div>
 
-                                <div className="relative bg-white rounded-3xl p-8 shadow-inner border-2 border-base-100 isolate">
-                                    <div className="relative w-64 h-64 flex items-center justify-center isolate">
+                                <div className="relative bg-white rounded-3xl p-2 sm:p-8 shadow-inner border-2 border-base-100 isolate">
+                                    <div className="relative w-48 h-48 sm:w-64 sm:h-64 flex items-center justify-center isolate">
                                         {/* 펭귄 배경 (벽지) */}
                                         {getPreviewItems().map(id => {
                                             const asset = AVATAR_ASSETS[id];
@@ -154,25 +154,25 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                         })}
                                         {/* 소파 */}
                                         {getPreviewItems().includes('item_sofa') && (
-                                            <div className="absolute -bottom-2 w-[500px] h-[280px] z-[5]">
+                                            <div className="absolute -bottom-1.5 sm:-bottom-2 w-[375px] sm:w-[500px] h-[210px] sm:h-[280px] z-[5]">
                                                 <img src="/assets/avatar/icon_sofa.png" alt="Sofa" className="w-full h-full object-contain" />
                                             </div>
                                         )}
                                         {/* 모니터 */}
                                         {getPreviewItems().includes('item_monitor') && (
-                                            <div className="absolute right-8 top-1/2 w-24 h-20 z-10 translate-y-[-20%] scale-x-[-1]">
+                                            <div className="absolute right-6 sm:right-8 top-1/2 w-[72px] sm:w-24 h-[60px] sm:h-20 z-10 translate-y-[-20%] scale-x-[-1]">
                                                 <SvgMonitor />
                                             </div>
                                         )}
                                         {/* 보물상자 */}
                                         {getPreviewItems().includes('item_treasure') && (
-                                            <div className="absolute left-8 bottom-16 w-20 h-16 z-10">
+                                            <div className="absolute left-6 sm:left-8 bottom-12 sm:bottom-16 w-[60px] sm:w-20 h-[48px] sm:h-16 z-10">
                                                 <SvgTreasure />
                                             </div>
                                         )}
                                         {/* 금고 */}
                                         {getPreviewItems().includes('item_safe') && (
-                                            <div className="absolute right-8 bottom-16 w-16 h-24 z-10">
+                                            <div className="absolute right-6 sm:right-8 bottom-12 sm:bottom-16 w-[48px] sm:w-16 h-[72px] sm:h-24 z-10">
                                                 <SvgSafe />
                                             </div>
                                         )}
@@ -194,12 +194,12 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                         <img
                                             src={previewSkinPath}
                                             alt="Penguin Preview"
-                                            className="w-52 h-52 object-contain relative z-10"
+                                            className="w-[156px] h-[156px] sm:w-52 sm:h-52 object-contain relative z-10"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="mt-8 text-center space-y-1">
+                                <div className="hidden sm:block mt-8 text-center space-y-1">
                                     <p className="text-sm font-black text-base-800 font-sans">
                                         {previewItemId ? SHOP_ITEMS.find(i => i.id === previewItemId)?.name : '피팅룸'}
                                     </p>
@@ -210,9 +210,9 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                             </div>
 
                             {/* Right: Item List */}
-                            <div className="w-[65%] flex flex-col">
+                            <div className="w-full sm:w-[65%] flex flex-col overflow-hidden">
                                 {/* Categories */}
-                                <div className="flex border-b border-base-100 p-2 gap-2 bg-base-50/50">
+                                <div className="flex border-b border-base-100 p-2 gap-2 bg-base-50/50 overflow-x-auto scrollbar-hide shrink-0">
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
