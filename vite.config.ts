@@ -4,10 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import autoprefixer from 'autoprefixer'
 
 // https://vite.dev/config/
-export default defineConfig(({ command }) => {
+export default defineConfig(() => {
   return {
     // 깃허브 배포 시에는 레포지토리 이름을, 로컬 개발 시에는 루트(/)를 사용
-    base: command === 'build' ? '/CoTe-Coach/' : '/',
+    base: '/',
     plugins: [react(), tailwindcss()],
     css: {
       postcss: {
