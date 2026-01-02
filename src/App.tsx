@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import DailyPlanner from './components/DailyPlanner'
 import StatsDashboard from './components/StatsDashboard'
-import Heatmap from './components/Heatmap'
 import { motion } from 'framer-motion';
 import ProblemCard from './components/ProblemCard'
 import CustomProblemCard from './components/CustomProblemCard'
@@ -437,15 +436,6 @@ function App() {
 
               {/* Stats Dashboard Section */}
               <StatsDashboard />
-
-              {/* Learning Heatmap */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-lg font-black text-base-800 font-sans">코딩 잔디 현황</h3>
-                  <p className="text-xs font-bold text-base-400 uppercase tracking-widest font-sans">Streak Consistency</p>
-                </div>
-                <Heatmap />
-              </div>
             </div>
           )}
         </motion.div>
