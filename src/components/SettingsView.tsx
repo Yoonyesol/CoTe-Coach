@@ -4,13 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
 import { User, Lock, Trash2, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Password validation regex (same as sign-up)
-const validatePassword = (password: string): boolean => {
-    if (password.length < 8) return false;
-    if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/.test(password)) return false;
-    return true;
-};
+import { validatePassword } from '../lib/validation';
 
 const SettingsView: React.FC = () => {
     const { nickname, setNickname } = useUserStore();

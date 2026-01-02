@@ -4,6 +4,7 @@ import { Mail, ArrowRight, Trophy, Zap, Target, Loader2, Lock, Sparkles, CheckCi
 import { useAuthStore } from '../store/useAuthStore';
 import { clsx } from 'clsx';
 import { AuthError } from '@supabase/supabase-js';
+import { validateEmail, getPasswordValidationError } from '../lib/validation';
 
 const LandingPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -23,21 +24,6 @@ const LandingPage: React.FC = () => {
 
     const { signInWithPassword, signUp } = useAuthStore();
 
-    const validateEmail = (val: string) => {
-        if (!val) return '이메일을 입력해 주세요.';
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return '올바른 이메일 형식이 아닙니다.';
-        return '';
-    };
-
-    const validatePassword = (val: string) => {
-        if (!val) return '비밀번호를 입력해 주세요.';
-        if (val.length < 8) return '비밀번호는 최소 8자 이상이어야 합니다.';
-        if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/.test(val)) {
-            return '영문, 숫자, 특수문자를 각각 최소 하나씩 포함해야 합니다.';
-        }
-        return '';
-    };
-
     // 실시간 검증 효과
     useEffect(() => {
         if (email) setEmailError(validateEmail(email));
@@ -45,7 +31,7 @@ const LandingPage: React.FC = () => {
     }, [email]);
 
     useEffect(() => {
-        if (password) setPasswordError(validatePassword(password));
+        if (password) setPasswordError(getPasswordValidationError(password));
         else setPasswordError('');
     }, [password]);
 
@@ -62,7 +48,7 @@ const LandingPage: React.FC = () => {
         setError(null);
 
         const eErr = validateEmail(email);
-        const pErr = validatePassword(password);
+        const pErr = getPasswordValidationError(password);
         setEmailError(eErr);
         setPasswordError(pErr);
 
