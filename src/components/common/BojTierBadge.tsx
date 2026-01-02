@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BojTierBadgeProps } from '../types/components';
+import { BojTierBadgeProps } from '../../types/components';
 
 const BojTierBadge: React.FC<BojTierBadgeProps> = ({ level, size = 'md', className = '' }) => {
 

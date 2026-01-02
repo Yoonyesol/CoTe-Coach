@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUserStore } from '../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, ArrowRight, Trophy, CheckCircle2 } from 'lucide-react';
 import { clsx } from 'clsx';

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Play, Pause, RotateCcw, Maximize2, Minimize2, AlertCircle, X, Timer as TimerIcon } from 'lucide-react';
-import { useUserStore } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
+import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 

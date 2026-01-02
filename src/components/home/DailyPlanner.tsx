@@ -2,7 +2,7 @@ import React from 'react';
 import { Target, CheckCircle2, Circle, Calendar, Trophy } from 'lucide-react';
 import { clsx } from 'clsx';
 
-import { DailyPlannerProps } from '../types/components';
+import { DailyPlannerProps } from '../../types/components';
 
 const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, daysRemaining, streak }) => {
     const percentage = Math.round((solvedCount / goalCount) * 100);

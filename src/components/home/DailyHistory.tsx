@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
     History,
-    Edit2,
     Clock,
     Trophy,
     Tag,
@@ -9,8 +8,8 @@ import {
     ChevronRight,
     Calendar
 } from 'lucide-react';
-import { useUserStore } from '../store/useUserStore';
-import { DailyHistoryProps } from '../types/components';
+import { useUserStore } from '../../store/useUserStore';
+import { DailyHistoryProps } from '../../types/components';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {

@@ -9,12 +9,12 @@ import {
     ReviewNotificationsSkeleton,
     ProblemCardSkeleton
 } from '../components/common/Skeleton';
-import GoalBanner from '../components/GoalBanner';
-import DailyPlanner from '../components/DailyPlanner';
-import ReviewNotifications from '../components/ReviewNotifications';
-import ProblemCard from '../components/ProblemCard';
-import CustomProblemCard from '../components/CustomProblemCard';
-import DailyHistory from '../components/DailyHistory';
+import GoalBanner from '../components/home/GoalBanner';
+import DailyPlanner from '../components/home/DailyPlanner';
+import ReviewNotifications from '../components/home/ReviewNotifications';
+import ProblemCard from '../components/problems/ProblemCard';
+import CustomProblemCard from '../components/problems/CustomProblemCard';
+import DailyHistory from '../components/home/DailyHistory';
 import { StudyLog, DailyTask } from '../types/study';
 import { getLocalDateString } from '../lib/dateUtils';
 import { useUserStore } from '../store/useUserStore';

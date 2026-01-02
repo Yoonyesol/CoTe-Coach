@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TierBadgeProps } from '../types/components';
+import { TierBadgeProps } from '../../types/components';
 
 const TierBadge: React.FC<TierBadgeProps> = ({ tier, size = 'md', className = '' }) => {
     const [rankName, rankLevel] = tier.split(' ');

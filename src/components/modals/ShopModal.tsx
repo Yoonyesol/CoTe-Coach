@@ -5,7 +5,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { ShopItem } from '../../types/shop';
 import { clsx } from 'clsx';
 import { ShopModalProps } from '../../types/modal';
-import { AVATAR_ASSETS, resolveSkin, SvgMonitor, SvgTreasure, SvgSafe, SvgAura, SvgHalo, SvgHearts, SvgSnow } from '../avatar/AvatarAssets';
+import { AVATAR_ASSETS, resolveSkin, SvgMonitor, SvgTreasure, SvgSafe } from '../avatar/AvatarAssets';
 import { SHOP_ITEMS } from '../../constants/shop';
 
 interface ExtendedShopModalProps extends ShopModalProps {
@@ -208,7 +208,6 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                     const isOwned = inventory.includes(item.id);
                                     const isEquipped = equippedItems.includes(item.id);
                                     const isSelected = previewItemId === item.id;
-                                    const canAfford = points >= item.price;
                                     const asset = AVATAR_ASSETS[item.id];
 
                                     return (

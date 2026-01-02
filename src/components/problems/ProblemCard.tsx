@@ -2,15 +2,15 @@ import React from 'react';
 import { ExternalLink, Zap, Flame, Trophy, Play, Pause, Timer as TimerIcon, Brain, CheckCircle } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { useUserStore } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
+import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { motion } from 'framer-motion';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import { ProblemCardProps } from '../types/components';
+import { ProblemCardProps } from '../../types/components';
 
 const typeStyles = {
   WARM_UP: {

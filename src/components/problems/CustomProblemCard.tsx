@@ -2,9 +2,9 @@ import React from 'react';
 import { ExternalLink, Zap, Play, Pause, Timer as TimerIcon, CheckCircle, Trash2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { DailyTask } from '../types/study';
-import { useUserStore } from '../store/useUserStore';
-import { useModalStore } from '../store/useModalStore';
+import { DailyTask } from '../../types/study';
+import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { motion } from 'framer-motion';
 
 function cn(...inputs: ClassValue[]) {

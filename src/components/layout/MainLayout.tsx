@@ -5,8 +5,8 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../modals/ShopModal';
 import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library } from 'lucide-react';
-import TierBadge from '../TierBadge';
-import BojTierBadge from '../BojTierBadge';
+import TierBadge from '../common/TierBadge';
+import BojTierBadge from '../common/BojTierBadge';
 import { clsx } from 'clsx';
 import { SidebarSkeleton } from '../common/Skeleton';
 import { resolveSkin, getBackgroundItems, getEffectItems } from '../avatar/AvatarAssets';
@@ -92,8 +92,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     <button
                         onClick={() => onTabChange('SETTINGS')}
                         className={clsx(
-                             "p-3 rounded-2xl transition-all outline-none cursor-pointer",
-                             activeTab === 'SETTINGS'
+                            "p-3 rounded-2xl transition-all outline-none cursor-pointer",
+                            activeTab === 'SETTINGS'
                                 ? "bg-white text-base-900 shadow-lg shadow-white/10"
                                 : "text-white/40 hover:text-white hover:bg-white/5"
                         )}

@@ -65,7 +65,7 @@ const MaturityChart: React.FC = () => {
                             cursor={{ fill: '#f8fafc' }}
                         />
                         <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={40}>
-                            {data.map((entry, index) => (
+                            {data.map((_, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Bar>

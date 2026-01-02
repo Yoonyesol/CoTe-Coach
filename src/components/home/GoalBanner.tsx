@@ -1,8 +1,8 @@
 import React from 'react';
 import { Target, Calendar, Zap, Settings, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useUserStore } from '../store/useUserStore';
-import { getLocalDateString } from '../lib/dateUtils';
+import { useUserStore } from '../../store/useUserStore';
+import { getLocalDateString } from '../../lib/dateUtils';
 import clsx from 'clsx';
 
 interface GoalBannerProps {
