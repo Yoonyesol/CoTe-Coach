@@ -29,6 +29,8 @@ import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
 import SettingsView from './components/SettingsView'
+import DeleteAccountModal from './components/modals/DeleteAccountModal'
+import ContactModal from './components/modals/ContactModal'
 import {
   RefreshCw, Settings2, Plus, Target, Loader2, Target as TargetIcon
 } from 'lucide-react';
@@ -124,6 +126,8 @@ function App() {
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
   const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS'>(() => {
     if (typeof window === 'undefined') return 'HOME';
@@ -433,7 +437,10 @@ function App() {
           ) : activeTab === 'LIBRARY' ? (
             <ProblemLibrary onProblemClick={setEditingLog} />
           ) : activeTab === 'SETTINGS' ? (
-            <SettingsView />
+            <SettingsView
+              onDeleteAccountOpen={() => setIsDeleteModalOpen(true)}
+              onContactOpen={() => setIsContactModalOpen(true)}
+            />
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-1">
@@ -499,6 +506,14 @@ function App() {
         isOpen={isGoalModalOpen}
         onClose={() => setIsGoalModalOpen(false)}
         editGoal={getActiveGoal()}
+      />
+      <DeleteAccountModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
       />
     </>
   );
