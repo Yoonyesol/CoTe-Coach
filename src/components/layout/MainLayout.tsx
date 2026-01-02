@@ -1,19 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 import ShopModal from '../modals/ShopModal';
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, Info, BookOpen, Library } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library } from 'lucide-react';
 import TierBadge from '../TierBadge';
 import BojTierBadge from '../BojTierBadge';
 import { clsx } from 'clsx';
 import { SidebarSkeleton } from '../common/Skeleton';
+import { resolveSkin, getBackgroundItems, getEffectItems } from '../avatar/AvatarAssets';
+import { AvatarAsset } from '../../types/avatar';
 
-const ITEM_EMOJIS: Record<string, string> = {
-    'item_1': '🕶️', 'item_2': '🧢', 'item_3': '👑',
-    'item_4': '🛋️', 'item_5': '🖥️', 'item_6': '💰', 'item_7': '✨'
-};
 
 export interface MainLayoutProps {
     children: React.ReactNode;
@@ -36,13 +34,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const { showConfirm } = useModalStore();
 
     const [isShopOpen, setIsShopOpen] = useState(false);
+    const [shopInitialCategory, setShopInitialCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'INVENTORY' | undefined>();
     const progress = xp % 100;
 
     const { data: solvedAcData } = useSolvedAcUser(bojHandle);
     const syncSolvedAcTier = useUserStore((state) => state.syncSolvedAcTier);
 
     // Auto-sync BOJ rating whenever data refreshed
-    React.useEffect(() => {
+    useEffect(() => {
         if (solvedAcData?.rating) {
             syncSolvedAcTier(solvedAcData.rating);
         }
@@ -128,31 +127,53 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center relative">
-                            {/* Equipped Decoration (Aura) */}
-                            {equippedItems.includes('item_7') && (
-                                <div className="absolute w-64 h-64 bg-yellow-200/20 rounded-full blur-3xl animate-pulse" />
-                            )}
+                            {/* Character Container with Layers */}
+                            <div className="relative mb-8 flex items-center justify-center w-64 h-64 isolate">
+                                {getBackgroundItems(equippedItems).map((asset: AvatarAsset) => {
+                                    let positionClass = "absolute z-0";
+                                    if (asset.id === 'item_sofa') positionClass = "absolute -bottom-11 w-[720px] h-[400px] z-[5]";
+                                    if (asset.id === 'item_monitor') positionClass = "absolute right-12 top-1/2 w-28 h-24 z-10 translate-y-[-20%] scale-x-[-1]";
+                                    if (asset.id === 'item_treasure') positionClass = "absolute left-6 bottom-20 w-24 h-20 z-10";
+                                    if (asset.id === 'item_safe') positionClass = "absolute right-6 bottom-20 w-20 h-28 z-10";
+                                    if (asset.slot === 'wallpaper') positionClass = "absolute inset-0 z-[-1]";
 
-                            {/* Character Container */}
-                            <div className="relative mb-8">
-                                <div className="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl z-20">
-                                    {equippedItems.includes('item_3') ? ITEM_EMOJIS['item_3'] :
-                                        equippedItems.includes('item_2') ? ITEM_EMOJIS['item_2'] : ''}
-                                </div>
-                                <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xl z-20 ml-1">
-                                    {equippedItems.includes('item_1') ? ITEM_EMOJIS['item_1'] : ''}
-                                </div>
-                                <div className="text-9xl mb-4 animate-bounce-soft relative z-10 drop-shadow-2xl">🐧</div>
+                                    if (asset.svgIcon) {
+                                        const SvgComponent = asset.svgIcon;
+                                        return (
+                                            <div key={asset.id} className={positionClass}>
+                                                <SvgComponent />
+                                            </div>
+                                        );
+                                    }
 
-                                <div className="absolute -right-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                                    {equippedItems.includes('item_5') ? ITEM_EMOJIS['item_5'] : ''}
-                                </div>
-                                <div className="absolute -left-16 bottom-4 text-4xl animate-in zoom-in duration-500">
-                                    {equippedItems.includes('item_4') ? ITEM_EMOJIS['item_4'] : ''}
-                                </div>
-                                <div className="absolute -bottom-8 left-12 text-3xl animate-in zoom-in duration-500">
-                                    {equippedItems.includes('item_6') ? ITEM_EMOJIS['item_6'] : ''}
-                                </div>
+                                    if (asset.iconPath) {
+                                        return (
+                                            <div key={asset.id} className={positionClass}>
+                                                <img src={asset.iconPath} alt={asset.name} className="w-full h-full object-contain" />
+                                            </div>
+                                        );
+                                    }
+
+                                    return null;
+                                })}
+
+                                {getEffectItems(equippedItems).map((asset: AvatarAsset) => {
+                                    const SvgComponent = asset.svgIcon;
+                                    if (!SvgComponent) return null;
+
+                                    const isBehind = ['item_aura', 'item_halo'].includes(asset.id);
+                                    return (
+                                        <div key={asset.id} className={clsx("absolute inset-0 pointer-events-none", isBehind ? "z-[2]" : "z-20")}>
+                                            <SvgComponent />
+                                        </div>
+                                    );
+                                })}
+
+                                <img
+                                    src={resolveSkin(equippedItems)}
+                                    alt="Penguin Avatar"
+                                    className="w-56 h-56 object-contain animate-bounce-soft relative z-10 drop-shadow-2xl"
+                                />
                             </div>
 
                             <div className="w-full space-y-6">
@@ -260,7 +281,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                             </div>
 
                             <div className="flex justify-center">
-                                <button className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6">
+                                <button
+                                    onClick={() => {
+                                        setShopInitialCategory('INVENTORY');
+                                        setIsShopOpen(true);
+                                    }}
+                                    className="game-button bg-white text-base-800 text-[10px] shadow-sm font-black border-none ring-1 ring-base-100 hover:bg-base-50 transition-colors cursor-pointer flex items-center gap-2 group px-6"
+                                >
                                     <Briefcase className="w-3 h-3 text-base-400 group-hover:text-misty transition-colors" />
                                     가방 확인
                                 </button>
@@ -269,7 +296,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     </div>
                 )}
 
-                <ShopModal isOpen={isShopOpen} onClose={() => setIsShopOpen(false)} />
+                <ShopModal
+                    isOpen={isShopOpen}
+                    onClose={() => {
+                        setIsShopOpen(false);
+                        setShopInitialCategory(undefined);
+                    }}
+                    initialCategory={shopInitialCategory}
+                />
             </aside>
 
             {/* 3. Main Content */}
