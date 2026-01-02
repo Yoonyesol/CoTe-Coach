@@ -1,38 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Check, Coins } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { ShopItem } from '../../types/shop';
 import { clsx } from 'clsx';
-
 import { ShopModalProps } from '../../types/modal';
+import { AVATAR_ASSETS, resolveSkin, SvgMonitor, SvgTreasure, SvgSafe, SvgAura, SvgHalo, SvgHearts, SvgSnow } from '../avatar/AvatarAssets';
+import { SHOP_ITEMS } from '../../constants/shop';
 
-const SHOP_ITEMS: ShopItem[] = [
-    { id: 'item_1', name: '멋쟁이 선글라스', price: 100, category: 'CLOTHES', emoji: '🕶️' },
-    { id: 'item_2', name: '알록달록 모자', price: 250, category: 'CLOTHES', emoji: '🧢' },
-    { id: 'item_3', name: '럭셔리 왕관', price: 1500, category: 'CLOTHES', emoji: '👑' },
-    { id: 'item_4', name: '편안한 소파', price: 500, category: 'FURNITURE', emoji: '🛋️' },
-    { id: 'item_5', name: '코딩용 모니터', price: 800, category: 'FURNITURE', emoji: '🖥️' },
-    { id: 'item_6', name: '황금 보물상자', price: 2000, category: 'DECO', emoji: '💰' },
-    { id: 'item_7', name: '반짝이는 오라', price: 3000, category: 'DECO', emoji: '✨' },
-];
+interface ExtendedShopModalProps extends ShopModalProps {
+    initialCategory?: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY';
+}
 
-const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) => {
+const ItemIcon: React.FC<{ item: ShopItem; asset?: any }> = ({ item, asset }) => {
+    const [hasError, setHasError] = useState(false);
+
+    // 1. AvatarAssets에 정의된 iconPath 우선
+    // 2. 없으면 규칙에 따른 경로 (/assets/avatar/icon_아이템명.png) 시도
+    const iconUrl = asset?.iconPath || `/assets/avatar/icon_${item.id.replace('item_', '')}.png`;
+
+    if (hasError) {
+        return <span className="text-4xl animate-in zoom-in duration-300">{item.emoji}</span>;
+    }
+
+    return (
+        <img
+            src={iconUrl}
+            alt={item.name}
+            className="w-full h-full object-contain drop-shadow-md animate-in fade-in zoom-in duration-300"
+            onError={() => setHasError(true)}
+        />
+    );
+};
+
+const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialCategory }) => {
     const { points, inventory, equippedItems, buyItem, toggleEquip } = useUserStore();
-    const [activeCategory, setActiveCategory] = useState<'CLOTHES' | 'FURNITURE' | 'DECO'>('CLOTHES');
+    const [activeCategory, setActiveCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY'>(initialCategory || 'ACCESSORY');
+    const [previewItemId, setPreviewItemId] = useState<string | null>(null);
+
+    // Sync active category when prop changes
+    useEffect(() => {
+        if (initialCategory) setActiveCategory(initialCategory);
+    }, [initialCategory]);
 
     if (!isOpen) return null;
 
     const categories = [
+        { id: 'ACCESSORY', label: '악세사리', emoji: '🎀' },
         { id: 'CLOTHES', label: '의상', emoji: '👕' },
         { id: 'FURNITURE', label: '가구', emoji: '🏠' },
+        { id: 'WALLPAPER', label: '벽지', emoji: '🖼️' },
         { id: 'DECO', label: '장식', emoji: '🎨' },
+        { id: 'INVENTORY', label: '내 가방', emoji: '🎒' },
     ] as const;
 
-    const filteredItems = SHOP_ITEMS.filter(item => item.category === activeCategory);
+    const filteredItems = activeCategory === 'INVENTORY'
+        ? SHOP_ITEMS.filter(item => inventory.includes(item.id))
+        : SHOP_ITEMS.filter(item => item.category === activeCategory);
+
+    // 미리보기용 아이템 목록 계산
+    const getPreviewItems = (): string[] => {
+        if (!previewItemId) return equippedItems;
+
+        const previewAsset = AVATAR_ASSETS[previewItemId];
+        if (!previewAsset) return [...equippedItems, previewItemId];
+
+        // 같은 슬롯의 기존 아이템 제외하고 새 아이템 추가
+        const filtered = equippedItems.filter(id => {
+            const asset = AVATAR_ASSETS[id];
+            return !asset || asset.slot !== previewAsset.slot;
+        });
+        return [...filtered, previewItemId];
+    };
+
+    const previewSkinPath = resolveSkin(getPreviewItems());
 
     return (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-base-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="glass-card bg-white w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col h-[600px]">
+            <div className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col h-[700px]">
 
                 {/* Header */}
                 <div className="bg-base-900 p-6 text-white flex justify-between items-center">
@@ -50,99 +94,195 @@ const ShopModal: React.FC<ShopModalProps> = ({ isOpen, onClose }) => {
                             <Coins className="w-4 h-4 text-wheat" />
                             <span className="text-sm font-black text-wheat">{points.toLocaleString()}G</span>
                         </div>
-                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                        <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
 
-                {/* Categories */}
-                <div className="flex border-b border-base-100 p-2 gap-2 bg-base-50/50">
-                    {categories.map((cat) => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setActiveCategory(cat.id)}
-                            className={clsx(
-                                "flex-1 py-3 px-4 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2",
-                                activeCategory === cat.id
-                                    ? "bg-white text-base-900 shadow-md border border-base-100"
-                                    : "text-base-400 hover:bg-white/50"
-                            )}
-                        >
-                            <span>{cat.emoji}</span>
-                            {cat.label}
-                        </button>
-                    ))}
-                </div>
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Left: Fitting Room */}
+                    <div className="w-[35%] bg-base-50/50 border-r border-base-100 flex flex-col items-center justify-center p-8 relative">
+                        <div className="absolute top-4 left-4 flex items-center gap-2">
+                            <span className="px-3 py-1 bg-misty-dark text-white rounded-full text-[10px] font-black uppercase tracking-tight">Fitting Room</span>
+                        </div>
 
-                {/* Item List */}
-                <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {filteredItems.map((item) => {
-                            const isOwned = inventory.includes(item.id);
-                            const isEquipped = equippedItems.includes(item.id);
-                            const canAfford = points >= item.price;
+                        <div className="relative bg-white rounded-3xl p-8 shadow-inner border-2 border-base-100 isolate">
+                            <div className="relative w-64 h-64 flex items-center justify-center isolate">
+                                {/* 펭귄 배경 (벽지) */}
+                                {getPreviewItems().map(id => {
+                                    const asset = AVATAR_ASSETS[id];
+                                    if (asset && asset.slot === 'wallpaper' && asset.svgIcon) {
+                                        const SvgComponent = asset.svgIcon;
+                                        return (
+                                            <div key={id} className="absolute inset-0 z-[-1]">
+                                                <SvgComponent />
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                {/* 소파 */}
+                                {getPreviewItems().includes('item_sofa') && (
+                                    <div className="absolute -bottom-2 w-[500px] h-[280px] z-[5]">
+                                        <img src="/assets/avatar/icon_sofa.png" alt="Sofa" className="w-full h-full object-contain" />
+                                    </div>
+                                )}
+                                {/* 모니터 */}
+                                {getPreviewItems().includes('item_monitor') && (
+                                    <div className="absolute right-8 top-1/2 w-24 h-20 z-10 translate-y-[-20%] scale-x-[-1]">
+                                        <SvgMonitor />
+                                    </div>
+                                )}
+                                {/* 보물상자 */}
+                                {getPreviewItems().includes('item_treasure') && (
+                                    <div className="absolute left-8 bottom-16 w-20 h-16 z-10">
+                                        <SvgTreasure />
+                                    </div>
+                                )}
+                                {/* 금고 */}
+                                {getPreviewItems().includes('item_safe') && (
+                                    <div className="absolute right-8 bottom-16 w-16 h-24 z-10">
+                                        <SvgSafe />
+                                    </div>
+                                )}
+                                {/* 장식 효과들 (오라, 후광, 하트, 눈 등) */}
+                                {getPreviewItems().map(id => {
+                                    const asset = AVATAR_ASSETS[id];
+                                    if (asset && asset.slot === 'effect' && asset.svgIcon) {
+                                        const SvgComponent = asset.svgIcon;
+                                        const isBehind = ['item_aura', 'item_halo'].includes(id);
+                                        return (
+                                            <div key={id} className={clsx("absolute inset-0 pointer-events-none", isBehind ? "z-[2]" : "z-20")}>
+                                                <SvgComponent />
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                                {/* 펭귄 */}
+                                <img
+                                    src={previewSkinPath}
+                                    alt="Penguin Preview"
+                                    className="w-52 h-52 object-contain relative z-10"
+                                />
+                            </div>
+                        </div>
 
-                            return (
-                                <div
-                                    key={item.id}
+                        <div className="mt-8 text-center space-y-1">
+                            <p className="text-sm font-black text-base-800 font-sans">
+                                {previewItemId ? SHOP_ITEMS.find(i => i.id === previewItemId)?.name : '피팅룸'}
+                            </p>
+                            <p className="text-[11px] font-bold text-base-400 font-sans">
+                                {previewItemId ? '구매 전 미리 입혀보세요!' : '아이템을 클릭하여 미리보세요.'}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Right: Item List */}
+                    <div className="w-[65%] flex flex-col">
+                        {/* Categories */}
+                        <div className="flex border-b border-base-100 p-2 gap-2 bg-base-50/50">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setActiveCategory(cat.id)}
                                     className={clsx(
-                                        "glass-card p-4 flex flex-col items-center justify-center gap-3 border-2 transition-all group relative overflow-hidden",
-                                        isEquipped ? "border-misty bg-misty-light/10" : "border-base-100 hover:border-base-200"
+                                        "flex-1 py-3 px-2 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap",
+                                        activeCategory === cat.id
+                                            ? "bg-white text-base-900 shadow-md border border-base-100"
+                                            : "text-base-400 hover:bg-white/50"
                                     )}
                                 >
-                                    <div className="text-4xl group-hover:scale-110 transition-transform duration-300 relative z-10">
-                                        {item.emoji}
-                                    </div>
-                                    <div className="text-center">
-                                        <p className="text-xs font-black text-base-800 font-sans">{item.name}</p>
-                                        <p className="text-[10px] font-bold text-base-400 uppercase font-sans">{item.price}G</p>
-                                    </div>
+                                    <span>{cat.emoji}</span>
+                                    {cat.label}
+                                </button>
+                            ))}
+                        </div>
 
-                                    {isOwned ? (
-                                        <button
-                                            onClick={() => toggleEquip(item.id)}
+                        <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                            <div className="grid grid-cols-2 gap-4">
+                                {filteredItems.map((item) => {
+                                    const isOwned = inventory.includes(item.id);
+                                    const isEquipped = equippedItems.includes(item.id);
+                                    const isSelected = previewItemId === item.id;
+                                    const canAfford = points >= item.price;
+                                    const asset = AVATAR_ASSETS[item.id];
+
+                                    return (
+                                        <div
+                                            key={item.id}
+                                            onClick={() => setPreviewItemId(item.id)}
                                             className={clsx(
-                                                "w-full py-2 rounded-lg text-[10px] font-black transition-all flex items-center justify-center gap-1",
-                                                isEquipped ? "bg-misty-dark text-white" : "bg-base-100 text-base-600 hover:bg-base-200"
+                                                "p-4 flex flex-col items-center justify-center gap-3 border-2 rounded-2xl transition-all group relative overflow-hidden cursor-pointer",
+                                                isSelected ? "border-misty ring-2 ring-misty-light ring-offset-2" : "border-base-100 hover:border-base-200 bg-white shadow-sm",
+                                                isEquipped && "bg-misty-light/5"
                                             )}
                                         >
-                                            {isEquipped ? (
-                                                <><Check className="w-3 h-3" /> 착용 중</>
+                                            <div className="w-16 h-16 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                                                <ItemIcon item={item} asset={asset} />
+                                            </div>
+                                            <div className="text-center">
+                                                <p className="text-xs font-black text-base-800 font-sans">{item.name}</p>
+                                                <div className="flex items-center justify-center gap-1 mt-1">
+                                                    <Coins className="w-3 h-3 text-wheat-dark" />
+                                                    <p className="text-[10px] font-black text-base-400 uppercase font-sans tracking-tight">{item.price}G</p>
+                                                </div>
+                                            </div>
+
+                                            {isOwned ? (
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleEquip(item.id, asset?.slot, item.category);
+                                                    }}
+                                                    className={clsx(
+                                                        "w-full py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer",
+                                                        isEquipped ? "bg-misty-dark text-white shadow-inner" : "bg-base-100 text-base-600 hover:bg-base-200"
+                                                    )}
+                                                >
+                                                    {isEquipped ? (
+                                                        <><Check className="w-3 h-3" /> 착용 중</>
+                                                    ) : (
+                                                        '착용하기'
+                                                    )}
+                                                </button>
                                             ) : (
-                                                '착용하기'
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        buyItem(item);
+                                                    }}
+                                                    disabled={!canAfford}
+                                                    className={clsx(
+                                                        "w-full py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer",
+                                                        canAfford
+                                                            ? "bg-base-900 text-white hover:bg-base-800 shadow-lg active:scale-95"
+                                                            : "bg-base-50 text-base-300 cursor-not-allowed"
+                                                    )}
+                                                >
+                                                    구매하기
+                                                </button>
                                             )}
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => buyItem(item)}
-                                            disabled={!canAfford}
-                                            className={clsx(
-                                                "w-full py-2 rounded-lg text-[10px] font-black transition-all flex items-center justify-center gap-1",
-                                                canAfford
-                                                    ? "bg-base-900 text-white hover:bg-base-800 shadow-sm"
-                                                    : "bg-base-50 text-base-300 cursor-not-allowed"
-                                            )}
-                                        >
-                                            구매하기
-                                        </button>
-                                    )}
 
-                                    {/* Sold Out Badge */}
-                                    {isOwned && (
-                                        <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-sage-light rounded-md text-sage-dark text-[8px] font-black uppercase">
-                                            OWNED
+                                            {isOwned && (
+                                                <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 bg-sage-light rounded-md text-sage-dark text-[8px] font-black uppercase tracking-tighter">
+                                                    OWNED
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                    );
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Footer Info */}
-                <div className="p-4 bg-base-50/50 border-t border-base-100 text-center">
-                    <p className="text-[10px] font-bold text-base-400 font-sans uppercase tracking-tight">문제를 풀고 획득한 골드로 캐릭터를 꾸며보세요!</p>
+                {/* Footer */}
+                <div className="p-4 bg-white border-t border-base-100 text-center">
+                    <p className="text-[10px] font-bold text-base-400 font-sans uppercase tracking-tight">
+                        아이템을 클릭하면 <span className="text-misty-dark">피팅룸</span>에서 미리 입혀볼 수 있어요!
+                    </p>
                 </div>
             </div>
         </div>
