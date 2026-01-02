@@ -1,4 +1,5 @@
 name: Deploy to GitHub Pages
+# Triggering a fresh build with updated secrets bridge
 
 on:
   push:
