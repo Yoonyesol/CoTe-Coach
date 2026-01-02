@@ -35,19 +35,19 @@ const NicknameSection: React.FC = () => {
                     <label className="text-[10px] font-black text-base-400 uppercase tracking-widest font-sans">
                         닉네임
                     </label>
-                    <div className="flex gap-2">
+                    <div className="space-y-3">
                         <input
                             type="text"
                             maxLength={15}
                             placeholder="별명을 설정해주세요 (최대 15자)"
                             value={nicknameInput}
                             onChange={(e) => setNicknameInput(e.target.value)}
-                            className="flex-1 px-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-coral/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
+                            className="w-full px-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-coral/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
                         />
                         <button
                             onClick={handleSaveNickname}
                             disabled={!nicknameInput.trim() || nicknameInput === nickname}
-                            className="px-6 py-3 bg-base-900 text-white rounded-xl font-black text-sm hover:bg-base-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-full px-6 py-3 bg-base-900 text-white rounded-xl font-black text-sm hover:bg-base-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                         >
                             저장
                         </button>
