@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { useUserStore } from '../store/useUserStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
-import { User, Lock, Trash2, Check, ExternalLink } from 'lucide-react';
+import { User, Lock, Trash2, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
+
+// Password validation regex (same as sign-up)
+const validatePassword = (password: string): boolean => {
+    if (password.length < 8) return false;
+    if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])/.test(password)) return false;
+    return true;
+};
 
 const SettingsView: React.FC = () => {
     const { nickname, setNickname } = useUserStore();
+    const { verifyCurrentPassword, updatePassword } = useAuthStore();
     const { showAlert, showConfirm } = useModalStore();
 
     // 1. Nickname State
@@ -21,14 +30,57 @@ const SettingsView: React.FC = () => {
         showAlert("프로필 업데이트", "닉네임이 성공적으로 변경되었습니다! 🎉");
     };
 
-    // 2. Password State (Placeholder for now)
+    // 2. Password State
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    const handleChangePassword = () => {
-        // TODO: Implement actual Supabase password update
-        showAlert("준비 중", "비밀번호 변경 기능은 곧 업데이트될 예정입니다.");
+    const handleChangePassword = async () => {
+        // 1. Validate new password format
+        if (!validatePassword(newPassword)) {
+            showAlert("비밀번호 오류", "새 비밀번호는 8자 이상이며, 영문/숫자/특수문자(@$!%*#?&)를 각각 최소 하나씩 포함해야 합니다.");
+            return;
+        }
+
+        // 2. Check if passwords match
+        if (newPassword !== confirmPassword) {
+            showAlert("비밀번호 오류", "새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+            return;
+        }
+
+        setIsChangingPassword(true);
+
+        try {
+            // 3. Verify current password
+            const { error: verifyError } = await verifyCurrentPassword(currentPassword);
+            if (verifyError) {
+                showAlert("인증 실패", "현재 비밀번호가 올바르지 않습니다.");
+                setIsChangingPassword(false);
+                return;
+            }
+
+            // 4. Update password
+            const { error: updateError } = await updatePassword(newPassword);
+            if (updateError) {
+                showAlert("변경 실패", updateError.message || "비밀번호 변경 중 오류가 발생했습니다.");
+                setIsChangingPassword(false);
+                return;
+            }
+
+            // Success
+            showAlert("비밀번호 변경 완료", "비밀번호가 성공적으로 변경되었습니다! 🔒");
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err) {
+            showAlert("오류 발생", "비밀번호 변경 중 예기치 않은 오류가 발생했습니다.");
+        } finally {
+            setIsChangingPassword(false);
+        }
     };
 
     // 3. Account Deletion
@@ -106,50 +158,86 @@ const SettingsView: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-4 opacity-50 pointer-events-none relative">
-                            {/* Overlay for 'Coming Soon' if needed, or just disabled */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="col-span-full">
+                        <div className="space-y-4">
+                            <div className="space-y-4">
+                                <div>
                                     <label className="text-[10px] font-black text-base-400 uppercase tracking-widest font-sans block mb-2">
                                         현재 비밀번호
                                     </label>
-                                    <input
-                                        type="password"
-                                        disabled
-                                        className="w-full px-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showCurrentPassword ? "text" : "password"}
+                                            placeholder="현재 비밀번호 입력"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="w-full px-4 py-3 pr-12 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
+                                        >
+                                            {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black text-base-400 uppercase tracking-widest font-sans block mb-2">
                                         새 비밀번호
                                     </label>
-                                    <input
-                                        type="password"
-                                        disabled
-                                        className="w-full px-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showNewPassword ? "text" : "password"}
+                                            placeholder="8자 이상, 영문/숫자/특수문자"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className="w-full px-4 py-3 pr-12 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowNewPassword(!showNewPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
+                                        >
+                                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                    {newPassword && !validatePassword(newPassword) && (
+                                        <p className="text-[10px] text-coral font-bold mt-1">8자 이상, 영문/숫자/특수문자(@$!%*#?&) 포함 필수</p>
+                                    )}
                                 </div>
                                 <div>
                                     <label className="text-[10px] font-black text-base-400 uppercase tracking-widest font-sans block mb-2">
                                         새 비밀번호 확인
                                     </label>
-                                    <input
-                                        type="password"
-                                        disabled
-                                        className="w-full px-4 py-3 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type={showConfirmPassword ? "text" : "password"}
+                                            placeholder="새 비밀번호 재입력"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            className="w-full px-4 py-3 pr-12 bg-base-50 border-none rounded-xl focus:ring-2 focus:ring-misty/50 transition-all text-sm font-bold placeholder:text-base-300 outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-base-400 hover:text-misty-dark transition-colors"
+                                        >
+                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                    {confirmPassword && newPassword !== confirmPassword && (
+                                        <p className="text-[10px] text-coral font-bold mt-1">비밀번호가 일치하지 않습니다.</p>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex justify-end mt-2">
                                 <button
                                     onClick={handleChangePassword}
-                                    className="px-6 py-3 bg-misty-dark text-white rounded-xl font-black text-sm hover:bg-misty transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                                    disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
+                                    className="px-6 py-3 bg-misty-dark text-white rounded-xl font-black text-sm hover:bg-misty transition-all active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                                 >
-                                    비밀번호 변경
+                                    {isChangingPassword ? '변경 중...' : '비밀번호 변경'}
                                 </button>
-                            </div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="bg-base-900/80 text-white px-4 py-2 rounded-full text-xs font-bold backdrop-blur-sm">다음 단계에서 구현됩니다</span>
                             </div>
                         </div>
                     </div>

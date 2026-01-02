@@ -58,5 +58,22 @@ export const useAuthStore = create<AuthState>((set) => ({
             console.error('Auth initialization error:', error);
             set({ isLoading: false, initialized: true });
         }
+    },
+
+    verifyCurrentPassword: async (password: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user?.email) {
+            return { error: { message: '로그인 정보를 찾을 수 없습니다.' } as any };
+        }
+        const { error } = await supabase.auth.signInWithPassword({
+            email: user.email,
+            password
+        });
+        return { error };
+    },
+
+    updatePassword: async (newPassword: string) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        return { error };
     }
 }));

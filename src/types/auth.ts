@@ -12,4 +12,6 @@ export interface AuthState {
     signUp: (email: string, password: string) => Promise<{ error: AuthError | null }>;
     signOut: () => Promise<{ error: AuthError | null }>;
     initialize: () => Promise<void>;
+    verifyCurrentPassword: (password: string) => Promise<{ error: AuthError | null }>;
+    updatePassword: (newPassword: string) => Promise<{ error: AuthError | null }>;
 }
