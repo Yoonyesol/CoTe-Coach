@@ -31,7 +31,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const bojHandle = useUserStore((state) => state.bojHandle);
 
     const { signOut } = useAuthStore();
-    const { showConfirm } = useModalStore();
+    const { showConfirm, showAlert } = useModalStore();
 
     const [isShopOpen, setIsShopOpen] = useState(false);
     const [shopInitialCategory, setShopInitialCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'INVENTORY' | undefined>();
@@ -86,7 +86,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     >
                         <ShoppingBag className="w-6 h-6" />
                     </button>
-                    <button className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer">
+                    <button
+                        onClick={() => showAlert('오픈 준비 중', '랭킹 시스템은 현재 준비 중입니다. 조금만 기다려주세요! 🏆')}
+                        className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer"
+                        title="랭킹"
+                    >
                         <Trophy className="w-6 h-6" />
                     </button>
                     <button
