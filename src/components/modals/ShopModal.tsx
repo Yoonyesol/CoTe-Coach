@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ShoppingBag, Check, Coins } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
+import { useModalStore } from '../../store/useModalStore';
 import { ShopItem } from '../../types/shop';
 import { clsx } from 'clsx';
 import { ShopModalProps } from '../../types/modal';
@@ -34,6 +35,7 @@ const ItemIcon: React.FC<{ item: ShopItem; asset?: any }> = ({ item, asset }) =>
 
 const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialCategory }) => {
     const { points, inventory, equippedItems, buyItem, toggleEquip } = useUserStore();
+    const { showAlert } = useModalStore();
     const [activeCategory, setActiveCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY'>(initialCategory || 'ACCESSORY');
     const [previewItemId, setPreviewItemId] = useState<string | null>(null);
 
@@ -242,7 +244,7 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                                     )}
                                                 >
                                                     {isEquipped ? (
-                                                        <><Check className="w-3 h-3" /> 착용 중</>
+                                                        <><Check className="w-3 h-3" /> 착용 해제</>
                                                     ) : (
                                                         '착용하기'
                                                     )}
@@ -251,15 +253,12 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        buyItem(item);
+                                                        const success = buyItem(item);
+                                                        if (!success && points < item.price) {
+                                                            showAlert('골드 부족', `${item.name}을(를) 구매하기 위한 골드가 부족합니다.`);
+                                                        }
                                                     }}
-                                                    disabled={!canAfford}
-                                                    className={clsx(
-                                                        "w-full py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer",
-                                                        canAfford
-                                                            ? "bg-base-900 text-white hover:bg-base-800 shadow-lg active:scale-95"
-                                                            : "bg-base-50 text-base-300 cursor-not-allowed"
-                                                    )}
+                                                    className="w-full py-2.5 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1 cursor-pointer bg-wheat-dark text-white hover:bg-wheat shadow-lg active:scale-95"
                                                 >
                                                     구매하기
                                                 </button>
