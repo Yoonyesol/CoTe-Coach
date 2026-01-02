@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useModalStore } from '../store/useModalStore';
-import { User, Lock, Check, ExternalLink, Eye, EyeOff } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { User, Lock, ExternalLink, Eye, EyeOff } from 'lucide-react';
 import { validatePassword } from '../lib/validation';
 import DeleteAccountModal from './modals/DeleteAccountModal';
+import ContactModal from './modals/ContactModal';
 
 const SettingsView: React.FC = () => {
     const { nickname, setNickname } = useUserStore();
@@ -34,8 +34,9 @@ const SettingsView: React.FC = () => {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-    // 3. Deletion State
+    // 3. Deletion & Contact State
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
     const handleChangePassword = async () => {
         // 1. Validate new password format
@@ -252,7 +253,10 @@ const SettingsView: React.FC = () => {
                             <p className="text-sm text-white/60 mb-6 leading-relaxed">
                                 계정 설정이나 서비스 이용에 어려움이 있다면 언제든 문의해주세요.
                             </p>
-                            <button className="flex items-center gap-2 text-xs font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors cursor-pointer">
+                            <button
+                                onClick={() => setIsContactModalOpen(true)}
+                                className="flex items-center gap-2 text-xs font-bold bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                            >
                                 <ExternalLink size={14} />
                                 문의하기
                             </button>
@@ -267,6 +271,10 @@ const SettingsView: React.FC = () => {
             <DeleteAccountModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
+            />
+            <ContactModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
             />
         </div>
     );
