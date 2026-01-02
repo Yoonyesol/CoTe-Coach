@@ -58,8 +58,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
         <div className="min-h-screen flex flex-col md:flex-row bg-base-100 overflow-hidden font-sans">
             {/* 1. Navigation Rail (Leftmost) */}
             <nav className="w-20 bg-base-900 flex flex-col items-center py-8 gap-6 z-30 shrink-0">
-                <div className="w-10 h-10 bg-misty rounded-xl flex items-center justify-center mb-4">
-                    <span className="text-xl font-black text-base-900">C</span>
+                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm overflow-hidden p-1">
+                    <img src="/public/assets/nav_logo.png" alt="CoTe Coach" className="w-full h-full object-contain" />
                 </div>
 
                 {navItems.map((item) => (
@@ -117,13 +117,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                     <SidebarSkeleton />
                 ) : (
                     <div className="p-8 flex flex-col h-full">
-                        <div className="flex justify-between items-center mb-12">
-                            <span className="text-xl font-black bg-gradient-to-br from-misty-dark to-lavender-dark bg-clip-text text-transparent">CoTe Coach</span>
-                            <div className="flex gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-white/50 border border-white flex items-center justify-center text-base-400 hover:text-misty-dark transition-colors cursor-pointer">
-                                    <Settings size={14} />
-                                </div>
-                            </div>
+                        <div className="flex justify-center">
+                            <img src="/public/assets/logo-row.png" alt="CoTe Coach" className="h-16 object-contain drop-shadow-sm" />
                         </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center relative">
