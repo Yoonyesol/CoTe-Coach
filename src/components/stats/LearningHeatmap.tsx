@@ -14,9 +14,9 @@ const LearningHeatmap: React.FC<LearningHeatmapProps> = ({ studyLogs }) => {
         const result = [];
         const today = new Date();
         const startDate = new Date();
-        startDate.setDate(today.getDate() - 12 * 7); // 12 weeks back
+        startDate.setDate(today.getDate() - 20 * 7); // 20 weeks back for better fill
 
-        for (let w = 0; w < 12; w++) {
+        for (let w = 0; w < 20; w++) {
             const week = [];
             for (let d = 0; d < 7; d++) {
                 const current = new Date(startDate);
@@ -35,31 +35,41 @@ const LearningHeatmap: React.FC<LearningHeatmapProps> = ({ studyLogs }) => {
     }, [studyLogs]);
 
     const getColor = (count: number) => {
-        if (count === 0) return 'bg-base-50';
+        if (count === 0) return 'bg-slate-200'; // Much darker for visibility
         if (count === 1) return 'bg-misty-light';
         if (count === 2) return 'bg-misty';
         if (count >= 3) return 'bg-misty-dark';
-        return 'bg-base-50';
+        return 'bg-slate-200';
     };
 
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-6 border-none overflow-hidden col-span-1 lg:col-span-2"
+            className="glass-card p-6 border-none overflow-hidden h-full flex flex-col"
         >
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h3 className="text-sm font-black text-base-800 font-sans">학습 스트라이크 가든</h3>
                     <p className="text-[10px] font-bold text-base-400 font-sans uppercase tracking-tight">Activity Heatmap</p>
                 </div>
-                <div className="flex items-center gap-1.5 text-[8px] font-black text-base-400 uppercase">
-                    <span>Less</span>
-                    <div className="w-2 h-2 bg-base-50 rounded-[2px]" />
-                    <div className="w-2 h-2 bg-misty-light rounded-[2px]" />
-                    <div className="w-2 h-2 bg-misty rounded-[2px]" />
-                    <div className="w-2 h-2 bg-misty-dark rounded-[2px]" />
-                    <span>More</span>
+                <div className="flex items-center gap-2 text-[8px] font-bold text-base-400">
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-slate-200 rounded-[2px]" />
+                        <span>0</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-misty-light rounded-[2px]" />
+                        <span>1</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-misty rounded-[2px]" />
+                        <span>2</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-misty-dark rounded-[2px]" />
+                        <span>3+</span>
+                    </div>
                 </div>
             </div>
 

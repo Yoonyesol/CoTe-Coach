@@ -33,7 +33,7 @@ const LevelUpCard: React.FC = () => {
     }, [level, xp, studyLogs]);
 
     return (
-        <div className="glass-card p-6 border-none flex flex-col justify-between h-[400px]">
+        <div className="glass-card p-6 border-none flex flex-col justify-between h-full min-h-[300px]">
             <div className="flex items-center gap-2 mb-6">
                 <div className="p-2 bg-coral-light rounded-lg">
                     <Target className="w-4 h-4 text-coral-dark" />

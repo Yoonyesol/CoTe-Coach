@@ -57,11 +57,11 @@ const StatsDashboard: React.FC = () => {
             <div className="min-h-[500px]">
                 {activeTab === 'GROWTH' && (
                     <div className="flex flex-col gap-6 animate-in zoom-in-95 fade-in duration-500">
-                        <LearningHeatmap studyLogs={studyLogs} />
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <XPChart studyLogs={studyLogs} bojRating={bojRating} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[320px]">
+                            <LearningHeatmap studyLogs={studyLogs} />
                             <LevelUpCard />
                         </div>
+                        <XPChart studyLogs={studyLogs} bojRating={bojRating} />
                     </div>
                 )}
 
