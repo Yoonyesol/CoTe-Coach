@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useModalStore } from '../../store/useModalStore';
 import emailjs from '@emailjs/browser';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface ContactModalProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface ContactModalProps {
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
     const { showAlert } = useModalStore();
+    useLockBodyScroll(isOpen);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: '',

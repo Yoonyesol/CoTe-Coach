@@ -5,6 +5,7 @@ import { AlertCircle, HelpCircle, X } from 'lucide-react';
 import { clsx } from 'clsx';
 
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 const GlobalModal: React.FC = () => {
     const { isOpen, options, closeModal } = useModalStore();
@@ -18,20 +19,7 @@ const GlobalModal: React.FC = () => {
     }, []);
 
     // Prevent background scrolling when modal is open
-    useEffect(() => {
-        const mainElement = document.querySelector('main');
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            if (mainElement) mainElement.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-            if (mainElement) mainElement.style.overflow = 'auto';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-            if (mainElement) mainElement.style.overflow = 'auto';
-        };
-    }, [isOpen]);
+    useLockBodyScroll(isOpen);
 
     if (!options) return null;
 

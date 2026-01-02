@@ -7,6 +7,7 @@ import { RecommendationSettings } from '../../types/study';
 import { clsx } from 'clsx';
 import DifficultyGuideModal from './DifficultyGuideModal';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 const ALGORITHMS = [
     { id: 'Greedy', name: '그리디' },
@@ -48,6 +49,8 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
     useEffect(() => {
         if (isOpen) {

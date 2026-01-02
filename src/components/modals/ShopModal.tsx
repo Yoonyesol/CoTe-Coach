@@ -9,6 +9,7 @@ import { ShopModalProps } from '../../types/modal';
 import { AVATAR_ASSETS, resolveSkin, SvgMonitor, SvgTreasure, SvgSafe } from '../avatar/AvatarAssets';
 import { SHOP_ITEMS } from '../../constants/shop';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface ExtendedShopModalProps extends ShopModalProps {
     initialCategory?: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY';
@@ -53,6 +54,8 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
     useEffect(() => {
         if (initialCategory) setActiveCategory(initialCategory);
     }, [initialCategory]);
+
+    useLockBodyScroll(isOpen);
 
     if (!isOpen) return null;
 

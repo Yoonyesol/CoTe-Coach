@@ -6,6 +6,7 @@ import { getTodayString } from '../../lib/dateUtils';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface GoalModalProps {
     isOpen: boolean;
@@ -35,7 +36,10 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, editGoal }) => {
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
     // Populate form when editing
     useEffect(() => {

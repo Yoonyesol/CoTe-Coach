@@ -8,6 +8,7 @@ import { clsx } from 'clsx';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 import { AddProblemModalProps } from '../../types/modal';
 
@@ -33,6 +34,8 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    useLockBodyScroll(isOpen);
+
     // Combine BOJ tier + level into difficulty
     useEffect(() => {
         if (platform === 'BOJ' && bojTier && bojLevel) {
@@ -51,22 +54,6 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
             setBojLevel('');
             setActiveTab('SOLVE_NOW');
         }
-    }, [isOpen]);
-
-    // Prevent background scrolling when modal is open
-    useEffect(() => {
-        const mainElement = document.querySelector('main');
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            if (mainElement) mainElement.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-            if (mainElement) mainElement.style.overflow = 'auto';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-            if (mainElement) mainElement.style.overflow = 'auto';
-        };
     }, [isOpen]);
 
     if (!isOpen) return null;

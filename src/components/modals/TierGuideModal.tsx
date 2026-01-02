@@ -3,6 +3,7 @@ import { X, Award, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import TierBadge from '../common/TierBadge';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 import { TierGuideModalProps } from '../../types/modal';
 
@@ -16,7 +17,10 @@ const TierGuideModal: React.FC<TierGuideModalProps> = ({ isOpen, onClose }) => {
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    useLockBodyScroll(isOpen);
+
     const modalVariants = getModalVariants(isMobile);
+
     if (!isOpen) return null;
 
     const tiers = [

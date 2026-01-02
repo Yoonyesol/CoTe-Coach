@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Info, HelpCircle, Target, TrendingUp, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 import { DifficultyGuideModalProps } from '../../types/modal';
 
@@ -14,6 +15,8 @@ const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onC
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
     const modalVariants = getModalVariants(isMobile);
 

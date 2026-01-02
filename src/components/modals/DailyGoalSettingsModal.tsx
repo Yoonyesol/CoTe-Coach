@@ -3,6 +3,7 @@ import { X, Target, Check } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface DailyGoalSettingsModalProps {
     isOpen: boolean;
@@ -37,6 +38,8 @@ const DailyGoalSettingsModal: React.FC<DailyGoalSettingsModalProps> = ({ isOpen,
     }, []);
 
     const modalVariants = getModalVariants(isMobile);
+
+    useLockBodyScroll(isOpen);
 
     if (!isOpen) return null;
 

@@ -7,6 +7,7 @@ import LogForm from '../common/LogForm';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 import { ReviewModalProps } from '../../types/modal';
 
@@ -25,6 +26,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
     // Initial values for the form
     const elapsedTime = getTotalElapsed(problem.title);

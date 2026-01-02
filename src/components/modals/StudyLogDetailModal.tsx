@@ -13,6 +13,7 @@ import { StudyLogDetailModalProps } from '../../types/modal';
 import LogForm from '../common/LogForm';
 
 import { useModalStore } from '../../store/useModalStore';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialLog, isOpen, onClose }) => {
     const { updateStudyLog, deleteStudyLog, studyLogs } = useUserStore();
@@ -29,6 +30,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
 
     // HISTORY LOGS (All logs for the same problem)

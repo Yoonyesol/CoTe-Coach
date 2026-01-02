@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useModalStore } from '../../store/useModalStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface DeleteAccountModalProps {
     isOpen: boolean;
@@ -31,13 +32,13 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
     const [step, setStep] = useState<'FORM' | 'FAREWELL'>('FORM');
 
     // Prevent background scrolling
+    useLockBodyScroll(isOpen);
+
+    // Reset loop for step init
     useEffect(() => {
         if (isOpen) {
-            document.body.style.overflow = 'hidden';
-            setStep('FORM'); // Reset to form when opening
+            setStep('FORM');
             setPassword('');
-        } else {
-            document.body.style.overflow = 'unset';
         }
     }, [isOpen]);
 

@@ -6,6 +6,7 @@ import { ReviewDetailModalProps } from '../../types/modal';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, plan, onStartReview, onQuickLog, onViewFullDetail }) => {
     const { timer, studyLogs } = useUserStore();
@@ -17,6 +18,8 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useLockBodyScroll(isOpen);
 
     // NEW: Log Navigation Logic
     const historyLogs = useMemo(() => {

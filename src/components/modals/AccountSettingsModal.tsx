@@ -7,6 +7,7 @@ import { SolvedAcUser } from '../../types/user';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { backdropVariants, getModalVariants } from '../../lib/animations';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 import { AccountSettingsModalProps } from '../../types/modal';
 
 const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onClose }) => {
@@ -28,13 +29,7 @@ const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({ isOpen, onC
     }, [isOpen, bojHandle]);
 
     // Prevent background scrolling
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-    }, [isOpen]);
+    useLockBodyScroll(isOpen);
 
     const handleVerify = async () => {
         if (!handle.trim()) return;
