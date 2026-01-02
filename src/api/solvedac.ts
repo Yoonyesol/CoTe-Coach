@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = '/api/v3';
+const BASE_URL = import.meta.env.DEV ? '/api/v3' : 'https://solved.ac/api/v3';
 
 import { SolvedAcUser } from '../types/user';
 import { SolvedAcProblem } from '../types/problem';

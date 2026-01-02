@@ -2,22 +2,22 @@ export * from '../../types/avatar';
 import { AvatarAsset } from '../../types/avatar';
 
 // 펭귄 기본 이미지
-export const PENGUIN_BASE_IMAGE = '/assets/avatar/penguin_base.png';
+export const PENGUIN_BASE_IMAGE = `${import.meta.env.BASE_URL}assets/avatar/penguin_base.png`;
 
 // 스킨 맵: 아이템 ID 조합 -> 완성된 펭귄 이미지
 export const SKIN_MAP: Record<string, string> = {
-    '': '/assets/avatar/penguin_base.png',
-    'item_hat': '/assets/avatar/penguin_item_hat.png',
-    'item_scarf': '/assets/avatar/penguin_item_scarf.png',
-    'item_hat_item_scarf': '/assets/avatar/penguin_item_hat_item_scarf.png',
-    'item_crown': '/assets/avatar/penguin_item_crown.png',
-    'item_robe': '/assets/avatar/penguin_item_robe.png',
-    'item_crown_item_robe': '/assets/avatar/penguin_item_crown_item_robe.png',
-    'item_scarf_item_sunglass': '/assets/avatar/penguin_item_scarf_item_sunglass.png',
-    'item_sunglass': '/assets/avatar/penguin_item_sunglass.png',
-    'item_robe_item_sunglass': '/assets/avatar/penguin_item_sunglass_item_robe.png',
-    'item_hat_item_robe': '/assets/avatar/penguin_item_hat_item_robe.png',
-    'item_crown_item_scarf': '/assets/avatar/penguin_item_crown_item_scarf.png',
+    '': `${import.meta.env.BASE_URL}assets/avatar/penguin_base.png`,
+    'item_hat': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_hat.png`,
+    'item_scarf': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_scarf.png`,
+    'item_hat_item_scarf': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_hat_item_scarf.png`,
+    'item_crown': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_crown.png`,
+    'item_robe': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_robe.png`,
+    'item_crown_item_robe': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_crown_item_robe.png`,
+    'item_scarf_item_sunglass': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_scarf_item_sunglass.png`,
+    'item_sunglass': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_sunglass.png`,
+    'item_robe_item_sunglass': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_sunglass_item_robe.png`,
+    'item_hat_item_robe': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_hat_item_robe.png`,
+    'item_crown_item_scarf': `${import.meta.env.BASE_URL}assets/avatar/penguin_item_crown_item_scarf.png`,
 };
 
 // ========== SVG 배경 에셋들 ==========
@@ -393,19 +393,19 @@ export const AVATAR_ASSETS: Record<string, AvatarAsset> = {
         id: 'item_hat',
         name: '알록달록 모자',
         slot: 'head',
-        iconPath: '/assets/avatar/icon_hat.png',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_hat.png`,
     },
     'item_scarf': {
         id: 'item_scarf',
         name: '빨간 목도리',
         slot: 'clothes',
-        iconPath: '/assets/avatar/icon_scarf.png',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_scarf.png`,
     },
     'item_sofa': {
         id: 'item_sofa',
         name: '편안한 소파',
         slot: 'ground',
-        iconPath: '/assets/avatar/icon_sofa.png',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_sofa.png`,
     },
     'item_monitor': {
         id: 'item_monitor',
@@ -495,16 +495,19 @@ export const AVATAR_ASSETS: Record<string, AvatarAsset> = {
         id: 'item_crown',
         name: '임금님의 왕관',
         slot: 'head',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_crown.png`,
     },
     'item_robe': {
         id: 'item_robe',
         name: '신비로운 로브',
         slot: 'clothes',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_robe.png`,
     },
     'item_sunglass': {
         id: 'item_sunglass',
         name: '멋쟁이 선글라스',
         slot: 'head',
+        iconPath: `${import.meta.env.BASE_URL}assets/avatar/icon_sunglass.png`,
     },
 };
 

@@ -57,7 +57,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
             {/* 1. Navigation Rail (Leftmost) */}
             <nav className="w-20 bg-base-900 flex flex-col items-center py-8 gap-6 z-30 shrink-0">
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-4 shadow-sm overflow-hidden p-1">
-                    <img src="/public/assets/nav_logo.png" alt="CoTe Coach" className="w-full h-full object-contain" />
+                    <img src={`${import.meta.env.BASE_URL}assets/nav_logo.png`} alt="CoTe Coach" className="w-full h-full object-contain" />
                 </div>
 
                 {navItems.map((item) => (
@@ -126,7 +126,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                 ) : (
                     <div className="p-8 flex flex-col h-full">
                         <div className="flex justify-center">
-                            <img src="/public/assets/logo-row.png" alt="CoTe Coach" className="h-16 object-contain drop-shadow-sm" />
+                            <img src={`${import.meta.env.BASE_URL}assets/logo-row.png`} alt="CoTe Coach" className="h-16 object-contain drop-shadow-sm" />
                         </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center relative">
