@@ -2,6 +2,6 @@ export interface ShopItem {
     id: string;
     name: string;
     price: number;
-    category: 'CLOTHES' | 'FURNITURE' | 'DECO';
+    category: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER';
     emoji: string;
 }
