@@ -28,8 +28,9 @@ import { useModalStore } from './store/useModalStore'
 import { StudyLog, DailyTask } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import { useRecommendations } from './hooks/useRecommendations'
+import SettingsView from './components/SettingsView'
 import {
-  Search, TrendingUp, Calendar, RefreshCw, Settings2, Plus, Target, Loader2, Target as TargetIcon
+  RefreshCw, Settings2, Plus, Target, Loader2, Target as TargetIcon
 } from 'lucide-react';
 import { getLocalDateString } from './lib/dateUtils'
 import clsx from 'clsx';
@@ -56,7 +57,8 @@ function App() {
     startTimer,
     fetchGoals,
     getActiveGoal,
-    getStreak
+    getStreak,
+    nickname
   } = useUserStore();
   const { showAlert } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
@@ -122,17 +124,19 @@ function App() {
   const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
   const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
   const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY'>(() => {
+
+  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS'>(() => {
     if (typeof window === 'undefined') return 'HOME';
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
     if (tab === 'STATS') return 'STATS';
     if (tab === 'JOURNAL') return 'JOURNAL';
     if (tab === 'LIBRARY') return 'LIBRARY';
+    if (tab === 'SETTINGS') return 'SETTINGS';
     return 'HOME';
   });
 
-  const handleTabChange = (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => {
+  const handleTabChange = (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS') => {
     setActiveTab(tab);
     const url = new URL(window.location.href);
     if (tab === 'HOME') {
@@ -150,6 +154,7 @@ function App() {
       if (tab === 'STATS') setActiveTab('STATS');
       else if (tab === 'JOURNAL') setActiveTab('JOURNAL');
       else if (tab === 'LIBRARY') setActiveTab('LIBRARY');
+      else if (tab === 'SETTINGS') setActiveTab('SETTINGS');
       else setActiveTab('HOME');
     };
 
@@ -235,7 +240,7 @@ function App() {
               ) : (
                 <header className="flex justify-between items-center">
                   <div>
-                    <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{user.email?.split('@')[0]}님!</span></h1>
+                    <h1 className="text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{nickname || user.email?.split('@')[0]}님!</span></h1>
                     <div className="text-sm font-medium text-base-400 mt-2 font-sans flex items-center gap-1.5 flex-wrap">
                       <span>오늘의 목표인</span>
                       <button
@@ -427,6 +432,8 @@ function App() {
             />
           ) : activeTab === 'LIBRARY' ? (
             <ProblemLibrary onProblemClick={setEditingLog} />
+          ) : activeTab === 'SETTINGS' ? (
+            <SettingsView />
           ) : (
             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="space-y-1">

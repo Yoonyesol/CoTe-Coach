@@ -17,6 +17,7 @@ export const useUserStore = create<UserState>()(
             points: 0,
             tier: 'Iron 1',
             bojHandle: '',
+            nickname: null,
             bojRating: 0,
 
             recommendationSettings: {
@@ -62,6 +63,11 @@ export const useUserStore = create<UserState>()(
             addPoints: (amount) => set((state) => ({ points: state.points + amount })),
 
             setBojHandle: (handle: string) => set({ bojHandle: handle }),
+            setNickname: async (nickname: string) => {
+                set({ nickname });
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) await get().saveProfile(user.id);
+            },
 
 
 
@@ -164,6 +170,7 @@ export const useUserStore = create<UserState>()(
                 if (profile) {
                     set({
                         bojHandle: profile.boj_handle || '',
+                        nickname: profile.nickname || null,
                         bojRating: profile.boj_rating || 0,
                         level: profile.level || 1,
                         tier: profile.tier || 'Bronze 5',
@@ -230,6 +237,7 @@ export const useUserStore = create<UserState>()(
                     .upsert({
                         id: userId,
                         boj_handle: state.bojHandle,
+                        nickname: state.nickname,
                         boj_rating: state.bojRating,
                         level: state.level,
                         tier: state.tier,

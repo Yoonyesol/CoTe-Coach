@@ -15,8 +15,8 @@ import { AvatarAsset } from '../../types/avatar';
 
 export interface MainLayoutProps {
     children: React.ReactNode;
-    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY';
-    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => void;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
     isLoading?: boolean;
@@ -90,7 +90,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                         <Trophy className="w-6 h-6" />
                     </button>
                     <button
-                        className="p-3 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 transition-all outline-none cursor-pointer"
+                        onClick={() => onTabChange('SETTINGS')}
+                        className={clsx(
+                             "p-3 rounded-2xl transition-all outline-none cursor-pointer",
+                             activeTab === 'SETTINGS'
+                                ? "bg-white text-base-900 shadow-lg shadow-white/10"
+                                : "text-white/40 hover:text-white hover:bg-white/5"
+                        )}
                         title="설정"
                     >
                         <Settings className="w-6 h-6" />

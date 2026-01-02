@@ -25,6 +25,7 @@ export interface UserState {
     points: number;
     tier: string;
     bojHandle: string;
+    nickname: string | null;
     bojRating: number;
 
     recommendationSettings: RecommendationSettings;
@@ -40,6 +41,7 @@ export interface UserState {
     addXp: (amount: number) => void;
     addPoints: (amount: number) => void;
     setBojHandle: (handle: string) => void;
+    setNickname: (nickname: string) => void;
 
     setRecommendationSettings: (settings: Partial<RecommendationSettings>) => void;
     calculateTier: (level: number) => string;
