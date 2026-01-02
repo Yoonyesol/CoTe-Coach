@@ -185,7 +185,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full max-w-4xl bg-white sm:rounded-[2rem] rounded-t-3xl rounded-b-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-[90vh] md:h-auto md:max-h-[85vh]"
+                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-t-3xl rounded-b-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-[98vh] md:h-auto md:max-h-[85vh]"
                     >
                         {/* LEFT PANEL: Detailed Content */}
                         <div className="flex-1 flex flex-col bg-white overflow-hidden">
@@ -371,8 +371,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         </div>
 
                         {/* RIGHT PANEL: History Timeline */}
-                        <div className="w-full md:w-72 bg-base-50 border-l border-base-100 flex flex-col h-[40vh] md:h-auto overflow-hidden">
-                            <div className="p-6 border-b border-base-100 flex justify-between items-center">
+                        <div className="w-full md:w-72 bg-base-50 border-l border-base-100 flex flex-col h-[30vh] md:h-auto overflow-hidden">
+                            <div className="p-4 md:p-6 border-b border-base-100 flex justify-between items-center">
                                 <h4 className="text-[11px] font-black text-base-400 uppercase tracking-widest flex items-center gap-2">
                                     <History className="w-4 h-4" /> Challenge History
                                 </h4>
@@ -380,13 +380,13 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                     <X className="w-5 h-5 text-base-300" />
                                 </button>
                             </div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-4 space-y-3 md:space-y-4">
                                 {displayLogs.map((h, i) => (
                                     <button
                                         key={h.id}
                                         onClick={() => setCurrentLog(h)}
                                         className={clsx(
-                                            "cursor-pointer w-full p-4 rounded-2xl text-left transition-all border-2 relative group",
+                                            "cursor-pointer w-full p-3 md:p-4 rounded-2xl text-left transition-all border-2 relative group",
                                             h.id === currentLog.id
                                                 ? "bg-white border-misty-dark shadow-md"
                                                 : "bg-transparent border-transparent hover:bg-white/50"
@@ -417,7 +417,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                     </button>
                                 ))}
                             </div>
-                            <div className="p-6 bg-white/50 border-t border-base-100">
+                            <div className="p-4 md:p-6 bg-white/50 border-t border-base-100">
                                 <p className="text-[10px] font-bold text-base-300 leading-tight">
                                     전체 해결 {historyLogs.length}회 • 평균 시간 {Math.round((stats?.avgTime || 0) / 60000)}분
                                 </p>

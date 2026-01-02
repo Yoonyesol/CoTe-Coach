@@ -21,7 +21,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
@@ -69,7 +69,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4">
                     <motion.div
                         variants={backdropVariants}
                         initial="hidden"
@@ -84,11 +84,11 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full max-w-lg overflow-hidden shadow-2xl relative z-10 sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-t-[2rem] rounded-b-none md:rounded-b-2xl h-[98vh] md:h-auto"
                     >
 
                         {/* Header */}
-                        <div className="bg-base-900 p-6 text-white flex justify-between items-center">
+                        <div className="bg-base-900 p-5 md:p-6 text-white flex justify-between items-center">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white/10 rounded-lg">
                                     <Brain className="w-5 h-5 text-misty" />
@@ -114,7 +114,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                 <p className="text-base-500 font-bold">학습 데이터가 연동되었습니다. ✨</p>
                             </div>
                         ) : (
-                            <div className="p-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                            <div className="p-5 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
                                 <LogForm
                                     initialValues={{
                                         result: 'SUCCESS',
