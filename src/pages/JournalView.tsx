@@ -10,7 +10,6 @@ import {
     Target,
     Clock,
     Trophy,
-    Zap,
     Bell,
     BookOpen
 } from 'lucide-react';
@@ -20,17 +19,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { StudyLog } from '../types/study';
 import { getLocalDateString, getTodayString } from '../lib/dateUtils';
 
-const PLATFORM_ICONS: Record<string, string> = {
-    BOJ: 'https://static.solved.ac/logo.json', // Placeholder for concept
-};
-
-interface LearningJournalProps {
+interface JournalViewProps {
     onLogClick?: (log: StudyLog) => void;
     onGoalClick?: () => void;
     onReviewPlanClick?: (plan: any) => void;
 }
 
-const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalClick, onReviewPlanClick }) => {
+const JournalView: React.FC<JournalViewProps> = ({ onLogClick, onGoalClick, onReviewPlanClick }) => {
     const {
         dailyTasks,
         studyLogs,
@@ -466,4 +461,4 @@ const LearningJournal: React.FC<LearningJournalProps> = ({ onLogClick, onGoalCli
     );
 };
 
-export default LearningJournal;
+export default JournalView;

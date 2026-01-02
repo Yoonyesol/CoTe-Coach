@@ -6,7 +6,7 @@ import { useUserStore } from '../store/useUserStore';
 import { StudyLog } from '../types/study';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
-import { ProblemCardSkeleton } from './common/Skeleton';
+import { ProblemCardSkeleton } from '../components/common/Skeleton';
 
 interface ProblemStats {
     problemId: string;

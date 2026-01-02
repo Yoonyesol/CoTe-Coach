@@ -4,20 +4,21 @@ import { TrendingUp, Brain, Timer, History } from 'lucide-react';
 import clsx from 'clsx';
 
 // Existing components
-import XPChart from './stats/XPChart';
-import SkillRadar from './stats/SkillRadar';
-import ActivityBar from './stats/ActivityBar';
-import LearningHeatmap from './stats/LearningHeatmap';
-import LevelUpCard from './stats/LevelUpCard';
-import PlatformDonut from './stats/PlatformDonut';
-import SuccessRateBar from './stats/SuccessRateBar';
-import SolvingTimeChart from './stats/SolvingTimeChart';
-import MaturityChart from './stats/MaturityChart';
-import ReviewDefenseRate from './stats/ReviewDefenseRate';
+// Existing components from src/components/stats/
+import XPChart from '../components/stats/XPChart';
+import SkillRadar from '../components/stats/SkillRadar';
+import ActivityBar from '../components/stats/ActivityBar';
+import LearningHeatmap from '../components/stats/LearningHeatmap';
+import LevelUpCard from '../components/stats/LevelUpCard';
+import PlatformDonut from '../components/stats/PlatformDonut';
+import SuccessRateBar from '../components/stats/SuccessRateBar';
+import SolvingTimeChart from '../components/stats/SolvingTimeChart';
+import MaturityChart from '../components/stats/MaturityChart';
+import ReviewDefenseRate from '../components/stats/ReviewDefenseRate';
 
 type TabType = 'GROWTH' | 'PATTERN' | 'EFFICIENCY' | 'RETENTION';
 
-const StatsDashboard: React.FC = () => {
+const StatsView: React.FC = () => {
     const { studyLogs, bojRating } = useUserStore();
     const [activeTab, setActiveTab] = useState<TabType>('GROWTH');
 
@@ -93,4 +94,4 @@ const StatsDashboard: React.FC = () => {
     );
 };
 
-export default StatsDashboard;
+export default StatsView;
