@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import {
     X, Trash2, Clock,
     BookOpen, Zap, MessageSquare,
-    Calendar, History, TrendingUp, Edit3, BarChart3
+    Calendar, History, TrendingUp, Edit3, BarChart3, Archive
 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -115,7 +115,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
             solvingMethod: data.solvingMethod,
             elapsedTime: data.elapsedTime,
             concepts: data.concepts,
-            isFinished: data.isFinished
+            isFinished: data.isFinished,
+            language: data.language
         });
 
         const updatedLog = {
@@ -127,7 +128,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
             solvingMethod: data.solvingMethod,
             elapsedTime: data.elapsedTime,
             concepts: data.concepts,
-            isFinished: data.isFinished
+            isFinished: data.isFinished,
+            language: data.language
         };
         setCurrentLog(updatedLog);
         setIsEditing(false);
@@ -217,7 +219,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                             approach: currentLog.approach,
                                             reflection: currentLog.reflection,
                                             concepts: currentLog.concepts,
-                                            isFinished: currentLog.isFinished
+                                            isFinished: currentLog.isFinished,
+                                            language: currentLog.language
                                         }}
                                         onSubmit={handleFormSubmit}
                                         onCancel={() => setIsEditing(false)}
@@ -228,19 +231,19 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                 /* VIEW MODE */
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                     {/* Stats Grid */}
-                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                                         <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
                                             <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
                                                 <Clock className="w-3 h-3" /> Time
                                             </p>
-                                            <p className="text-lg font-black text-base-800">{Math.round(currentLog.elapsedTime / 60000)}m</p>
+                                            <p className="text-sm font-black text-base-800">{Math.round(currentLog.elapsedTime / 60000)}m</p>
                                         </div>
                                         <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
                                             <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
                                                 <TrendingUp className="w-3 h-3" /> Difficulty
                                             </p>
                                             <p className={clsx(
-                                                "text-lg font-black",
+                                                "text-sm font-black",
                                                 currentLog.perceivedDifficulty === 'HARD' ? "text-coral" :
                                                     currentLog.perceivedDifficulty === 'EASY' ? "text-sage-dark" : "text-misty-dark"
                                             )}>
@@ -251,8 +254,16 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                             <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
                                                 <BookOpen className="w-3 h-3" /> Method
                                             </p>
-                                            <p className="text-lg font-black text-base-800">
+                                            <p className="text-sm font-black text-base-800">
                                                 {currentLog.solvingMethod === 'SELF' ? 'Self' : 'Ref'}
+                                            </p>
+                                        </div>
+                                        <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
+                                            <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                                <Archive className="w-3 h-3" /> Language
+                                            </p>
+                                            <p className="text-sm font-black text-base-800">
+                                                {currentLog.language || 'N/A'}
                                             </p>
                                         </div>
                                         <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
@@ -260,7 +271,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 <Zap className="w-3 h-3 text-coral" /> Improve
                                             </p>
                                             <p className={clsx(
-                                                "text-lg font-black",
+                                                "text-sm font-black",
                                                 (stats?.improvement || 0) > 0 ? "text-coral" : "text-base-400"
                                             )}>
                                                 {stats?.improvement && stats.improvement > 0 ? `-${Math.round(stats.improvement)}%` : '0%'}
@@ -297,7 +308,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 <Zap className="w-3.5 h-3.5 text-wheat-dark" /> Solution Approach
                                             </h4>
                                             <div className="p-5 bg-wheat/5 border-l-4 border-wheat rounded-r-2xl">
-                                                <p className="text-sm font-bold text-base-800 leading-relaxed whitespace-pre-wrap">
+                                                <p className="text-xs font-bold text-base-800 leading-relaxed whitespace-pre-wrap">
                                                     {currentLog.approach || '작성된 접근법이 없습니다.'}
                                                 </p>
                                             </div>
@@ -308,7 +319,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 <MessageSquare className="w-3.5 h-3.5 text-misty-dark" /> Reflection
                                             </h4>
                                             <div className="p-5 bg-misty-light/10 border-l-4 border-misty rounded-r-2xl">
-                                                <p className="text-sm font-bold text-base-700 leading-relaxed whitespace-pre-wrap italic">
+                                                <p className="text-xs font-bold text-base-700 leading-relaxed whitespace-pre-wrap italic">
                                                     "{currentLog.reflection || '작성된 소감이 없습니다.'}"
                                                 </p>
                                             </div>
@@ -378,10 +389,10 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                         </span>
                                     </div>
                                     <p className={clsx(
-                                        "text-xs font-black",
+                                        "text-[10px] font-black",
                                         h.id === currentLog.id ? "text-base-900" : "text-base-400"
                                     )}>
-                                        {h.result === 'SUCCESS' ? '✅ 성공' : '❌ 실패'}
+                                        {h.result === 'SUCCESS' ? '✅ 성공' : '❌ 실패'} {h.language ? `(${h.language})` : ''}
                                     </p>
 
                                     {/* Timeline line */}

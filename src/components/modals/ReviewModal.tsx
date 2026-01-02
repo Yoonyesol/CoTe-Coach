@@ -34,7 +34,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                 reflection: data.reflection,
                 approach: data.approach,
                 concepts: data.concepts,
-                isFinished: data.isFinished
+                isFinished: data.isFinished,
+                language: data.language
             });
 
             setIsSubmitted(true);

@@ -210,7 +210,8 @@ export const useUserStore = create<UserState>()(
                             completedAt: l.created_at,
                             stage: l.stage || 0,
                             ratingContribution: l.rating_contribution || 0,
-                            isFinished: l.is_finished || false
+                            isFinished: l.is_finished || false,
+                            language: l.language || undefined
                         }))
                     });
                 }
@@ -506,6 +507,7 @@ export const useUserStore = create<UserState>()(
                 if (updates.elapsedTime !== undefined) dbUpdates.elapsed_time = updates.elapsedTime;
                 if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
                 if (updates.isFinished !== undefined) dbUpdates.is_finished = updates.isFinished;
+                if (updates.language !== undefined) dbUpdates.language = updates.language;
 
                 const { error } = await supabase.from('study_logs').update(dbUpdates).eq('id', logId);
 
@@ -689,7 +691,8 @@ export const useUserStore = create<UserState>()(
                                 completedAt: l.created_at,
                                 stage: l.stage || 0,
                                 ratingContribution: l.rating_contribution || 0,
-                                isFinished: l.is_finished || false
+                                isFinished: l.is_finished || false,
+                                language: l.language || undefined
                             }))
                         });
                     }
@@ -777,7 +780,8 @@ export const useUserStore = create<UserState>()(
                         concepts: newLog.concepts,
                         stage: newLog.stage,
                         rating_contribution: newLog.ratingContribution,
-                        is_finished: logData.isFinished || false
+                        is_finished: logData.isFinished || false,
+                        language: logData.language || null
                     }).select().single();
 
                     if (logError || !dbLog) {

@@ -127,6 +127,7 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                                         <div className="flex justify-between items-center mb-3">
                                             <span className="text-[10px] font-black text-wheat-dark px-2 py-0.5 bg-wheat/20 rounded">
                                                 {displayedLog.stage === 0 ? '기본 풀이' : `${displayedLog.stage}차 복습`}
+                                                {displayedLog.language && ` (${displayedLog.language})`}
                                             </span>
                                             <span className="text-[10px] font-bold text-base-400">
                                                 {new Date(displayedLog.completedAt).toLocaleDateString()}

@@ -13,6 +13,7 @@ interface LogFormProps {
         reflection: string;
         concepts: string[];
         isFinished?: boolean;
+        language?: string;
     };
     onSubmit: (data: {
         result: 'SUCCESS' | 'FAIL';
@@ -23,6 +24,7 @@ interface LogFormProps {
         reflection: string;
         concepts: string[];
         isFinished: boolean;
+        language: string;
     }) => void;
     onCancel?: () => void;
     submitLabel?: string;
@@ -37,9 +39,12 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
     const [concept, setConcept] = useState('');
     const [concepts, setConcepts] = useState<string[]>(initialValues?.concepts || []);
     const [isFinished, setIsFinished] = useState(initialValues?.isFinished || false);
+    const [language, setLanguage] = useState(initialValues?.language || 'C++');
 
     const [manualMinutes, setManualMinutes] = useState<number>(initialValues?.elapsedMinutes || 0);
     const [manualSeconds, setManualSeconds] = useState<number>(initialValues?.elapsedSeconds || 0);
+
+    const languages = ['C++', 'Java', 'Python', 'JavaScript', 'TypeScript', 'Rust', 'Go', 'Swift', 'Kotlin'];
 
     const handleAddConcept = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && concept.trim()) {
@@ -66,7 +71,8 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
             approach,
             reflection,
             concepts,
-            isFinished
+            isFinished,
+            language
         });
     };
 
@@ -154,6 +160,42 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             {level === 'EASY' ? '쉬움' : level === 'NORMAL' ? '보통' : '어려움'}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            {/* Language Selection */}
+            <div className="space-y-3">
+                <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                    <Zap className="w-3 h-3" /> 사용 언어
+                </label>
+                <div className="flex flex-wrap gap-2">
+                    {languages.map((lang) => (
+                        <button
+                            key={lang}
+                            type="button"
+                            onClick={() => setLanguage(lang)}
+                            className={clsx(
+                                "cursor-pointer px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2",
+                                language === lang
+                                    ? "bg-base-900 border-base-900 text-white shadow-md font-extrabold"
+                                    : "bg-white border-base-100 text-base-400 hover:border-base-200 font-bold"
+                            )}
+                        >
+                            {lang}
+                        </button>
+                    ))}
+                    <input
+                        type="text"
+                        placeholder="기타..."
+                        value={languages.includes(language) ? '' : language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className={clsx(
+                            "px-4 py-2 rounded-xl text-[10px] font-black transition-all border-2 outline-none w-24",
+                            !languages.includes(language) && language !== ''
+                                ? "bg-base-900 border-base-900 text-white"
+                                : "bg-white border-base-100 text-base-400 hover:border-base-200"
+                        )}
+                    />
                 </div>
             </div>
 
