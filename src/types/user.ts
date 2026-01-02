@@ -16,6 +16,7 @@ export interface TimerState {
     isRunning: boolean;
     startTime: number | null;
     currentProblemId: string | null;
+    activeLogId: string | null; // DB의 현재 진행 중인 로그 ID 추적
     problemTimers: Record<string, number>; // { [problemId]: totalMs }
 }
 
@@ -95,9 +96,9 @@ export interface UserState {
     ) => Promise<void>;
 
     // Timer Actions
-    startTimer: (problemId: string) => boolean;
-    stopTimer: () => void;
-    resetTimer: (problemId?: string) => void;
+    startTimer: (problemId: string) => Promise<boolean>;
+    stopTimer: () => Promise<void>;
+    resetTimer: (problemId?: string) => Promise<void>;
     getTotalElapsed: (problemId: string) => number;
 
     // Daily Planner Helpers (Derived State)

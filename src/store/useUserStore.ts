@@ -32,6 +32,7 @@ export const useUserStore = create<UserState>()(
                 isRunning: false,
                 startTime: null,
                 currentProblemId: null,
+                activeLogId: null,
                 problemTimers: {},
             },
             studyLogs: [],
@@ -227,6 +228,51 @@ export const useUserStore = create<UserState>()(
                 }
 
                 await get().fetchDailyTasks(userId);
+
+                // --- 타이머 기록 복구 (Timer Data Aggregation) ---
+                const { data: timerLogs } = await supabase
+                    .from('timer_logs')
+                    .select('problem_id, duration_ms, end_time, start_time, id')
+                    .eq('user_id', userId);
+
+                if (timerLogs) {
+                    const aggregated: Record<string, number> = {};
+                    let activeLog: {
+                        problem_id: string;
+                        start_time: string;
+                        id: string;
+                        end_time: string | null
+                    } | null = null;
+
+                    timerLogs.forEach((log: {
+                        problem_id: string;
+                        duration_ms: number | null;
+                        start_time: string;
+                        id: string;
+                        end_time: string | null
+                    }) => {
+                        // 1. 누적 시간 합산
+                        aggregated[log.problem_id] = (aggregated[log.problem_id] || 0) + (log.duration_ms || 0);
+
+                        // 2. 진행 중인 세션 찾기 (end_time이 null인 가장 최신 것)
+                        if (!log.end_time) {
+                            activeLog = log;
+                        }
+                    });
+
+                    set(state => ({
+                        timer: {
+                            ...state.timer,
+                            problemTimers: aggregated,
+                            // 진행 중인 세션이 있다면 복구
+                            isRunning: !!activeLog,
+                            currentProblemId: activeLog ? (activeLog as { problem_id: string }).problem_id : state.timer.currentProblemId,
+                            startTime: activeLog ? new Date((activeLog as { start_time: string }).start_time).getTime() : state.timer.startTime,
+                            activeLogId: activeLog ? (activeLog as { id: string }).id : null
+                        }
+                    }));
+                }
+
                 await get().refreshRating();
             },
 
@@ -812,22 +858,80 @@ export const useUserStore = create<UserState>()(
                 set({ xp: totalRating, level: nextLevel, tier: nextTier });
             },
 
-            startTimer: (problemId) => {
+            startTimer: async (problemId) => {
                 const { timer } = get();
                 if (timer.isRunning && timer.currentProblemId !== problemId) return false;
-                set(state => ({ timer: { ...state.timer, isRunning: true, startTime: Date.now(), currentProblemId: problemId } }));
+
+                const startTime = Date.now();
+                let activeLogId = null;
+
+                // DB에 시작 기록 생성
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data, error } = await supabase
+                        .from('timer_logs')
+                        .insert({
+                            user_id: user.id,
+                            problem_id: problemId,
+                            start_time: new Date(startTime).toISOString()
+                        })
+                        .select()
+                        .single();
+
+                    if (!error && data) {
+                        activeLogId = data.id;
+                    }
+                }
+
+                set(state => ({
+                    timer: {
+                        ...state.timer,
+                        isRunning: true,
+                        startTime,
+                        currentProblemId: problemId,
+                        activeLogId
+                    }
+                }));
                 return true;
             },
 
-            stopTimer: () => {
+            stopTimer: async () => {
                 const { timer } = get();
                 if (!timer.isRunning || !timer.startTime) return;
+
                 const delta = Date.now() - timer.startTime;
+
+                // 서버 부하 최적화: 5초 미만은 무시 (실수 방지)
+                if (delta < 5000 && timer.activeLogId) {
+                    await supabase.from('timer_logs').delete().eq('id', timer.activeLogId);
+                    set(state => ({
+                        timer: {
+                            ...state.timer,
+                            isRunning: false,
+                            startTime: null,
+                            activeLogId: null
+                        }
+                    }));
+                    return;
+                }
+
+                // DB에 종료 및 시간 기록 (Heartbeat 최종 단계)
+                if (timer.activeLogId) {
+                    await supabase
+                        .from('timer_logs')
+                        .update({
+                            end_time: new Date().toISOString(),
+                            duration_ms: delta
+                        })
+                        .eq('id', timer.activeLogId);
+                }
+
                 set(state => ({
                     timer: {
                         ...state.timer,
                         isRunning: false,
                         startTime: null,
+                        activeLogId: null,
                         problemTimers: {
                             ...state.timer.problemTimers,
                             [timer.currentProblemId!]: (state.timer.problemTimers[timer.currentProblemId!] || 0) + delta
@@ -836,9 +940,16 @@ export const useUserStore = create<UserState>()(
                 }));
             },
 
-            resetTimer: (problemId) => {
+            resetTimer: async (problemId) => {
                 const targetId = problemId || get().timer.currentProblemId;
                 if (!targetId) return;
+
+                // DB 기록 삭제
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase.from('timer_logs').delete().eq('user_id', user.id).eq('problem_id', targetId);
+                }
+
                 set(state => {
                     const nextTimers = { ...state.timer.problemTimers };
                     delete nextTimers[targetId];
@@ -849,6 +960,7 @@ export const useUserStore = create<UserState>()(
                             isRunning: isTargetActive ? false : state.timer.isRunning,
                             startTime: isTargetActive ? null : state.timer.startTime,
                             currentProblemId: isTargetActive ? null : state.timer.currentProblemId,
+                            activeLogId: isTargetActive ? null : state.timer.activeLogId,
                             problemTimers: nextTimers
                         }
                     };
