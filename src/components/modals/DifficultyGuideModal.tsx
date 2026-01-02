@@ -1,26 +1,40 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Info, HelpCircle, Target, TrendingUp, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { backdropVariants, getModalVariants } from '../../lib/animations';
 
 import { DifficultyGuideModalProps } from '../../types/modal';
 
 const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onClose }) => {
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const modalVariants = getModalVariants(isMobile);
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        variants={backdropVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         className="absolute inset-0 bg-base-900/40 backdrop-blur-md cursor-pointer"
+                        onClick={onClose}
                     />
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: 30 }}
-                        className="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20"
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] rounded-b-none sm:rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20"
                     >
                         {/* Header */}
                         <div className="bg-base-900 p-8 text-white relative">

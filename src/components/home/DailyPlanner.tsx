@@ -55,7 +55,7 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                         <p className="text-xs md:text-sm font-bold text-base-500 font-sans leading-relaxed">
                             목표 {goalCount}문제 중 {solvedCount}문제를 해결했습니다.
                             <br className="md:hidden" />
-                            {percentage >= 100 ? ' 오늘 목표 달성!🏆' : ' 조금만 더 힘내보아요! 🎁'}
+                            {percentage >= 100 ? ' 오늘 목표 달성! 대단해요! 🏆' : ' 조금만 더 힘내보아요! 🎁'}
                         </p>
                     </div>
 
@@ -63,7 +63,7 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                         <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/60 rounded-xl border border-white shadow-sm font-sans">
                             <Calendar className="w-3.5 h-3.5 text-base-400" />
                             <span className="text-[10px] font-black text-base-600 uppercase">
-                                {daysRemaining > 0 ? 'D-Day' : '오늘'}
+                                {daysRemaining > 0 ? '목표 기한까지' : '새로운 목표가 필요해요'}
                             </span>
                             <span className="text-xs md:text-sm font-black text-misty-dark">
                                 {daysRemaining > 0 ? `D-${daysRemaining}` : '오늘'}

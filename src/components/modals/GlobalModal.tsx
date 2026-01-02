@@ -1,11 +1,21 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useModalStore } from '../../store/useModalStore';
 import { AlertCircle, HelpCircle, X } from 'lucide-react';
 import { clsx } from 'clsx';
 
+import { backdropVariants, getModalVariants } from '../../lib/animations';
+
 const GlobalModal: React.FC = () => {
     const { isOpen, options, closeModal } = useModalStore();
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Prevent background scrolling when modal is open
     useEffect(() => {
@@ -37,25 +47,29 @@ const GlobalModal: React.FC = () => {
         closeModal();
     };
 
+    const modalVariants = getModalVariants(isMobile);
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     {/* Backdrop */}
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        variants={backdropVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         onClick={handleCancel}
                         className="absolute inset-0 bg-base-900/40 backdrop-blur-[2px] cursor-pointer"
                     />
 
                     {/* Modal Content */}
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="relative w-full max-w-sm bg-white p-8 rounded-[2.5rem] shadow-2xl overflow-hidden font-sans"
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="relative w-full max-w-sm bg-white p-8 rounded-[2.5rem] shadow-2xl overflow-hidden font-sans sm:rounded-[2.5rem] rounded-t-[2.5rem] rounded-b-none sm:rounded-b-[2.5rem] mb-0 sm:mb-auto"
                     >
                         <div className="flex flex-col items-center text-center">
                             <div className={clsx(

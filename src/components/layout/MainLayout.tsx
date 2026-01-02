@@ -170,7 +170,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                             activeTab === item.id ? "text-base-900 bg-base-50" : "text-base-300"
                         )}
                     >
-                        {React.cloneElement(item.icon as React.ReactElement, { className: "w-5 h-5" })}
+                        {React.cloneElement(item.icon as any, { className: "w-5 h-5" })}
                         <span className="text-[10px] font-black uppercase tracking-tighter">{item.label}</span>
                     </button>
                 ))}

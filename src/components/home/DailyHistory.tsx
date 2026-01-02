@@ -98,18 +98,18 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                                     <div className="flex items-center gap-2 flex-wrap">
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${log.result === 'SUCCESS' ? 'bg-sage/10 text-sage' : 'bg-coral/10 text-coral'
                                             }`}>
-                                            {log.result === 'SUCCESS' ? '해결' : '미달성'}
+                                            {log.result === 'SUCCESS' ? '해결함' : '못 끝냄'}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${log.solvingMethod === 'SELF' ? 'bg-misty/10 text-misty-dark' : 'bg-amber-100 text-amber-700'
                                             }`}>
-                                            {log.solvingMethod === 'SELF' ? '독학' : '참고'}
+                                            {log.solvingMethod === 'SELF' ? '스스로' : '답지참고'}
                                         </span>
                                         <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-base-100 text-base-500`}>
                                             {log.platform}
                                         </span>
                                         {log.stage > 0 && (
                                             <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest bg-lavender/10 text-lavender-dark">
-                                                {log.stage}차
+                                                {log.stage}차 복습
                                             </span>
                                         )}
                                     </div>
