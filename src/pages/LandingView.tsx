@@ -3,10 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, ArrowRight, Trophy, Zap, Target, Loader2, Lock, Sparkles, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { clsx } from 'clsx';
-import { AuthError } from '@supabase/supabase-js';
 import { validateEmail, getPasswordValidationError } from '../lib/validation';
 
-const LandingPage: React.FC = () => {
+const LandingView: React.FC = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -361,4 +360,4 @@ const LandingPage: React.FC = () => {
     );
 };
 
-export default LandingPage;
+export default LandingView;

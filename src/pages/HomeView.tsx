@@ -1,5 +1,5 @@
-import React from 'react';
-import { Target, Plus, Settings2, RefreshCw } from 'lucide-react';
+import React, { useState } from 'react';
+import { Target, RefreshCw, Plus, Settings2 } from 'lucide-react';
 import clsx from 'clsx';
 import {
     ProfileHeaderSkeleton,
@@ -17,51 +17,46 @@ import CustomProblemCard from '../components/CustomProblemCard';
 import DailyHistory from '../components/DailyHistory';
 import { StudyLog, DailyTask } from '../types/study';
 import { getLocalDateString } from '../lib/dateUtils';
+import { useUserStore } from '../store/useUserStore';
+import { useAuthStore } from '../store/useAuthStore';
+import { useRecommendations } from '../hooks/useRecommendations';
 
 interface HomeViewProps {
     isLoading: boolean;
-    nickname: string;
-    email: string;
-    dailyProgress: { solved: number; goal: number };
-    getStreak: () => number;
-    daysRemaining: number;
-    recommendations: any[] | undefined;
-    isRecsLoading: boolean;
-    isRecsFetching: boolean;
-    isRefreshing: boolean;
-    dailyTasks: DailyTask[];
     onDailyGoalOpen: () => void;
     onAddModalOpen: () => void;
     onGoalModalOpen: () => void;
     onReviewOpen: (problem: any) => void;
     onReviewDetailOpen: (plan: any) => void;
-    onRefreshRecommendations: () => Promise<void>;
-    onRefetchRecommendations: () => Promise<any>;
     onEditLog: (log: StudyLog) => void;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({
     isLoading,
-    nickname,
-    email,
-    dailyProgress,
-    getStreak,
-    daysRemaining,
-    recommendations,
-    isRecsLoading,
-    isRecsFetching,
-    isRefreshing,
-    dailyTasks,
     onDailyGoalOpen,
     onAddModalOpen,
     onGoalModalOpen,
     onReviewOpen,
     onReviewDetailOpen,
-    onRefreshRecommendations,
-    onRefetchRecommendations,
     onEditLog
 }) => {
-    const [isLocalRefreshing, setIsLocalRefreshing] = React.useState(false);
+    const {
+        getDailyProgress,
+        getDaysRemaining,
+        refreshRecommendations,
+        dailyTasks,
+        getStreak,
+        nickname
+    } = useUserStore();
+    const { user } = useAuthStore();
+    const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isLocalRefreshing, setIsLocalRefreshing] = useState(false);
+
+    const dailyProgress = getDailyProgress();
+    const daysRemaining = getDaysRemaining();
+    const email = user?.email || '';
 
     return (
         <>
@@ -160,8 +155,10 @@ const HomeView: React.FC<HomeViewProps> = ({
                             <button
                                 onClick={async () => {
                                     setIsLocalRefreshing(true);
-                                    await onRefreshRecommendations();
-                                    await onRefetchRecommendations();
+                                    setIsRefreshing(true);
+                                    await refreshRecommendations();
+                                    await refetch();
+                                    setIsRefreshing(false);
                                     setIsLocalRefreshing(false);
                                 }}
                                 disabled={isLocalRefreshing || isRefreshing}

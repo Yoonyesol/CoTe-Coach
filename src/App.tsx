@@ -8,18 +8,16 @@ import TierGuideModal from './components/modals/TierGuideModal'
 import ReviewModal from './components/modals/ReviewModal'
 import ReviewDetailModal from './components/modals/ReviewDetailModal'
 import Stopwatch from './components/Stopwatch'
-import LandingPage from './components/LandingPage'
+import LandingView from './pages/LandingView'
 import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
-import GoalBanner from './components/GoalBanner'
 import GoalModal from './components/modals/GoalModal'
 import DailyGoalSettingsModal from './components/modals/DailyGoalSettingsModal'
 import { useUserStore } from './store/useUserStore'
 import { useModalStore } from './store/useModalStore'
-import { StudyLog, DailyTask } from './types/study'
+import { StudyLog } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
-import { useRecommendations } from './hooks/useRecommendations'
 import DeleteAccountModal from './components/modals/DeleteAccountModal'
 import ContactModal from './components/modals/ContactModal'
 
@@ -30,40 +28,21 @@ import JournalView from './pages/JournalView'
 import LibraryView from './pages/LibraryView'
 import SettingsView from './pages/SettingsView'
 import {
-  RefreshCw, Settings2, Plus, Target, Loader2, Target as TargetIcon
+  Loader2
 } from 'lucide-react';
-import { getLocalDateString } from './lib/dateUtils'
-import clsx from 'clsx';
-import {
-  ProfileHeaderSkeleton,
-  DailyPlannerSkeleton,
-  ProblemCardSkeleton,
-  GoalBannerSkeleton,
-  ReviewNotificationsSkeleton,
-  DailyHistorySkeleton,
-  SectionHeaderSkeleton
-} from './components/common/Skeleton';
 
 function App() {
   const {
-    getDailyProgress,
-    getDaysRemaining,
     fetchUserData,
     refreshRating,
-    refreshRecommendations,
-    dailyTasks,
     stopTimer,
     timer,
     startTimer,
     fetchGoals,
-    getActiveGoal,
-    getStreak,
-    nickname
+    getActiveGoal
   } = useUserStore();
   const { showAlert } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
-  const { data: recommendations, isLoading: isRecsLoading, isFetching: isRecsFetching, refetch } = useRecommendations();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(false);
@@ -112,9 +91,6 @@ function App() {
 
     syncData();
   }, [isHydrated, authInitialized, user, fetchUserData, refreshRating]);
-
-  const dailyProgress = getDailyProgress();
-  const daysRemaining = getDaysRemaining();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
@@ -216,7 +192,7 @@ function App() {
   }
 
   if (!user) {
-    return <LandingPage />;
+    return <LandingView />;
   }
 
   return (
@@ -238,27 +214,11 @@ function App() {
           {activeTab === 'HOME' ? (
             <HomeView
               isLoading={isDataLoading}
-              nickname={nickname}
-              email={user.email || ''}
-              dailyProgress={dailyProgress}
-              getStreak={getStreak}
-              daysRemaining={daysRemaining}
-              recommendations={recommendations}
-              isRecsLoading={isRecsLoading}
-              isRecsFetching={isRecsFetching}
-              isRefreshing={isRefreshing}
-              dailyTasks={dailyTasks}
               onDailyGoalOpen={() => setIsDailyGoalModalOpen(true)}
               onAddModalOpen={() => setIsAddModalOpen(true)}
               onGoalModalOpen={() => setIsGoalModalOpen(true)}
               onReviewOpen={handleReviewOpen}
               onReviewDetailOpen={handleReviewDetailOpen}
-              onRefreshRecommendations={async () => {
-                setIsRefreshing(true);
-                await refreshRecommendations();
-                setIsRefreshing(false);
-              }}
-              onRefetchRecommendations={refetch}
               onEditLog={setEditingLog}
             />
           ) : activeTab === 'JOURNAL' ? (
