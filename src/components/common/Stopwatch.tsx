@@ -56,12 +56,12 @@ const Stopwatch: React.FC = () => {
 
     if (isExpanded) {
         return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-base-900/80 backdrop-blur-md animate-in fade-in duration-300 font-sans">
-                <div className="glass-card bg-white w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
-                    <div className="bg-base-900 p-12 text-center text-white relative">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 bg-base-900/80 backdrop-blur-md animate-in fade-in duration-300 font-sans">
+                <div className="glass-card bg-white w-full md:max-w-2xl h-[100dvh] md:h-auto overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300 flex flex-col md:block rounded-none md:rounded-3xl">
+                    <div className="bg-base-900 p-6 md:p-12 text-center text-white relative flex-1 md:flex-none flex flex-col justify-center">
                         <button
                             onClick={() => setIsExpanded(false)}
-                            className="absolute right-6 top-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"
+                            className="absolute right-4 top-4 md:right-6 md:top-6 p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all z-20"
                         >
                             <Minimize2 className="w-6 h-6" />
                         </button>
@@ -69,25 +69,25 @@ const Stopwatch: React.FC = () => {
                             <div className="px-4 py-1.5 bg-coral/20 text-coral rounded-full text-xs font-black uppercase tracking-widest animate-pulse">
                                 {timer.isRunning ? 'Focus Mode Active' : 'Paused'}
                             </div>
-                            <h2 className="text-2xl font-black leading-tight max-w-md mx-auto line-clamp-2">
+                            <h2 className="text-xl md:text-2xl font-black leading-tight max-w-md mx-auto line-clamp-2 px-4">
                                 {currentProblem}
                             </h2>
                             <div className="mt-8 flex items-baseline gap-2">
-                                <span className="text-8xl font-black tracking-tighter tabular-nums">{time.main}</span>
-                                <span className="text-3xl font-bold text-white/30 tabular-nums w-12 text-left">{time.ms}</span>
+                                <span className="text-7xl md:text-8xl font-black tracking-tighter tabular-nums">{time.main}</span>
+                                <span className="text-2xl md:text-3xl font-bold text-white/30 tabular-nums w-12 text-left">{time.ms}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="p-12 flex justify-center gap-8">
+                    <div className="p-8 md:p-12 flex justify-center gap-8 items-center bg-white flex-1 md:flex-none">
                         <button
                             onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
                             className={clsx(
-                                "w-24 h-24 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-xl",
+                                "w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-xl shrink-0",
                                 timer.isRunning ? "bg-base-100 text-base-400" : "bg-base-900 text-white"
                             )}
                         >
-                            {timer.isRunning ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-2" />}
+                            {timer.isRunning ? <Pause className="w-8 h-8 md:w-10 md:h-10 fill-current" /> : <Play className="w-8 h-8 md:w-10 md:h-10 fill-current ml-2" />}
                         </button>
                         <button
                             onClick={() => {
@@ -97,17 +97,17 @@ const Stopwatch: React.FC = () => {
                                     () => resetTimer()
                                 );
                             }}
-                            className="w-24 h-24 rounded-full bg-base-50 text-base-300 hover:bg-base-100 hover:text-base-500 flex items-center justify-center transition-all active:scale-90"
+                            className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-base-50 text-base-300 hover:bg-base-100 hover:text-base-500 flex items-center justify-center transition-all active:scale-90 shrink-0"
                         >
-                            <RotateCcw className="w-10 h-10" />
+                            <RotateCcw className="w-8 h-8 md:w-10 md:h-10" />
                         </button>
                     </div>
 
-                    <div className="px-12 pb-12 text-center">
-                        <div className="inline-flex items-center gap-3 px-6 py-4 bg-sage-light/30 border border-sage/20 rounded-2xl text-sage-dark">
-                            <AlertCircle className="w-5 h-5" />
-                            <p className="text-sm font-bold">
-                                정확한 기록을 위해 페이지를 닫지 말아주세요. (백그라운드에서도 안전하게 측정됩니다)
+                    <div className="px-6 pb-8 md:px-12 md:pb-12 text-center bg-white">
+                        <div className="inline-flex items-center gap-3 px-4 py-3 md:px-6 md:py-4 bg-sage-light/30 border border-sage/20 rounded-2xl text-sage-dark">
+                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            <p className="text-xs md:text-sm font-bold text-left md:text-center">
+                                정확한 기록을 위해 페이지를 닫지 말아주세요.<br className="md:hidden" /> (백그라운드에서도 측정됩니다)
                             </p>
                         </div>
                     </div>
@@ -150,31 +150,31 @@ const Stopwatch: React.FC = () => {
                         timer.isRunning ? "scale-105" : "scale-100"
                     )}
                 >
-                    <div className="glass-card bg-base-900 text-white p-1 pr-4 flex items-center gap-4 border-none shadow-2xl rounded-full relative group/timer">
+                    <div className="glass-card bg-base-900 text-white p-1 pr-3 md:pr-4 flex items-center gap-3 md:gap-4 border-none shadow-2xl rounded-full relative group/timer">
                         {/* Close/Hide Button */}
                         <button
                             onClick={() => setIsHidden(true)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-base-900 text-white rounded-full flex items-center justify-center border border-white/20 opacity-0 group-hover/timer:opacity-100 transition-all hover:bg-red-600 hover:scale-110 shadow-lg active:scale-90 cursor-pointer"
+                            className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 w-5 h-5 md:w-6 md:h-6 bg-base-900 text-white rounded-full flex items-center justify-center border border-white/20 transition-all hover:bg-red-600 hover:scale-110 shadow-lg active:scale-90 cursor-pointer z-50 opacity-100 md:opacity-0 md:group-hover/timer:opacity-100"
                         >
-                            <X className="w-3 h-3" />
+                            <X className="w-2.5 h-2.5 md:w-3 md:h-3" />
                         </button>
 
                         <button
                             onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
                             className={clsx(
-                                "w-12 h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer",
+                                "w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer shrink-0",
                                 timer.isRunning ? "bg-coral text-white" : "bg-white text-base-900 hover:bg-base-50"
                             )}
                         >
-                            {timer.isRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                            {timer.isRunning ? <Pause className="w-4 h-4 md:w-5 md:h-5 fill-current" /> : <Play className="w-4 h-4 md:w-5 md:h-5 fill-current ml-0.5" />}
                         </button>
 
-                        <div className="cursor-pointer group flex items-center gap-4 active:cursor-grabbing" onClick={() => setIsExpanded(true)}>
+                        <div className="cursor-pointer group flex items-center gap-3 md:gap-4 active:cursor-grabbing" onClick={() => setIsExpanded(true)}>
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-1 group-hover:text-misty transition-colors max-w-[120px] truncate">
+                                <span className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-0.5 md:mb-1 group-hover:text-misty transition-colors max-w-[100px] md:max-w-[120px] truncate">
                                     {currentProblem}
                                 </span>
-                                <span className="text-3xl font-black tracking-tighter leading-none tabular-nums">
+                                <span className="text-xl md:text-3xl font-black tracking-tighter leading-none tabular-nums">
                                     {time.main}
                                 </span>
                             </div>

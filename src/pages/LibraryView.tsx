@@ -183,24 +183,32 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                 {/* Filter Toolbar */}
                 <div className="flex flex-col md:flex-row gap-2 bg-base-50 p-3 rounded-2xl border border-base-100 items-center">
 
-                    {/* Search */}
-                    <div className="relative flex-1 w-full md:w-auto">
+                    {/* Search Row */}
+                    <div className="flex w-full md:w-auto gap-2">
+                        <div className="relative flex-1">
+                            <button
+                                onClick={handleSearch}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-base-300 hover:text-misty-dark hover:bg-base-100 rounded-lg transition-colors"
+                            >
+                                <Search className="w-4 h-4" />
+                            </button>
+                            <input
+                                type="text"
+                                placeholder="제목 또는 ID 검색 (Enter)"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleSearch();
+                                }}
+                                className="w-full bg-white border border-base-100 rounded-xl pl-12 pr-4 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm"
+                            />
+                        </div>
                         <button
                             onClick={handleSearch}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-base-300 hover:text-misty-dark hover:bg-base-100 rounded-lg transition-colors"
+                            className="md:hidden px-4 bg-misty-dark text-white rounded-xl font-bold text-sm shrink-0 shadow-sm active:scale-95 transition-transform"
                         >
-                            <Search className="w-4 h-4" />
+                            검색
                         </button>
-                        <input
-                            type="text"
-                            placeholder="제목 또는 ID 검색 (Enter)"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleSearch();
-                            }}
-                            className="w-full bg-white border border-base-100 rounded-xl pl-12 pr-4 py-2 text-sm font-bold outline-none focus:border-misty-dark transition-all shadow-sm"
-                        />
                     </div>
 
                     {/* Platform Filter */}
