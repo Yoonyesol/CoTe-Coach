@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import { motion } from 'framer-motion';
 import AddProblemModal from './components/modals/AddProblemModal'
@@ -8,7 +8,6 @@ import TierGuideModal from './components/modals/TierGuideModal'
 import ReviewModal from './components/modals/ReviewModal'
 import ReviewDetailModal from './components/modals/ReviewDetailModal'
 import Stopwatch from './components/common/Stopwatch'
-import LandingView from './pages/LandingView'
 import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
@@ -22,12 +21,14 @@ import DeleteAccountModal from './components/modals/DeleteAccountModal'
 import ContactModal from './components/modals/ContactModal'
 import ShopModal from './components/modals/ShopModal'
 
-// Page Components
-import HomeView from './pages/HomeView'
-import StatsView from './pages/StatsView'
-import JournalView from './pages/JournalView'
-import LibraryView from './pages/LibraryView'
-import SettingsView from './pages/SettingsView'
+// Lazy Load Page Components
+const LandingView = lazy(() => import('./pages/LandingView'));
+const HomeView = lazy(() => import('./pages/HomeView'));
+const StatsView = lazy(() => import('./pages/StatsView'));
+const JournalView = lazy(() => import('./pages/JournalView'));
+const LibraryView = lazy(() => import('./pages/LibraryView'));
+const SettingsView = lazy(() => import('./pages/SettingsView'));
+
 import {
   Loader2
 } from 'lucide-react';
@@ -200,7 +201,15 @@ function App() {
   }
 
   if (!user) {
-    return <LandingView />;
+    return (
+      <Suspense fallback={
+        <div className="min-h-screen bg-base-900 flex items-center justify-center">
+          <Loader2 className="w-10 h-10 text-coral animate-spin" />
+        </div>
+      }>
+        <LandingView />
+      </Suspense>
+    );
   }
 
   return (
@@ -219,33 +228,39 @@ function App() {
           transition={{ duration: 0.3 }}
           className="space-y-6"
         >
-          {activeTab === 'HOME' ? (
-            <HomeView
-              isLoading={isDataLoading}
-              onDailyGoalOpen={() => setIsDailyGoalModalOpen(true)}
-              onAddModalOpen={() => setIsAddModalOpen(true)}
-              onGoalModalOpen={() => setIsGoalModalOpen(true)}
-              onRecommendationSettingsOpen={openRecommendationSettings}
-              onReviewOpen={handleReviewOpen}
-              onReviewDetailOpen={handleReviewDetailOpen}
-              onEditLog={setEditingLog}
-            />
-          ) : activeTab === 'JOURNAL' ? (
-            <JournalView
-              onLogClick={setEditingLog}
-              onGoalClick={() => setIsGoalModalOpen(true)}
-              onReviewPlanClick={handleReviewDetailOpen}
-            />
-          ) : activeTab === 'LIBRARY' ? (
-            <LibraryView onProblemClick={setEditingLog} />
-          ) : activeTab === 'SETTINGS' ? (
-            <SettingsView
-              onDeleteAccountOpen={() => setIsDeleteModalOpen(true)}
-              onContactOpen={() => setIsContactModalOpen(true)}
-            />
-          ) : (
-            <StatsView />
-          )}
+          <Suspense fallback={
+            <div className="w-full h-[calc(100vh-100px)] flex items-center justify-center">
+              <Loader2 className="w-8 h-8 text-coral animate-spin" />
+            </div>
+          }>
+            {activeTab === 'HOME' ? (
+              <HomeView
+                isLoading={isDataLoading}
+                onDailyGoalOpen={() => setIsDailyGoalModalOpen(true)}
+                onAddModalOpen={() => setIsAddModalOpen(true)}
+                onGoalModalOpen={() => setIsGoalModalOpen(true)}
+                onRecommendationSettingsOpen={openRecommendationSettings}
+                onReviewOpen={handleReviewOpen}
+                onReviewDetailOpen={handleReviewDetailOpen}
+                onEditLog={setEditingLog}
+              />
+            ) : activeTab === 'JOURNAL' ? (
+              <JournalView
+                onLogClick={setEditingLog}
+                onGoalClick={() => setIsGoalModalOpen(true)}
+                onReviewPlanClick={handleReviewDetailOpen}
+              />
+            ) : activeTab === 'LIBRARY' ? (
+              <LibraryView onProblemClick={setEditingLog} />
+            ) : activeTab === 'SETTINGS' ? (
+              <SettingsView
+                onDeleteAccountOpen={() => setIsDeleteModalOpen(true)}
+                onContactOpen={() => setIsContactModalOpen(true)}
+              />
+            ) : (
+              <StatsView />
+            )}
+          </Suspense>
         </motion.div>
       </MainLayout>
 
