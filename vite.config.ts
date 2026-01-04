@@ -25,6 +25,16 @@ export default defineConfig(() => {
     // 빌드 결과물이 dist 폴더로 나가도록 명시 (gh-pages 연동)
     build: {
       outDir: 'dist',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom'],
+            'vendor-utils': ['@tanstack/react-query', 'axios', 'zustand'],
+            'vendor-ui': ['framer-motion', 'lucide-react', 'recharts'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+          }
+        }
+      }
     }
   }
 })
