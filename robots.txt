@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cote.timeqlife.com/sitemap.xml
+
+#DaumWebMasterTool:62cb45a1fe2e6d1e9616943fbba1bda7c92ed9229fc50f97ff22b2f692d70eba:etGdj0RjHxXHTBuiD42KbA==
