@@ -162,12 +162,31 @@ export const useUserStore = create<UserState>()(
             },
 
             fetchUserData: async (userId) => {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', userId)
-                    .single();
+                // Parallelize all independent data fetching to eliminate waterfall
+                const [
+                    profileResult,
+                    , // reviewPlansResult (handled internally)
+                    logsResult,
+                    assetsResult,
+                    , // dailyTasksResult (handled internally)
+                    timerLogsResult
+                ] = await Promise.all([
+                    // 1. Profile
+                    supabase.from('profiles').select('*').eq('id', userId).single(),
+                    // 2. Review Plans (Action)
+                    get().fetchReviewPlans(userId),
+                    // 3. Study Logs
+                    supabase.from('study_logs').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+                    // 4. Assets
+                    supabase.from('user_assets').select('*').eq('user_id', userId),
+                    // 5. Daily Tasks (Action)
+                    get().fetchDailyTasks(userId),
+                    // 6. Timer Logs
+                    supabase.from('timer_logs').select('problem_id, duration_ms, end_time, start_time, id').eq('user_id', userId)
+                ]);
 
+                // --- Process Profile ---
+                const { data: profile } = profileResult;
                 if (profile) {
                     set({
                         bojHandle: profile.boj_handle || '',
@@ -184,14 +203,8 @@ export const useUserStore = create<UserState>()(
                     });
                 }
 
-                await get().fetchReviewPlans(userId);
-
-                const { data: logs } = await supabase
-                    .from('study_logs')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .order('created_at', { ascending: false });
-
+                // --- Process Study Logs ---
+                const { data: logs } = logsResult;
                 if (logs) {
                     set({
                         studyLogs: logs.map(l => ({
@@ -216,11 +229,8 @@ export const useUserStore = create<UserState>()(
                     });
                 }
 
-                const { data: assets } = await supabase
-                    .from('user_assets')
-                    .select('*')
-                    .eq('user_id', userId);
-
+                // --- Process Assets ---
+                const { data: assets } = assetsResult;
                 if (assets) {
                     set({
                         inventory: assets.map(a => a.asset_id),
@@ -228,14 +238,8 @@ export const useUserStore = create<UserState>()(
                     });
                 }
 
-                await get().fetchDailyTasks(userId);
-
-                // --- 타이머 기록 복구 (Timer Data Aggregation) ---
-                const { data: timerLogs } = await supabase
-                    .from('timer_logs')
-                    .select('problem_id, duration_ms, end_time, start_time, id')
-                    .eq('user_id', userId);
-
+                // --- Process Timer Logs ---
+                const { data: timerLogs } = timerLogsResult;
                 if (timerLogs) {
                     const aggregated: Record<string, number> = {};
                     let activeLog: {
@@ -252,10 +256,10 @@ export const useUserStore = create<UserState>()(
                         id: string;
                         end_time: string | null
                     }) => {
-                        // 1. 누적 시간 합산
+                        // 1. Accumulate duration
                         aggregated[log.problem_id] = (aggregated[log.problem_id] || 0) + (log.duration_ms || 0);
 
-                        // 2. 진행 중인 세션 찾기 (end_time이 null인 가장 최신 것)
+                        // 2. Find active session (latest with null end_time)
                         if (!log.end_time) {
                             activeLog = log;
                         }
@@ -265,7 +269,7 @@ export const useUserStore = create<UserState>()(
                         timer: {
                             ...state.timer,
                             problemTimers: aggregated,
-                            // 진행 중인 세션이 있다면 복구
+                            // Restore active session
                             isRunning: !!activeLog,
                             currentProblemId: activeLog ? (activeLog as { problem_id: string }).problem_id : state.timer.currentProblemId,
                             startTime: activeLog ? new Date((activeLog as { start_time: string }).start_time).getTime() : state.timer.startTime,
