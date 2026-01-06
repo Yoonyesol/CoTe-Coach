@@ -57,7 +57,7 @@ const GlobalModal: React.FC = () => {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full max-w-sm bg-white p-8 rounded-[2.5rem] shadow-2xl overflow-hidden font-sans sm:rounded-[2.5rem] rounded-t-[2.5rem] rounded-b-none sm:rounded-b-[2.5rem] mb-0 sm:mb-auto"
+                        className="relative w-full max-w-sm bg-white p-8 rounded-[2.5rem] shadow-2xl overflow-hidden font-sans sm:rounded-[2.5rem] rounded-t-[2.5rem] rounded-b-none sm:rounded-b-[2.5rem] mb-0"
                     >
                         <div className="flex flex-col items-center text-center">
                             <div className={clsx(
