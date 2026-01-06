@@ -21,6 +21,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({ onDeleteAccountOpen, onCont
                 <div className="md:col-span-2 space-y-6">
                     <NicknameSection />
                     <SecuritySection />
+                    <div className="block md:hidden">
+                        <HelpSection onOpenContact={onContactOpen} />
+                    </div>
                     <DangerZone onDeleteAccount={onDeleteAccountOpen} />
                 </div>
 
