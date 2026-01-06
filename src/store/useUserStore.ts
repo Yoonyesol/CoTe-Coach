@@ -871,47 +871,65 @@ export const useUserStore = create<UserState>()(
                 if (timer.isRunning && timer.currentProblemId !== problemId) return false;
 
                 const startTime = Date.now();
-                let activeLogId = null;
+                let activeLogId: string | null = null;
 
-                // DB에 시작 기록 생성
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) {
-                    const { data, error } = await supabase
-                        .from('timer_logs')
-                        .insert({
-                            user_id: user.id,
-                            problem_id: problemId,
-                            start_time: new Date(startTime).toISOString()
-                        })
-                        .select()
-                        .single();
-
-                    if (!error && data) {
-                        activeLogId = data.id;
-                    }
-                }
-
+                // Optimistic Start
                 set(state => ({
                     timer: {
                         ...state.timer,
                         isRunning: true,
                         startTime,
                         currentProblemId: problemId,
-                        activeLogId
+                        activeLogId: null // Pending
                     }
                 }));
+
+                // DB에 시작 기록 생성
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    try {
+                        const { data, error } = await supabase
+                            .from('timer_logs')
+                            .insert({
+                                user_id: user.id,
+                                problem_id: problemId,
+                                start_time: new Date(startTime).toISOString()
+                            })
+                            .select()
+                            .single();
+
+                        if (!error && data) {
+                            activeLogId = data.id;
+                            // Update with real ID
+                            set(state => ({
+                                timer: {
+                                    ...state.timer,
+                                    activeLogId
+                                }
+                            }));
+                        } else {
+                            console.error('Failed to start timer log:', error);
+                        }
+                    } catch (err) {
+                        console.error('Timer start exception:', err);
+                    }
+                }
                 return true;
             },
 
             stopTimer: async () => {
                 const { timer } = get();
-                if (!timer.isRunning || !timer.startTime) return;
+                if (!timer.isRunning) return;
 
-                const delta = Date.now() - timer.startTime;
+                const now = Date.now();
+                const startTime = timer.startTime || now; // Fallback to now if missing (0 duration)
+                const delta = now - startTime;
+                const activeLogId = timer.activeLogId;
+                const currentProblemId = timer.currentProblemId;
 
-                // 서버 부하 최적화: 5초 미만은 무시 (실수 방지)
-                if (delta < 5000 && timer.activeLogId) {
-                    await supabase.from('timer_logs').delete().eq('id', timer.activeLogId);
+                // 1. 서버 부하 최적화: 5초 미만은 무시 (실수 방지 및 optimistic update)
+                // startTime이 없으면(0초) 무조건 삭제됨
+                if (delta < 5000) {
                     set(state => ({
                         timer: {
                             ...state.timer,
@@ -920,20 +938,18 @@ export const useUserStore = create<UserState>()(
                             activeLogId: null
                         }
                     }));
+
+                    if (activeLogId) {
+                        try {
+                            await supabase.from('timer_logs').delete().eq('id', activeLogId);
+                        } catch (err) {
+                            console.error('Failed to delete short timer log:', err);
+                        }
+                    }
                     return;
                 }
 
-                // DB에 종료 및 시간 기록 (Heartbeat 최종 단계)
-                if (timer.activeLogId) {
-                    await supabase
-                        .from('timer_logs')
-                        .update({
-                            end_time: new Date().toISOString(),
-                            duration_ms: delta
-                        })
-                        .eq('id', timer.activeLogId);
-                }
-
+                // 2. 정상 종료 (Optimistic Update)
                 set(state => ({
                     timer: {
                         ...state.timer,
@@ -942,10 +958,25 @@ export const useUserStore = create<UserState>()(
                         activeLogId: null,
                         problemTimers: {
                             ...state.timer.problemTimers,
-                            [timer.currentProblemId!]: (state.timer.problemTimers[timer.currentProblemId!] || 0) + delta
+                            [currentProblemId!]: (state.timer.problemTimers[currentProblemId!] || 0) + delta
                         }
                     }
                 }));
+
+                // DB에 종료 및 시간 기록 (Background)
+                if (activeLogId) {
+                    try {
+                        await supabase
+                            .from('timer_logs')
+                            .update({
+                                end_time: new Date().toISOString(),
+                                duration_ms: delta
+                            })
+                            .eq('id', activeLogId);
+                    } catch (err) {
+                        console.error('Failed to save timer log:', err);
+                    }
+                }
             },
 
             resetTimer: async (problemId) => {
