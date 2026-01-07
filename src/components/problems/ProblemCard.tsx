@@ -11,6 +11,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 import { ProblemCardProps } from '../../types/components';
+import { getLocalDateString } from '../../lib/dateUtils';
 
 const typeStyles = {
   WARM_UP: {
@@ -61,6 +62,26 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
         "이미 다른 문제를 풀이 중입니다. 현재 진행 중인 타이머를 먼저 중단해주세요!"
       );
       return;
+    }
+
+    // Auto-add to Daily Tasks (Solving List) when starting timer
+    if (!isCurrent || !timer.isRunning) {
+      const { dailyTasks, addDailyTask } = useUserStore.getState();
+      const isAlreadyTracking = dailyTasks.some(t => t.problemId === title || t.problemTitle === title);
+
+      if (!isAlreadyTracking) {
+        // Use utility for consistent local date string
+        const dateString = getLocalDateString(new Date());
+
+        addDailyTask({
+          problemId: title,
+          problemTitle: title,
+          site: platform as any, // Cast to any or import Platform type if strictness needed
+          difficulty: difficulty,
+          targetDate: dateString,
+          tags: [...tags, '__auto'] // Add internal tag to distinguish from manual custom tasks
+        });
+      }
     }
 
     if (isCurrent && timer.isRunning) {

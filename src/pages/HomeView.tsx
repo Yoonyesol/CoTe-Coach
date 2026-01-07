@@ -16,7 +16,6 @@ import ProblemCard from '../components/problems/ProblemCard';
 import CustomProblemCard from '../components/problems/CustomProblemCard';
 import DailyHistory from '../components/home/DailyHistory';
 import { StudyLog, DailyTask } from '../types/study';
-import { getLocalDateString } from '../lib/dateUtils';
 import { useUserStore } from '../store/useUserStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useRecommendations } from '../hooks/useRecommendations';
@@ -208,12 +207,12 @@ const HomeView: React.FC<HomeViewProps> = ({
                 )}
             </section>
 
-            {/* Custom Problem List Section */}
             {(() => {
-                const today = getLocalDateString(new Date());
-                const todayTasks = dailyTasks.filter(t => t.targetDate === today && t.status === 'pending');
+                // Separate tasks by origin (Manual vs Auto)
+                const manualTasks = dailyTasks.filter(t => t.status === 'pending' && !t.tags?.includes('__auto'));
+                const autoTasks = dailyTasks.filter(t => t.status === 'pending' && t.tags?.includes('__auto'));
 
-                if (todayTasks.length === 0) return null;
+                if (manualTasks.length === 0 && autoTasks.length === 0) return null;
 
                 const handleCompleteTask = (task: DailyTask) => {
                     onReviewOpen({
@@ -224,27 +223,57 @@ const HomeView: React.FC<HomeViewProps> = ({
                 };
 
                 return (
-                    <section className="space-y-6">
-                        <div>
-                            <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
-                                오늘의 커스텀 리스트 <span className="text-sm font-bold bg-lavender px-2 py-0.5 rounded-lg text-lavender-dark leading-none">
-                                    {todayTasks.length} PROBLEMS
-                                </span>
-                            </h2>
-                            <p className="text-sm font-medium text-base-400 mt-1 font-sans">
-                                직접 추가한 문제들이에요. 카드에서 <span className="text-lavender-dark font-bold">시작</span> 버튼을 눌러 스톱워치를 켜세요!
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                            {todayTasks.map((task) => (
-                                <CustomProblemCard
-                                    key={task.id}
-                                    task={task}
-                                    onComplete={handleCompleteTask}
-                                />
-                            ))}
-                        </div>
-                    </section>
+                    <>
+                        {/* 1. Manual Custom List */}
+                        {manualTasks.length > 0 && (
+                            <section className="space-y-6">
+                                <div>
+                                    <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
+                                        나만의 커스텀 리스트 <span className="text-sm font-bold bg-lavender px-2 py-0.5 rounded-lg text-lavender-dark leading-none">
+                                            {manualTasks.length} PROBLEMS
+                                        </span>
+                                    </h2>
+                                    <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+                                        직접 추가한 문제들이에요. 목표를 달성할 때까지 사라지지 않아요!
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                    {manualTasks.map((task) => (
+                                        <CustomProblemCard
+                                            key={task.id}
+                                            task={task}
+                                            onComplete={handleCompleteTask}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+
+                        {/* 2. Active Problems (Started via Timer) */}
+                        {autoTasks.length > 0 && (
+                            <section className="space-y-6">
+                                <div>
+                                    <h2 className="text-2xl font-black text-base-800 flex items-center gap-2 font-sans">
+                                        진행 중인 문제함 <span className="text-sm font-bold bg-misty-light px-2 py-0.5 rounded-lg text-misty-dark leading-none">
+                                            {autoTasks.length} KEEP
+                                        </span>
+                                    </h2>
+                                    <p className="text-sm font-medium text-base-400 mt-1 font-sans">
+                                        풀이를 시작했던 문제들을 보관하고 있어요. 추천 리스트에서 사라져도 여기서 계속 풀 수 있어요.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                    {autoTasks.map((task) => (
+                                        <CustomProblemCard
+                                            key={task.id}
+                                            task={task}
+                                            onComplete={handleCompleteTask}
+                                        />
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </>
                 );
             })()}
 
