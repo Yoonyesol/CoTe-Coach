@@ -927,9 +927,9 @@ export const useUserStore = create<UserState>()(
                 const activeLogId = timer.activeLogId;
                 const currentProblemId = timer.currentProblemId;
 
-                // 1. 서버 부하 최적화: 5초 미만은 무시 (실수 방지 및 optimistic update)
+                // 1. 서버 부하 최적화: 1초 미만은 무시 (실수 방지)
                 // startTime이 없으면(0초) 무조건 삭제됨
-                if (delta < 5000) {
+                if (delta < 1000) {
                     set(state => ({
                         timer: {
                             ...state.timer,
