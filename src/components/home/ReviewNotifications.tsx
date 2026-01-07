@@ -50,8 +50,8 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
             </div>
 
             {/* Scrollable List Area */}
-            <div className="flex-1 min-h-0 relative z-10">
-                <div className="h-full max-h-[400px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
+            <div className="flex-1 min-h-0 relative z-10 flex flex-col">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 custom-scrollbar space-y-3">
                     <AnimatePresence mode="popLayout">
                         {dueReviews.length > 0 ? (
                             dueReviews.map((plan, index) => {
@@ -71,27 +71,27 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                                                 : "bg-white/50 backdrop-blur-sm border-white/40 hover:bg-white hover:border-lavender/30 hover:shadow-md"
                                         )}
                                     >
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 min-w-0 flex-1">
                                             <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-lg flex-shrink-0 animate-in fade-in zoom-in">
                                                 {plan.currentStage === 0 ? '🌱' : plan.currentStage >= 4 ? '🌳' : '🌿'}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                                <div className="flex items-center gap-2 mb-0.5">
                                                     <span className="text-[8px] md:text-[9px] font-black px-1.5 py-0.5 bg-lavender-light text-lavender-dark rounded-md uppercase shrink-0">
                                                         {plan.currentStage + 1}회차
                                                     </span>
-                                                    <span className="text-[8px] md:text-[9px] font-bold text-base-400 truncate max-w-[120px]">{plan.platform} • {plan.difficulty}</span>
+                                                    <span title={`${plan.platform} • ${plan.difficulty}`} className="text-[9px] md:text-[10px] font-bold text-base-400 truncate">{plan.platform} • {plan.difficulty}</span>
                                                     {isTiming && (
                                                         <span className="flex h-1.5 w-1.5 rounded-full bg-coral animate-ping shrink-0" />
                                                     )}
                                                 </div>
-                                                <h3 className="font-black text-base-800 text-xs md:text-sm truncate group-hover/item:text-lavender-dark transition-colors">
+                                                <h3 title={plan.problemTitle} className="font-black text-base-800 text-xs md:text-sm truncate group-hover/item:text-lavender-dark transition-colors">
                                                     {plan.problemTitle}
                                                 </h3>
                                             </div>
                                         </div>
 
-                                        <div className="p-2.5 bg-white text-base-300 group-hover/item:text-lavender-dark group-hover/item:bg-lavender-light/50 rounded-xl transition-all">
+                                        <div className="ml-3 p-2.5 bg-white text-base-300 group-hover/item:text-lavender-dark group-hover/item:bg-lavender-light/50 rounded-xl transition-all flex-shrink-0">
                                             <ArrowRight className="w-4 h-4" />
                                         </div>
                                     </motion.div>
@@ -118,9 +118,9 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                 </div>
             </div>
 
-            {/* Bottom Decoration */}
+            {/* Bottom Decoration - Fixed at bottom if exists */}
             {dueReviews.length > 0 && reviewPlans.some(p => p.status === 'COMPLETED') && (
-                <div className="mt-4 pt-4 border-t border-base-100 flex items-center gap-2 relative z-10">
+                <div className="mt-4 pt-4 border-t border-base-100 flex items-center gap-2 relative z-10 flex-shrink-0">
                     <Trophy className="w-3.5 h-3.5 text-sage-dark" />
                     <p className="text-[10px] font-bold text-sage-dark">
                         누적 {reviewPlans.filter(p => p.status === 'COMPLETED').length}개 정복 완료
@@ -128,9 +128,9 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                 </div>
             )}
 
-            {/* Completed Today Section */}
+            {/* Completed Today Section - Fixed at bottom if exists */}
             {completedToday.length > 0 && (
-                <div className="mt-6 pt-6 border-t border-base-100 relative z-10">
+                <div className="mt-6 pt-6 border-t border-base-100 relative z-10 flex-shrink-0">
                     <div className="flex items-center gap-2 mb-4">
                         <CheckCircle2 className="w-4 h-4 text-base-300" />
                         <h3 className="text-[10px] font-black text-base-300 uppercase tracking-widest">Completed Today</h3>
@@ -149,7 +149,7 @@ const ReviewNotifications: React.FC<ReviewNotificationsProps> = ({ onPlanClick }
                                             <span className="text-[8px] font-black px-1 py-0.5 bg-base-200 text-base-400 rounded uppercase">
                                                 {plan.currentStage === 0 ? '기본 완료' : `${plan.currentStage}차 완료`}
                                             </span>
-                                            <h4 className="text-xs font-bold text-base-400 truncate max-w-[150px]">
+                                            <h4 title={plan.problemTitle} className="text-xs font-bold text-base-400 truncate max-w-[150px]">
                                                 {plan.problemTitle}
                                             </h4>
                                         </div>
