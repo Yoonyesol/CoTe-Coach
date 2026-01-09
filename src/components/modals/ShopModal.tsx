@@ -6,7 +6,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { ShopItem } from '../../types/shop';
 import { clsx } from 'clsx';
 import { ShopModalProps } from '../../types/modal';
-import { AVATAR_ASSETS, resolveSkin, SvgMonitor, SvgTreasure, SvgSafe } from '../avatar/AvatarAssets';
+import { AVATAR_ASSETS, resolveSkin, SKIN_MAP, SvgMonitor, SvgTreasure, SvgSafe } from '../avatar/AvatarAssets';
 import { SHOP_ITEMS } from '../../constants/shop';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
@@ -56,6 +56,24 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
     }, [initialCategory]);
 
     useLockBodyScroll(isOpen);
+
+    // Preload all avatar assets on mount to prevent flickering/delay
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const preloadImage = (src: string) => {
+            const img = new Image();
+            img.src = src;
+        };
+
+        // 1. Preload Skin Combinations (Penguin Images)
+        Object.values(SKIN_MAP).forEach(src => preloadImage(src));
+
+        // 2. Preload Item Icons
+        Object.values(AVATAR_ASSETS).forEach(asset => {
+            if (asset.iconPath) preloadImage(asset.iconPath);
+        });
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
