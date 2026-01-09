@@ -12,7 +12,7 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
             {/* Background Accent */}
             <div className="absolute -right-20 -top-20 w-64 h-64 bg-misty/10 rounded-full blur-3xl group-hover:bg-misty/20 transition-colors duration-500" />
 
-            <div className="relative z-10 flex flex-col md:flex-row lg:flex-row gap-6 md:gap-8 items-center">
+            <div className="relative z-10 flex flex-col 2xl:flex-row gap-6 items-center">
 
                 {/* Circular Progress Section */}
                 <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0">
@@ -46,20 +46,20 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
                 </div>
 
                 {/* Content Section */}
-                <div className="flex-1 space-y-4 text-center md:text-left">
+                <div className="flex-1 space-y-4 text-center 2xl:text-left">
                     <div className="space-y-1">
-                        <h2 className="text-lg md:text-xl font-black text-base-900 flex items-center justify-center md:justify-start gap-2 font-sans">
+                        <h2 className="text-lg md:text-xl font-black text-base-900 flex items-center justify-center 2xl:justify-start gap-2 font-sans">
                             <Target className="w-5 h-5 text-misty-dark" />
                             오늘의 정복 계획
                         </h2>
                         <p className="text-xs md:text-sm font-bold text-base-500 font-sans leading-relaxed">
                             목표 {goalCount}문제 중 {solvedCount}문제를 해결했습니다.
-                            <br className="md:hidden" />
+                            <br className="2xl:hidden" />
                             {percentage >= 100 ? ' 오늘 목표 달성! 대단해요! 🏆' : ' 조금만 더 힘내보아요! 🎁'}
                         </p>
                     </div>
 
-                    <div className="flex flex-wrap justify-center md:justify-start gap-3 md:gap-4">
+                    <div className="flex flex-wrap justify-center 2xl:justify-start gap-3 md:gap-4">
                         <div className="flex items-center gap-2 px-3 md:px-4 py-2 bg-white/60 rounded-xl border border-white shadow-sm font-sans">
                             <Calendar className="w-3.5 h-3.5 text-base-400" />
                             <span className="text-[10px] font-black text-base-600 uppercase">
@@ -80,7 +80,7 @@ const DailyPlanner: React.FC<DailyPlannerProps> = ({ solvedCount, goalCount, day
 
             {/* Mini Progress Dots */}
             <div className="mt-8 pt-6 border-t border-base-100 overflow-x-auto scrollbar-hide">
-                <div className="flex justify-center md:justify-start gap-3 min-w-max px-2">
+                <div className="flex justify-center 2xl:justify-start gap-3 min-w-max px-2">
                     {Array.from({ length: goalCount }).map((_, i) => (
                         <div key={i} className="flex flex-col items-center gap-1">
                             {i < solvedCount ? (

@@ -126,50 +126,54 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete 
             </div>
 
             {/* Card Footer: Action */}
-            <div className="mt-6 pt-4 border-t border-white/30 flex flex-col gap-3">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <button
-                        onClick={handleStart}
-                        disabled={isOtherRunning}
-                        className={cn(
-                            "w-full sm:flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer",
-                            isCurrent && timer.isRunning ? "bg-coral text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
-                            isOtherRunning && "cursor-not-allowed opacity-50"
-                        )}
-                    >
-                        {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                        {isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '이어서 풀기' : '풀이 시작')}
-                    </button>
+            <div className="mt-auto pt-4 border-t border-white/30 flex flex-col gap-2">
+                {/* Row 1: Primary Action (Start/Stop) */}
+                <button
+                    onClick={handleStart}
+                    disabled={isOtherRunning}
+                    className={cn(
+                        "w-full py-3 px-3 rounded-xl text-xs md:text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-w-0",
+                        isCurrent && timer.isRunning ? "bg-coral text-white shadow-md shadow-coral/20" : "bg-base-100 text-base-600 hover:bg-base-200",
+                        isOtherRunning && "cursor-not-allowed opacity-50"
+                    )}
+                >
+                    {isCurrent && timer.isRunning ? <Pause className="w-4 h-4 shrink-0" /> : <Play className="w-4 h-4 shrink-0" />}
+                    <span className="truncate">{isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '계속하기' : '풀이 시작')}</span>
+                </button>
 
-                    {task.url && (
+                {/* Row 2: Secondary & Utility Actions */}
+                <div className="flex items-stretch gap-2">
+                    {task.url ? (
                         <a
                             href={task.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm cursor-pointer w-full sm:w-auto bg-white border border-base-200 text-base-800 hover:bg-base-50"
+                            className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-[11px] md:text-xs font-black transition-all active:scale-95 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 bg-white border border-base-200 text-base-800 hover:bg-base-50"
                         >
-                            문제 열기
-                            <ExternalLink className="w-4 h-4" />
+                            <span className="truncate">문제 열기</span>
+                            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                         </a>
+                    ) : (
+                        <div className="flex-1 text-[10px] font-bold text-base-300 flex items-center px-1">URL 없음</div>
                     )}
 
-                    <button
-                        onClick={() => onComplete(task)}
-                        className="w-full sm:w-auto p-2.5 bg-sage-light text-sage-dark border-2 border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group flex items-center justify-center gap-2"
-                        title="완료 처리"
-                    >
-                        <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        <span className="sm:hidden font-black text-sm">완료 체크</span>
-                    </button>
+                    <div className="flex gap-2 shrink-0">
+                        <button
+                            onClick={() => onComplete(task)}
+                            className="w-11 h-11 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
+                            title="완료 처리"
+                        >
+                            <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        </button>
 
-                    <button
-                        onClick={handleDelete}
-                        className="w-full sm:w-auto p-2.5 bg-base-50 text-base-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer flex items-center justify-center gap-2"
-                        title="삭제"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                        <span className="sm:hidden font-black text-sm">삭제</span>
-                    </button>
+                        <button
+                            onClick={handleDelete}
+                            className="w-11 h-11 flex items-center justify-center bg-base-50 text-base-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer group"
+                            title="삭제"
+                        >
+                            <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Review Submission Button: Only shown when time is recorded and not currently running */}

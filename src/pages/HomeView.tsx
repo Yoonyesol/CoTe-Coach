@@ -64,9 +64,9 @@ const HomeView: React.FC<HomeViewProps> = ({
             {isLoading ? (
                 <ProfileHeaderSkeleton />
             ) : (
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-                    <div className="space-y-2">
-                        <h1 className="text-2xl md:text-3xl font-black text-base-900 leading-tight">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{nickname || email.split('@')[0]}님!</span></h1>
+                <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                    <div className="space-y-2 min-w-0 flex-1">
+                        <h1 className="text-2xl md:text-3xl font-black text-base-900 leading-tight truncate">안녕하세요, <span className="text-misty-dark underline decoration-wheat decoration-4 underline-offset-4 font-sans">{nickname || email.split('@')[0]}님!</span></h1>
                         <div className="text-xs md:text-sm font-medium text-base-400 font-sans flex items-center gap-1.5 flex-wrap">
                             <span>오늘의 목표인</span>
                             <button
@@ -77,13 +77,13 @@ const HomeView: React.FC<HomeViewProps> = ({
                                 <span>{dailyProgress.goal}문제</span>
                             </button>
                             <span>중 {dailyProgress.solved}문제를 해결하셨어요!</span>
-                            <span className="font-bold text-base-600 italic">{dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}</span>
+                            <span className="font-bold text-base-600 italic whitespace-nowrap">{dailyProgress.solved >= dailyProgress.goal ? '축하드려요! 🎉' : '조금만 더 힘내보아요! 🔥'}</span>
                         </div>
                     </div>
-                    <div className="flex gap-2 w-full sm:w-auto">
+                    <div className="flex flex-wrap gap-2 w-full lg:w-auto shrink-0">
                         <button
                             onClick={onDailyGoalOpen}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm font-sans text-sm cursor-pointer"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white border border-base-200 text-base-600 rounded-2xl font-black hover:bg-base-50 transition-all active:scale-95 shadow-sm font-sans text-sm cursor-pointer whitespace-nowrap"
                             title="클릭하여 목표 변경"
                         >
                             <Target className="w-4 h-4 text-misty-dark" />
@@ -91,7 +91,7 @@ const HomeView: React.FC<HomeViewProps> = ({
                         </button>
                         <button
                             onClick={onAddModalOpen}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans cursor-pointer text-sm"
+                            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-3 bg-base-900 text-white rounded-2xl font-black hover:bg-base-800 transition-all active:scale-95 shadow-xl font-sans cursor-pointer text-sm whitespace-nowrap"
                         >
                             <Plus className="w-5 h-5" />
                             <span>문제 추가</span>
@@ -108,7 +108,7 @@ const HomeView: React.FC<HomeViewProps> = ({
             )}
 
             {/* Main Activity Row: Planner & Reviews */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
                 {/* Daily Planner Section */}
                 {isLoading ? (
                     <DailyPlannerSkeleton />
@@ -178,13 +178,13 @@ const HomeView: React.FC<HomeViewProps> = ({
                 )}
 
                 {isRecsLoading || isRecsFetching || isRefreshing || isLocalRefreshing ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {[1, 2, 3, 4].map((i) => (
                             <ProblemCardSkeleton key={i} />
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                         {recommendations?.map((p, i) => (
                             <ProblemCard
                                 key={i}
@@ -237,7 +237,7 @@ const HomeView: React.FC<HomeViewProps> = ({
                                         직접 추가한 문제들이에요. 목표를 달성할 때까지 사라지지 않아요!
                                     </p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                                     {manualTasks.map((task) => (
                                         <CustomProblemCard
                                             key={task.id}
@@ -262,7 +262,7 @@ const HomeView: React.FC<HomeViewProps> = ({
                                         풀이를 시작했던 문제들을 보관하고 있어요. 추천 리스트에서 사라져도 여기서 계속 풀 수 있어요.
                                     </p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
                                     {autoTasks.map((task) => (
                                         <CustomProblemCard
                                             key={task.id}

@@ -150,46 +150,45 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
       </div>
 
       {/* Card Footer: Action */}
-      <div className="mt-6 pt-4 border-t border-white/30 flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <button
-            onClick={handleStart}
-            disabled={isOtherRunning || isCompleted}
-            className={cn(
-              "w-full sm:flex-1 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer",
-              isCurrent && timer.isRunning ? "bg-coral text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
-              (isOtherRunning || isCompleted) && "cursor-not-allowed opacity-50"
-            )}
-          >
-            {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '이어서 풀기' : '풀이 시작')}
-          </button>
+      <div className="mt-auto pt-4 border-t border-white/30 flex flex-col gap-2">
+        {/* Row 1: Primary Action (Start/Stop) */}
+        <button
+          onClick={handleStart}
+          disabled={isOtherRunning || isCompleted}
+          className={cn(
+            "w-full py-3 px-3 rounded-xl text-xs md:text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-w-0",
+            isCurrent && timer.isRunning ? "bg-coral text-white shadow-md shadow-coral/20" : "bg-base-100 text-base-600 hover:bg-base-200",
+            (isOtherRunning || isCompleted) && "cursor-not-allowed opacity-50"
+          )}
+        >
+          {isCurrent && timer.isRunning ? <Pause className="w-4 h-4 shrink-0" /> : <Play className="w-4 h-4 shrink-0" />}
+          <span className="truncate">{isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '계속하기' : '풀이 시작')}</span>
+        </button>
 
+        {/* Row 2: Secondary Actions (Open Problem & Quick Complete) */}
+        <div className="flex items-stretch gap-2">
           <a
             href={isCompleted ? '#' : problemUrl}
             target={isCompleted ? undefined : "_blank"}
             rel="noopener noreferrer"
             onClick={(e) => isCompleted && e.preventDefault()}
             className={cn(
-              "flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95 shadow-sm cursor-pointer",
-              "w-full sm:w-auto",
+              "flex-1 px-3 py-2.5 rounded-xl text-[11px] md:text-xs font-black transition-all active:scale-95 shadow-sm cursor-pointer min-w-0 flex items-center justify-center gap-1.5",
               type === 'CHALLENGE' ? 'bg-base-900 text-white' : 'bg-white border border-base-200 text-base-800 hover:bg-base-50',
               isCompleted && "opacity-50 cursor-not-allowed"
             )}
           >
-            {isCompleted ? '제출 완료' : '문제 열기'}
-            {!isCompleted && <ExternalLink className="w-4 h-4" />}
+            <span className="truncate">{isCompleted ? '제출 완료' : '문제 열기'}</span>
+            {!isCompleted && <ExternalLink className="w-3.5 h-3.5 shrink-0" />}
           </a>
 
-          {/* Quick Complete Button */}
           {!isCompleted && (
             <button
               onClick={() => onReview({ title, platform, difficulty })}
-              className="w-full sm:w-auto p-2.5 bg-sage-light text-sage-dark border-2 border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group flex items-center justify-center gap-2"
+              className="w-12 shrink-0 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
               title="바로 완료 처리"
             >
               <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="sm:hidden font-black text-sm">완료 체크</span>
             </button>
           )}
         </div>
@@ -198,10 +197,10 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
         {elapsed > 0 && !timer.isRunning && !isCompleted && (
           <button
             onClick={() => onReview({ title, platform, difficulty })}
-            className="w-full py-2.5 bg-misty-light text-misty-dark border-2 border-misty/30 rounded-xl text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2 cursor-pointer"
+            className="w-full py-2.5 bg-misty-light text-misty-dark border border-misty/30 rounded-xl text-[10px] md:text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2 cursor-pointer whitespace-nowrap"
           >
             <Brain className="w-4 h-4" />
-            복습 로그 작성하고 기록 완료하기
+            <span>로그 작성/기록 완료</span>
           </button>
         )}
       </div>
