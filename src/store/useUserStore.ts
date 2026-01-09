@@ -100,14 +100,29 @@ export const useUserStore = create<UserState>()(
             },
 
             calculateTier: (level: number) => {
-                const majorTiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby', 'Challenger'];
-                const tierIndex = Math.floor((level - 1) / 5);
+                const tiers = [
+                    { name: 'Iron', min: 1, max: 3, maxSub: 3 },
+                    { name: 'Bronze', min: 4, max: 8, maxSub: 5 },
+                    { name: 'Silver', min: 9, max: 18, maxSub: 5 },
+                    { name: 'Gold', min: 19, max: 28, maxSub: 5 },
+                    { name: 'Platinum', min: 29, max: 35, maxSub: 4 },
+                    { name: 'Diamond', min: 36, max: 38, maxSub: 3 },
+                    { name: 'Master', min: 39, max: 40, maxSub: 2 },
+                    { name: 'Grandmaster', min: 41, max: 41, maxSub: 1 },
+                    { name: 'Challenger', min: 42, max: Infinity, maxSub: 1 }
+                ];
 
-                if (tierIndex >= 6) return 'Challenger';
+                const tier = tiers.find(t => level >= t.min && level <= t.max) || tiers[tiers.length - 1];
 
-                const tierName = majorTiers[tierIndex];
-                const subLevel = 5 - ((level - 1) % 5);
-                return `${tierName} ${subLevel}`;
+                if (tier.name === 'Challenger') return 'Challenger';
+
+                const rangeSize = (tier.max - tier.min) + 1;
+                const offset = level - tier.min;
+                const step = rangeSize / tier.maxSub;
+                const bucket = Math.min(Math.floor(offset / step), tier.maxSub - 1);
+                const subLevel = tier.maxSub - bucket;
+
+                return `${tier.name} ${subLevel}`;
             },
 
             syncSolvedAcTier: async (rating) => {
