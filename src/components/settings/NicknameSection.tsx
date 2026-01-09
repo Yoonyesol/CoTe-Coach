@@ -2,11 +2,16 @@ import React, { useState } from 'react';
 import { User } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const NicknameSection: React.FC = () => {
     const { nickname, setNickname } = useUserStore();
+    const { user } = useAuthStore();
     const { showAlert } = useModalStore();
-    const [nicknameInput, setNicknameInput] = useState(nickname || '');
+
+    // Default to email prefix if nickname is not set
+    const initialNickname = nickname || (user?.email ? user.email.split('@')[0] : '');
+    const [nicknameInput, setNicknameInput] = useState(initialNickname);
 
     const handleSaveNickname = () => {
         if (!nicknameInput.trim()) return;
