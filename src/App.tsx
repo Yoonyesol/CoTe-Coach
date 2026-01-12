@@ -287,7 +287,7 @@ function App() {
           onClose={() => setEditingLog(null)}
         />
       )}
-      <Stopwatch />
+      <Stopwatch onComplete={handleReviewOpen} />
       <RecommendationSettingsModal
         isOpen={isRecommendationSettingsOpen}
         onClose={closeRecommendationSettings}

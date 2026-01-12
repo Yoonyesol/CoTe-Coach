@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Play, Pause, RotateCcw, Maximize2, Minimize2, AlertCircle, X, Timer as TimerIcon } from 'lucide-react';
+import { Play, Pause, RotateCcw, Maximize2, Minimize2, AlertCircle, X, Timer as TimerIcon, CheckCircle } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Stopwatch: React.FC = () => {
-    const { timer, stopTimer, resetTimer, getTotalElapsed, startTimer } = useUserStore();
+interface StopwatchProps {
+    onComplete?: (problem: { title: string, platform: string, difficulty: string }) => void;
+}
+
+const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
+    const { timer, stopTimer, resetTimer, getTotalElapsed, startTimer, dailyTasks, reviewPlans, studyLogs } = useUserStore();
     const { showConfirm } = useModalStore();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isHidden, setIsHidden] = useState(false);
@@ -50,6 +54,26 @@ const Stopwatch: React.FC = () => {
         };
     };
 
+    const handleComplete = () => {
+        if (!currentProblem) return;
+
+        stopTimer();
+        setIsExpanded(false);
+
+        // Find problem details to open the log modal correctly
+        const task = dailyTasks.find(t => t.problemTitle === currentProblem);
+        const plan = reviewPlans.find(p => p.problemTitle === currentProblem);
+        const log = studyLogs.find(l => l.problemTitle === currentProblem);
+
+        const problemData = {
+            title: currentProblem,
+            platform: task?.site || plan?.platform || log?.platform || 'BOJ' as any,
+            difficulty: task?.difficulty || plan?.difficulty || log?.difficulty || '미정'
+        };
+
+        onComplete?.(problemData);
+    };
+
     if (!currentProblem) return null;
 
     const time = formatTime(currentTime);
@@ -79,16 +103,25 @@ const Stopwatch: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="p-8 md:p-12 flex justify-center gap-8 items-center bg-white flex-1 md:flex-none">
+                    <div className="p-8 md:p-12 flex justify-center gap-4 md:gap-8 items-center bg-white flex-1 md:flex-none">
                         <button
                             onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
                             className={clsx(
-                                "w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-xl shrink-0",
+                                "w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-xl shrink-0",
                                 timer.isRunning ? "bg-base-100 text-base-400" : "bg-base-900 text-white"
                             )}
                         >
-                            {timer.isRunning ? <Pause className="w-8 h-8 md:w-10 md:h-10 fill-current" /> : <Play className="w-8 h-8 md:w-10 md:h-10 fill-current ml-2" />}
+                            {timer.isRunning ? <Pause className="w-6 h-6 md:w-10 md:h-10 fill-current" /> : <Play className="w-6 h-6 md:w-10 md:h-10 fill-current ml-2" />}
                         </button>
+
+                        <button
+                            onClick={handleComplete}
+                            className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-misty text-white hover:bg-misty-dark flex flex-col items-center justify-center transition-all active:scale-90 shadow-xl shrink-0 gap-1"
+                        >
+                            <CheckCircle className="w-6 h-6 md:w-8 md:h-8" />
+                            <span className="text-[10px] md:text-xs font-black">해결완료</span>
+                        </button>
+
                         <button
                             onClick={() => {
                                 showConfirm(
@@ -97,9 +130,9 @@ const Stopwatch: React.FC = () => {
                                     () => resetTimer()
                                 );
                             }}
-                            className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-base-50 text-base-300 hover:bg-base-100 hover:text-base-500 flex items-center justify-center transition-all active:scale-90 shrink-0"
+                            className="w-16 h-16 md:w-24 md:h-24 rounded-full bg-base-50 text-base-300 hover:bg-base-100 hover:text-base-500 flex items-center justify-center transition-all active:scale-90 shrink-0"
                         >
-                            <RotateCcw className="w-8 h-8 md:w-10 md:h-10" />
+                            <RotateCcw className="w-6 h-6 md:w-10 md:h-10" />
                         </button>
                     </div>
 
@@ -183,7 +216,13 @@ const Stopwatch: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2 pl-4 border-l border-white/10">
+                        <div className="flex items-center gap-2 pl-2 md:pl-4 border-l border-white/10">
+                            <button
+                                onClick={handleComplete}
+                                className="p-2 text-misty hover:text-white transition-colors cursor-pointer flex flex-col items-center group/complete"
+                            >
+                                <CheckCircle className="w-5 h-5 md:w-6 md:h-6" />
+                            </button>
                             <button
                                 onClick={() => {
                                     showConfirm(
