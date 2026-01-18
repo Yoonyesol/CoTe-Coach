@@ -22,6 +22,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
     // CURRENT VIEW STATE
     const [currentLog, setCurrentLog] = useState<StudyLog>(initialLog);
     const [isEditing, setIsEditing] = useState(false);
+    const [isEditingProblem, setIsEditingProblem] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -119,7 +120,17 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
     }, [currentLog]);
 
     const handleFormSubmit = async (data: any) => {
+        const metadataUpdates: any = {};
+        if (isEditingProblem) {
+            metadataUpdates.problemTitle = data.problemTitle;
+            metadataUpdates.difficulty = data.difficulty;
+            // platform is site in study_logs? No, platform in log type mapped to platform column?
+            // checking StudyLog type... platform: Platform.
+            // updateStudyLog accepts Partial<StudyLog>.
+        }
+
         await updateStudyLog(currentLog.id, {
+            ...metadataUpdates,
             reflection: data.reflection,
             approach: data.approach,
             perceivedDifficulty: data.perceivedDifficulty,
@@ -133,6 +144,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
 
         const updatedLog = {
             ...currentLog,
+            ...metadataUpdates,
             reflection: data.reflection,
             approach: data.approach,
             perceivedDifficulty: data.perceivedDifficulty,
@@ -145,6 +157,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
         };
         setCurrentLog(updatedLog);
         setIsEditing(false);
+        setIsEditingProblem(false);
     };
 
     const handleDelete = () => {
@@ -214,18 +227,31 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                         {new Date(currentLog.completedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 완료
                                     </p>
                                 </div>
-                                <button onClick={onClose} className="p-2 hover:bg-base-100 rounded-xl transition-all md:hidden">
-                                    <X className="w-6 h-6 text-base-300" />
-                                </button>
+                                <div className="flex flex-col sm:flex-row gap-2 items-center">
+                                    {!isEditing && !isEditingProblem && (
+                                        <button
+                                            onClick={() => setIsEditingProblem(true)}
+                                            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-base-100 text-base-500 rounded-xl text-[11px] font-black hover:bg-base-200 transition-all shrink-0"
+                                        >
+                                            <Archive className="w-3 h-3" /> 정보 수정
+                                        </button>
+                                    )}
+                                    <button onClick={onClose} className="p-2 hover:bg-base-100 rounded-xl transition-all ml-1">
+                                        <X className="w-6 h-6 text-base-300" />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Content Body */}
                             <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
-                                {isEditing ? (
+                                {isEditing || isEditingProblem ? (
                                     /* EDIT MODE */
                                     <div className="animate-in fade-in duration-300">
                                         <LogForm
+                                            mode={isEditingProblem ? "PROBLEM" : "LOG"}
                                             initialValues={{
+                                                problemTitle: currentLog.problemTitle,
+                                                difficulty: currentLog.difficulty,
                                                 result: currentLog.result,
                                                 solvingMethod: currentLog.solvingMethod,
                                                 perceivedDifficulty: currentLog.perceivedDifficulty,
@@ -238,8 +264,11 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 language: currentLog.language
                                             }}
                                             onSubmit={handleFormSubmit}
-                                            onCancel={() => setIsEditing(false)}
-                                            submitLabel="기록 업데이트"
+                                            onCancel={() => {
+                                                setIsEditing(false);
+                                                setIsEditingProblem(false);
+                                            }}
+                                            submitLabel={isEditingProblem ? "문제 정보 업데이트" : "기록 업데이트"}
                                         />
                                     </div>
                                 ) : (
@@ -357,9 +386,9 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                 )}
                             </div>
 
-                            {/* Actions Footer (Only visible in View Mode, LogForm has its own buttons) */}
-                            {!isEditing && (
-                                <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100">
+                            {/* Actions Footer */}
+                            {!isEditing && !isEditingProblem && (
+                                <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100 shrink-0">
                                     <button onClick={handleDelete} className="cursor-pointer p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
                                         <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
                                     </button>

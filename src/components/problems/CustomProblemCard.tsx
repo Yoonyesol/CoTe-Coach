@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExternalLink, Zap, Play, Pause, Timer as TimerIcon, CheckCircle, Trash2 } from 'lucide-react';
+import { ExternalLink, Zap, Play, Pause, Timer as TimerIcon, CheckCircle, Trash2, Edit3 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { DailyTask } from '../../types/study';
@@ -14,9 +14,10 @@ function cn(...inputs: ClassValue[]) {
 interface CustomProblemCardProps {
     task: DailyTask;
     onComplete: (task: DailyTask) => void;
+    onEdit?: (task: DailyTask) => void;
 }
 
-const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete }) => {
+const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete, onEdit }) => {
     const { deleteDailyTask, timer, startTimer, stopTimer, getTotalElapsed } = useUserStore();
     const { showAlert } = useModalStore();
 
@@ -158,6 +159,13 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete 
                     )}
 
                     <div className="flex gap-2 shrink-0">
+                        <button
+                            onClick={() => onEdit?.(task)}
+                            className="w-11 h-11 flex items-center justify-center bg-base-50 text-base-400 rounded-xl hover:bg-misty-light hover:text-misty-dark transition-all cursor-pointer group"
+                            title="정보 수정"
+                        >
+                            <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                        </button>
                         <button
                             onClick={() => onComplete(task)}
                             className="w-11 h-11 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"

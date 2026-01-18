@@ -15,12 +15,13 @@ import GoalModal from './components/modals/GoalModal'
 import DailyGoalSettingsModal from './components/modals/DailyGoalSettingsModal'
 import { useUserStore } from './store/useUserStore'
 import { useModalStore } from './store/useModalStore'
-import { StudyLog } from './types/study'
 import { useAuthStore } from './store/useAuthStore'
 import DeleteAccountModal from './components/modals/DeleteAccountModal'
 import ContactModal from './components/modals/ContactModal'
 import ShopModal from './components/modals/ShopModal'
 import RewardedAdModal from './components/modals/RewardedAdModal'
+import EditTaskModal from './components/modals/EditTaskModal'
+import { StudyLog, DailyTask } from './types/study'
 
 // Lazy Load Page Components
 const LandingView = lazy(() => import('./pages/LandingView'));
@@ -138,6 +139,8 @@ function App() {
   const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<DailyTask | null>(null);
+  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS'>(() => {
     if (typeof window === 'undefined') return 'HOME';
@@ -272,6 +275,10 @@ function App() {
                 onReviewOpen={handleReviewOpen}
                 onReviewDetailOpen={handleReviewDetailOpen}
                 onEditLog={setEditingLog}
+                onEditTask={(task) => {
+                  setEditingTask(task);
+                  setIsEditTaskModalOpen(true);
+                }}
               />
             ) : activeTab === 'JOURNAL' ? (
               <JournalView
@@ -285,6 +292,10 @@ function App() {
               <MyProblemsView
                 onAddModalOpen={() => setIsAddModalOpen(true)}
                 onReviewOpen={handleReviewOpen}
+                onEditTask={(task) => {
+                  setEditingTask(task);
+                  setIsEditTaskModalOpen(true);
+                }}
               />
             ) : activeTab === 'SETTINGS' ? (
               <SettingsView
@@ -367,6 +378,17 @@ function App() {
         isOpen={isRewardedAdModalOpen}
         onClose={closeRewardedAdModal}
       />
+
+      {editingTask && (
+        <EditTaskModal
+          isOpen={isEditTaskModalOpen}
+          onClose={() => {
+            setIsEditTaskModalOpen(false);
+            setEditingTask(null);
+          }}
+          task={editingTask}
+        />
+      )}
     </>
   );
 }

@@ -29,6 +29,7 @@ interface HomeViewProps {
     onReviewOpen: (problem: { id?: string, title: string, platform: string, difficulty: string }) => void;
     onReviewDetailOpen: (plan: any) => void;
     onEditLog: (log: StudyLog) => void;
+    onEditTask: (task: DailyTask) => void;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({
@@ -39,7 +40,8 @@ const HomeView: React.FC<HomeViewProps> = ({
     onRecommendationSettingsOpen,
     onReviewOpen,
     onReviewDetailOpen,
-    onEditLog
+    onEditLog,
+    onEditTask
 }) => {
     const {
         getDailyProgress,
@@ -244,6 +246,7 @@ const HomeView: React.FC<HomeViewProps> = ({
                                             key={task.id}
                                             task={task}
                                             onComplete={handleCompleteTask}
+                                            onEdit={onEditTask}
                                         />
                                     ))}
                                 </div>
@@ -269,6 +272,7 @@ const HomeView: React.FC<HomeViewProps> = ({
                                             key={task.id}
                                             task={task}
                                             onComplete={handleCompleteTask}
+                                            onEdit={onEditTask}
                                         />
                                     ))}
                                 </div>

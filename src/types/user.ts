@@ -65,6 +65,7 @@ export interface UserState {
     fetchDailyTasks: (userId: string) => Promise<void>;
     addDailyTask: (task: Omit<DailyTask, 'id' | 'status'>) => Promise<void>;
     toggleTaskStatus: (taskId: string) => Promise<void>;
+    updateDailyTask: (taskId: string, updates: Partial<DailyTask>) => Promise<void>;
     deleteDailyTask: (taskId: string) => Promise<void>;
 
     // Review Actions

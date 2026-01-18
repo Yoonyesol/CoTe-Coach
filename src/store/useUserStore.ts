@@ -387,6 +387,22 @@ export const useUserStore = create<UserState>()(
                 }
             },
 
+            updateDailyTask: async (taskId, updates) => {
+                const dbUpdates: any = {};
+                if (updates.problemTitle) dbUpdates.problem_title = updates.problemTitle;
+                if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
+                if (updates.url !== undefined) dbUpdates.url = updates.url;
+                if (updates.tags) dbUpdates.tags = updates.tags;
+                if (updates.site) dbUpdates.site = updates.site;
+
+                const { error } = await supabase.from('daily_tasks').update(dbUpdates).eq('id', taskId);
+                if (!error) {
+                    set(state => ({
+                        dailyTasks: state.dailyTasks.map(t => t.id === taskId ? { ...t, ...updates } : t)
+                    }));
+                }
+            },
+
             deleteDailyTask: async (taskId) => {
                 const { error } = await supabase.from('daily_tasks').delete().eq('id', taskId);
                 if (!error) {
@@ -524,6 +540,7 @@ export const useUserStore = create<UserState>()(
                 if (updates.concepts) dbUpdates.concepts = updates.concepts;
                 if (updates.result) dbUpdates.result = updates.result;
                 if (updates.difficulty) dbUpdates.difficulty = updates.difficulty;
+                if (updates.problemTitle) dbUpdates.problem_title = updates.problemTitle;
                 if (updates.elapsedTime !== undefined) dbUpdates.elapsed_time = updates.elapsedTime;
                 if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
                 if (updates.isFinished !== undefined) dbUpdates.is_finished = updates.isFinished;

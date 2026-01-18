@@ -5,12 +5,15 @@ import CustomProblemCard from '../components/problems/CustomProblemCard';
 import { ListTodo, CheckCircle2, Clock, Plus } from 'lucide-react';
 import { clsx } from 'clsx';
 
+import { DailyTask } from '../types/study';
+
 interface MyProblemsViewProps {
     onAddModalOpen: () => void;
     onReviewOpen: (problem: { id?: string, title: string, platform: string, difficulty: string }) => void;
+    onEditTask: (task: DailyTask) => void;
 }
 
-const MyProblemsView: React.FC<MyProblemsViewProps> = ({ onAddModalOpen, onReviewOpen }) => {
+const MyProblemsView: React.FC<MyProblemsViewProps> = ({ onAddModalOpen, onReviewOpen, onEditTask }) => {
     const { dailyTasks } = useUserStore();
     const [filter, setFilter] = useState<'pending' | 'completed'>('pending');
 
@@ -100,6 +103,7 @@ const MyProblemsView: React.FC<MyProblemsViewProps> = ({ onAddModalOpen, onRevie
                             key={task.id}
                             task={task}
                             onComplete={handleCompleteTask}
+                            onEdit={onEditTask}
                         />
                     ))}
                 </div>
