@@ -300,7 +300,6 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                                     disabled={!title}
                                     className="w-full py-4 bg-misty-dark text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-misty transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-lg font-sans cursor-pointer"
                                 >
-                                    <Play className="w-5 h-5" />
                                     오늘의 문제에 추가
                                 </button>
                             ) : (

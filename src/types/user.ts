@@ -1,4 +1,4 @@
-import { RecommendationSettings, DailyTask, StudyLog, ReviewPlan, StudyGoal } from './study';
+import { RecommendationSettings, DailyTask, StudyLog, ReviewPlan, StudyGoal, GoldHistory } from './study';
 import { ShopItem } from './shop';
 
 export type Platform = 'BOJ' | 'PROG' | 'LC' | 'SWEA';
@@ -37,11 +37,12 @@ export interface UserState {
     dailyTasks: DailyTask[];
     reviewPlans: ReviewPlan[];
     studyGoals: StudyGoal[];
+    goldHistory: GoldHistory[];
     lastAdWatchTime: string | null;
 
     // Actions
     addXp: (amount: number) => void;
-    addPoints: (amount: number) => void;
+    addPoints: (amount: number, reason?: string) => Promise<void>;
     setBojHandle: (handle: string) => void;
     setNickname: (nickname: string) => void;
 
@@ -55,6 +56,7 @@ export interface UserState {
     // Supabase Sync Actions
     fetchUserData: (userId: string) => Promise<void>;
     saveProfile: (userId: string) => Promise<void>;
+    fetchGoldHistory: (userId: string) => Promise<void>;
 
     // Study Log Actions
     addStudyLog: (log: Omit<StudyLog, 'id' | 'completedAt' | 'stage'>) => Promise<void>;
@@ -108,7 +110,7 @@ export interface UserState {
     getDaysRemaining: () => number;
 
     // Shop Actions
-    buyItem: (item: ShopItem) => boolean;
+    buyItem: (item: ShopItem) => Promise<boolean>;
     toggleEquip: (itemId: string, slot?: string, category?: string) => void;
 
     // Helper to force recalculation

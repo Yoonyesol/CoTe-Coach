@@ -41,6 +41,7 @@ export const useUserStore = create<UserState>()(
             dailyTasks: [],
             reviewPlans: [],
             studyGoals: [],
+            goldHistory: [],
             lastAdWatchTime: null,
 
             addXp: (amount) => {
@@ -62,7 +63,39 @@ export const useUserStore = create<UserState>()(
                 get().addStudyLog(newLog);
             },
 
-            addPoints: (amount) => set((state) => ({ points: state.points + amount })),
+            addPoints: async (amount, reason = '지급') => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) return;
+
+                const newPoints = get().points + amount;
+                set({ points: newPoints });
+
+                const { data: historyData } = await supabase.from('gold_history').insert({
+                    user_id: user.id,
+                    amount,
+                    balance_after: newPoints,
+                    type: amount >= 0 ? 'EARN' : 'SPEND',
+                    reason
+                }).select().single();
+
+                if (historyData) {
+                    set(state => ({
+                        goldHistory: [
+                            {
+                                id: historyData.id,
+                                amount: historyData.amount,
+                                balanceAfter: historyData.balance_after,
+                                type: historyData.type,
+                                reason: historyData.reason,
+                                createdAt: historyData.created_at
+                            },
+                            ...state.goldHistory
+                        ].slice(0, 50)
+                    }));
+                }
+
+                await get().saveProfile(user.id);
+            },
 
             setBojHandle: (handle: string) => set({ bojHandle: handle }),
             setNickname: async (nickname: string) => {
@@ -169,10 +202,14 @@ export const useUserStore = create<UserState>()(
                     points: 0,
                     bojHandle: '',
                     bojRating: 0,
+                    goldHistory: []
                 });
                 const { data: { user } } = await supabase.auth.getUser();
                 if (user) {
-                    await supabase.from('study_logs').delete().eq('user_id', user.id);
+                    await Promise.all([
+                        supabase.from('study_logs').delete().eq('user_id', user.id),
+                        supabase.from('gold_history').delete().eq('user_id', user.id)
+                    ]);
                     await get().saveProfile(user.id);
                 }
             },
@@ -198,7 +235,9 @@ export const useUserStore = create<UserState>()(
                     // 5. Daily Tasks (Action)
                     get().fetchDailyTasks(userId),
                     // 6. Timer Logs
-                    supabase.from('timer_logs').select('problem_id, duration_ms, end_time, start_time, id').eq('user_id', userId)
+                    supabase.from('timer_logs').select('problem_id, duration_ms, end_time, start_time, id').eq('user_id', userId),
+                    // 7. Gold History (Action)
+                    get().fetchGoldHistory(userId)
                 ]);
 
                 // --- Process Profile ---
@@ -314,6 +353,27 @@ export const useUserStore = create<UserState>()(
                         updated_at: new Date().toISOString()
                     });
                 if (error) console.error('Profile sync error:', error);
+            },
+
+            fetchGoldHistory: async (userId) => {
+                const { data: history } = await supabase
+                    .from('gold_history')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false });
+
+                if (history) {
+                    set({
+                        goldHistory: history.map(h => ({
+                            id: h.id,
+                            amount: h.amount,
+                            balanceAfter: h.balance_after,
+                            type: h.type as any,
+                            reason: h.reason,
+                            createdAt: h.created_at
+                        }))
+                    });
+                }
             },
 
             fetchDailyTasks: async (userId) => {
@@ -857,6 +917,15 @@ export const useUserStore = create<UserState>()(
                         status: (isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE',
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
+
+                    // 3. Log Gold History
+                    await supabase.from('gold_history').insert({
+                        user_id: session.user.id,
+                        amount: earnedRating,
+                        balance_after: get().points + earnedRating,
+                        type: 'EARN',
+                        reason: `문제 해결: ${newLog.problemTitle}`
+                    });
                 }
 
                 // Update Local State (Only if DB sync succeeded)
@@ -1165,23 +1234,20 @@ export const useUserStore = create<UserState>()(
 
             watchAdAndEarnGold: async () => {
                 const now = new Date().toISOString();
-                set(state => ({
-                    points: state.points + 100,
-                    lastAdWatchTime: now
-                }));
-                const { data: { user } } = await supabase.auth.getUser();
-                if (user) await get().saveProfile(user.id);
+                await get().addPoints(100, '광고 시청');
+                set({ lastAdWatchTime: now });
             },
 
-            buyItem: (item) => {
+            buyItem: async (item) => {
                 if (get().points < item.price || get().inventory.includes(item.id)) return false;
-                set(state => ({ points: state.points - item.price, inventory: [...state.inventory, item.id] }));
-                supabase.auth.getUser().then(({ data: { user } }) => {
-                    if (user) {
-                        get().saveProfile(user.id);
-                        supabase.from('user_assets').insert({ user_id: user.id, asset_type: item.category, asset_id: item.id }).then();
-                    }
-                });
+
+                await get().addPoints(-item.price, `상점 구매: ${item.name}`);
+                set(state => ({ inventory: [...state.inventory, item.id] }));
+
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    await supabase.from('user_assets').insert({ user_id: user.id, asset_type: item.category, asset_id: item.id });
+                }
                 return true;
             },
 

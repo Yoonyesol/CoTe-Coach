@@ -33,7 +33,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
     const bojHandle = useUserStore((state) => state.bojHandle);
 
     const { signOut } = useAuthStore();
-    const { showConfirm, showAlert, openShop } = useModalStore();
+    const { showConfirm, showAlert, openShop, openGoldHistory } = useModalStore();
 
     const progress = xp % 100;
 
@@ -294,7 +294,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                                             <span className="text-sm font-black text-base-800 group-hover:text-misty-dark transition-colors">{tier}</span>
                                         </div>
                                     </div>
-                                    <div className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group">
+                                    <div
+                                        onClick={() => openGoldHistory()}
+                                        className="bg-white/40 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm hover:bg-white/60 transition-all cursor-pointer group"
+                                    >
                                         <p className="text-[9px] font-black text-base-400 uppercase tracking-widest mb-2">Total Gold</p>
                                         <div className="flex items-center gap-1.5">
                                             <span className="text-base">💰</span>

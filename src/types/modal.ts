@@ -16,6 +16,7 @@ export interface ModalState {
     isShopOpen: boolean;
     isRecommendationSettingsOpen: boolean;
     isRewardedAdModalOpen: boolean;
+    isGoldHistoryOpen: boolean;
     shopInitialCategory?: 'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY';
     showAlert: (title: string, message: string, onConfirm?: () => void) => void;
     showConfirm: (title: string, message: string, onConfirm: () => void, onCancel?: () => void) => void;
@@ -25,6 +26,8 @@ export interface ModalState {
     closeRecommendationSettings: () => void;
     openRewardedAdModal: () => void;
     closeRewardedAdModal: () => void;
+    openGoldHistory: () => void;
+    closeGoldHistory: () => void;
     closeModal: () => void;
 }
 

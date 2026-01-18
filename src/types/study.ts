@@ -74,3 +74,11 @@ export interface StudyGoal {
     createdAt: string;
 }
 
+export interface GoldHistory {
+    id: string;
+    amount: number;
+    balanceAfter: number;
+    type: 'EARN' | 'SPEND' | 'RESET';
+    reason: string;
+    createdAt: string;
+}

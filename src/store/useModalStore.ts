@@ -8,6 +8,7 @@ export const useModalStore = create<ModalState>((set) => ({
     isShopOpen: false,
     isRecommendationSettingsOpen: false,
     isRewardedAdModalOpen: false,
+    isGoldHistoryOpen: false,
     shopInitialCategory: undefined,
     showAlert: (title, message, onConfirm) => set({
         isOpen: true,
@@ -31,5 +32,7 @@ export const useModalStore = create<ModalState>((set) => ({
     closeRecommendationSettings: () => set({ isRecommendationSettingsOpen: false }),
     openRewardedAdModal: () => set({ isRewardedAdModalOpen: true }),
     closeRewardedAdModal: () => set({ isRewardedAdModalOpen: false }),
+    openGoldHistory: () => set({ isGoldHistoryOpen: true }),
+    closeGoldHistory: () => set({ isGoldHistoryOpen: false }),
     closeModal: () => set({ isOpen: false, options: null })
 }));

@@ -21,6 +21,7 @@ import ContactModal from './components/modals/ContactModal'
 import ShopModal from './components/modals/ShopModal'
 import RewardedAdModal from './components/modals/RewardedAdModal'
 import EditTaskModal from './components/modals/EditTaskModal'
+import GoldHistoryModal from './components/modals/GoldHistoryModal'
 import { StudyLog, DailyTask } from './types/study'
 
 // Lazy Load Page Components
@@ -55,7 +56,9 @@ function App() {
     openRecommendationSettings,
     closeRecommendationSettings,
     isRewardedAdModalOpen,
-    closeRewardedAdModal
+    closeRewardedAdModal,
+    isGoldHistoryOpen,
+    closeGoldHistory
   } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
 
@@ -389,6 +392,11 @@ function App() {
           task={editingTask}
         />
       )}
+
+      <GoldHistoryModal
+        isOpen={isGoldHistoryOpen}
+        onClose={closeGoldHistory}
+      />
     </>
   );
 }
