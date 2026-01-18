@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import {
     X, Trash2, Clock,
     BookOpen, Zap, MessageSquare,
-    Calendar, History, TrendingUp, Edit3, BarChart3, Archive
+    Calendar, History, TrendingUp, Edit3, BarChart3, Save, Code2, Link, Edit2
 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { backdropVariants, getModalVariants } from '../../lib/animations';
 import { clsx } from 'clsx';
 import { StudyLog } from '../../types/study';
+import { Platform } from '../../types/user';
 import { StudyLogDetailModalProps } from '../../types/modal';
 import LogForm from '../common/LogForm';
 
@@ -22,8 +24,11 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
     // CURRENT VIEW STATE
     const [currentLog, setCurrentLog] = useState<StudyLog>(initialLog);
     const [isEditing, setIsEditing] = useState(false);
-    const [isEditingProblem, setIsEditingProblem] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        setCurrentLog(initialLog);
+    }, [initialLog]);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -114,50 +119,59 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
         );
     };
 
-    // Sync form state when current log changes
+    const [isEditingProblem, setIsEditingProblem] = useState(false);
+    const [draftTitle, setDraftTitle] = useState('');
+    const [draftUrl, setDraftUrl] = useState('');
+    const [draftPlatform, setDraftPlatform] = useState<Platform>('BOJ');
+    const [draftBojTier, setDraftBojTier] = useState('');
+    const [draftLevel, setDraftLevel] = useState('');
+
     useEffect(() => {
-        setIsEditing(false); // Reset to view mode when switching logs
-    }, [currentLog]);
-
-    const handleFormSubmit = async (data: any) => {
-        const metadataUpdates: any = {};
-        if (isEditingProblem) {
-            metadataUpdates.problemTitle = data.problemTitle;
-            metadataUpdates.difficulty = data.difficulty;
-            // platform is site in study_logs? No, platform in log type mapped to platform column?
-            // checking StudyLog type... platform: Platform.
-            // updateStudyLog accepts Partial<StudyLog>.
-        }
-
-        await updateStudyLog(currentLog.id, {
-            ...metadataUpdates,
-            reflection: data.reflection,
-            approach: data.approach,
-            perceivedDifficulty: data.perceivedDifficulty,
-            result: data.result,
-            solvingMethod: data.solvingMethod,
-            elapsedTime: data.elapsedTime,
-            concepts: data.concepts,
-            isFinished: data.isFinished,
-            language: data.language
-        });
-
-        const updatedLog = {
-            ...currentLog,
-            ...metadataUpdates,
-            reflection: data.reflection,
-            approach: data.approach,
-            perceivedDifficulty: data.perceivedDifficulty,
-            result: data.result,
-            solvingMethod: data.solvingMethod,
-            elapsedTime: data.elapsedTime,
-            concepts: data.concepts,
-            isFinished: data.isFinished,
-            language: data.language
-        };
-        setCurrentLog(updatedLog);
         setIsEditing(false);
         setIsEditingProblem(false);
+        if (currentLog) {
+            setDraftTitle(currentLog.problemTitle);
+            setDraftUrl(currentLog.url || '');
+            setDraftPlatform(currentLog.platform);
+
+            if (currentLog.platform === 'BOJ') {
+                const parts = currentLog.difficulty.split(' ');
+                setDraftBojTier(parts[0] || 'Bronze');
+                setDraftLevel(parts[1] || '1');
+            } else {
+                setDraftLevel(currentLog.difficulty.replace('Level ', '') || '1');
+            }
+        }
+    }, [currentLog]);
+
+    const handleProblemUpdate = async () => {
+        if (!currentLog) return;
+
+        const finalDifficulty = draftPlatform === 'BOJ'
+            ? `${draftBojTier} ${draftLevel}`.trim()
+            : `Level ${draftLevel}`;
+
+        try {
+            await updateStudyLog(currentLog.id, {
+                problemTitle: draftTitle,
+                difficulty: finalDifficulty,
+                url: draftUrl,
+                platform: draftPlatform
+            });
+
+            // Local state update for immediate feedback
+            setCurrentLog({
+                ...currentLog,
+                problemTitle: draftTitle,
+                difficulty: finalDifficulty,
+                url: draftUrl,
+                platform: draftPlatform
+            });
+
+            setIsEditingProblem(false);
+        } catch (error) {
+            console.error('Failed to update problem info:', error);
+        }
     };
 
     const handleDelete = () => {
@@ -181,77 +195,167 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
 
     const modalVariants = getModalVariants(isMobile);
 
-    return (
+    const modalContent = (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 pointer-events-none">
                     <motion.div
                         variants={backdropVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
                         onClick={onClose}
-                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm"
+                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm pointer-events-auto"
                     />
                     <motion.div
                         variants={modalVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-t-3xl rounded-b-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row max-h-[80vh] md:max-h-[85vh]"
+                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-screen sm:h-auto md:max-h-[85vh] mb-0 pointer-events-auto"
                     >
                         {/* LEFT PANEL: Detailed Content */}
                         <div className="flex-1 flex flex-col bg-white overflow-hidden">
                             {/* Header */}
-                            <div className="p-8 pb-4 border-b border-base-50 flex justify-between items-start bg-gradient-to-r from-misty-light/10 to-white">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className={clsx(
-                                            "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest",
-                                            currentLog.result === 'SUCCESS' ? "bg-sage-light text-sage-dark" : "bg-coral/10 text-coral"
-                                        )}>
-                                            {currentLog.result === 'SUCCESS' ? 'SUCCESS' : 'FAIL'}
-                                        </span>
-                                        <span className="px-2 py-0.5 bg-base-100 text-base-500 rounded text-[10px] font-black uppercase tracking-widest">
-                                            {currentLog.platform} • {currentLog.difficulty}
-                                        </span>
-                                        <span className="px-2 py-0.5 bg-lavender-light text-lavender-dark rounded text-[10px] font-black uppercase tracking-widest">
-                                            STAGE {currentLog.stage === 0 ? 'Initial' : currentLog.stage}
-                                        </span>
-                                    </div>
-                                    <h3 className="text-2xl font-black text-base-900 font-sans tracking-tight leading-tight">
-                                        {currentLog.problemTitle}
-                                    </h3>
-                                    <p className="text-[11px] font-bold text-base-400 font-sans flex items-center gap-1">
-                                        <Calendar className="w-3 h-3" />
-                                        {new Date(currentLog.completedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 완료
-                                    </p>
-                                </div>
-                                <div className="flex flex-col sm:flex-row gap-2 items-center">
-                                    {!isEditing && !isEditingProblem && (
-                                        <button
-                                            onClick={() => setIsEditingProblem(true)}
-                                            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-base-100 text-base-500 rounded-xl text-[11px] font-black hover:bg-base-200 transition-all shrink-0"
-                                        >
-                                            <Archive className="w-3 h-3" /> 정보 수정
-                                        </button>
+                            <div className="p-6 sm:p-8 pb-4 border-b border-base-50 bg-gradient-to-r from-misty-light/10 to-white relative">
+                                <button
+                                    onClick={onClose}
+                                    className="absolute top-4 right-4 p-2.5 bg-base-100/50 hover:bg-base-100 rounded-full transition-all z-10 flex items-center justify-center"
+                                    aria-label="Close modal"
+                                >
+                                    <X className="w-5 h-5 text-base-500" />
+                                </button>
+
+                                <div className="space-y-4 pr-8">
+                                    {isEditingProblem ? (
+                                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            {/* Platform Selector */}
+                                            <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+                                                {(['BOJ', 'PROG', 'LC', 'SWEA'] as const).map((p) => (
+                                                    <button
+                                                        key={p}
+                                                        onClick={() => setDraftPlatform(p)}
+                                                        className={clsx(
+                                                            "px-2.5 py-1 rounded text-[10px] font-black transition-all whitespace-nowrap",
+                                                            draftPlatform === p
+                                                                ? "bg-misty-dark text-white shadow-sm"
+                                                                : "bg-base-100 text-base-400 hover:bg-base-200"
+                                                        )}
+                                                    >
+                                                        {p === 'BOJ' ? '백준' : p === 'PROG' ? 'Prog' : p === 'LC' ? 'LC' : 'SWEA'}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {/* Difficulty Selectors */}
+                                                <div className="flex gap-1">
+                                                    {draftPlatform === 'BOJ' && (
+                                                        <select
+                                                            value={draftBojTier}
+                                                            onChange={(e) => setDraftBojTier(e.target.value)}
+                                                            className="px-2 py-1 bg-base-100 border-2 border-transparent focus:border-misty rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest outline-none cursor-pointer"
+                                                        >
+                                                            {['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'].map(v => (
+                                                                <option key={v} value={v}>{v}</option>
+                                                            ))}
+                                                        </select>
+                                                    )}
+                                                    <select
+                                                        value={draftLevel}
+                                                        onChange={(e) => setDraftLevel(e.target.value)}
+                                                        className="px-2 py-1 bg-base-100 border-2 border-transparent focus:border-misty rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest outline-none cursor-pointer"
+                                                    >
+                                                        {draftPlatform === 'BOJ'
+                                                            ? [1, 2, 3, 4, 5].map(v => <option key={v} value={v.toString()}>{v}</option>)
+                                                            : [1, 2, 3, 4, 5].map(v => <option key={v} value={v.toString()}>Level {v}</option>)
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                <div className="relative flex-1 min-w-[150px]">
+                                                    <Link className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-base-300" />
+                                                    <input
+                                                        type="text"
+                                                        value={draftUrl}
+                                                        onChange={(e) => setDraftUrl(e.target.value)}
+                                                        placeholder="문제 URL"
+                                                        className="w-full pl-7 pr-2 py-1 bg-base-100 border-2 border-transparent focus:border-misty rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                value={draftTitle}
+                                                onChange={(e) => setDraftTitle(e.target.value)}
+                                                placeholder="문제 제목"
+                                                className="w-full text-xl sm:text-2xl font-black text-base-900 font-sans tracking-tight leading-tight bg-transparent border-b-2 border-misty/30 focus:border-misty outline-none pb-1"
+                                                autoFocus
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={handleProblemUpdate}
+                                                    className="px-4 py-1.5 bg-base-900 text-white text-[11px] font-black rounded-lg hover:bg-black transition-all flex items-center gap-1.5 shadow-sm"
+                                                >
+                                                    <Save className="w-3.5 h-3.5" /> 저장
+                                                </button>
+                                                <button
+                                                    onClick={() => setIsEditingProblem(false)}
+                                                    className="px-4 py-1.5 bg-base-100 text-base-500 text-[11px] font-black rounded-lg hover:bg-base-200 transition-all"
+                                                >
+                                                    취소
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className={clsx(
+                                                    "px-2 py-1 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest",
+                                                    currentLog.result === 'SUCCESS' ? "bg-sage-light text-sage-dark" : "bg-coral/10 text-coral"
+                                                )}>
+                                                    {currentLog.result === 'SUCCESS' ? 'SUCCESS' : 'FAIL'}
+                                                </span>
+                                                <span className="px-2 py-1 bg-base-100 text-base-500 rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest">
+                                                    {currentLog.platform} • {currentLog.difficulty}
+                                                </span>
+                                                <span className="px-2 py-1 bg-lavender-light text-lavender-dark rounded text-[10px] sm:text-[11px] font-black uppercase tracking-widest">
+                                                    STAGE {currentLog.stage === 0 ? 'Initial' : currentLog.stage}
+                                                </span>
+                                                {!isEditing && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setIsEditingProblem(true);
+                                                        }}
+                                                        className="cursor-pointer flex items-center gap-1.5 px-3 py-1 bg-white border border-base-200 text-base-600 rounded-lg text-[10px] sm:text-[11px] font-black hover:bg-base-50 transition-all shadow-sm"
+                                                    >
+                                                        <Edit2 className="w-3.5 h-3.5" /> 정보 수정
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="text-xl sm:text-2xl font-black text-base-900 font-sans tracking-tight leading-tight pr-4">
+                                                    {currentLog.problemTitle}
+                                                </h3>
+                                                <p className="text-[11px] sm:text-xs font-bold text-base-400 font-sans flex items-center gap-1.5">
+                                                    <Calendar className="w-3.5 h-3.5" />
+                                                    {new Date(currentLog.completedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 완료
+                                                </p>
+                                            </div>
+                                        </>
                                     )}
-                                    <button onClick={onClose} className="p-2 hover:bg-base-100 rounded-xl transition-all ml-1">
-                                        <X className="w-6 h-6 text-base-300" />
-                                    </button>
                                 </div>
                             </div>
 
                             {/* Content Body */}
-                            <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
-                                {isEditing || isEditingProblem ? (
-                                    /* EDIT MODE */
+                            <div className="p-5 sm:p-8 space-y-6 sm:space-y-8 flex-1 overflow-y-auto custom-scrollbar">
+                                {isEditing ? (
+                                    /* EDIT MODE: RECORD */
                                     <div className="animate-in fade-in duration-300">
                                         <LogForm
-                                            mode={isEditingProblem ? "PROBLEM" : "LOG"}
+                                            mode="LOG"
                                             initialValues={{
-                                                problemTitle: currentLog.problemTitle,
-                                                difficulty: currentLog.difficulty,
                                                 result: currentLog.result,
                                                 solvingMethod: currentLog.solvingMethod,
                                                 perceivedDifficulty: currentLog.perceivedDifficulty,
@@ -263,27 +367,38 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 isFinished: currentLog.isFinished,
                                                 language: currentLog.language
                                             }}
-                                            onSubmit={handleFormSubmit}
-                                            onCancel={() => {
-                                                setIsEditing(false);
-                                                setIsEditingProblem(false);
+                                            onSubmit={async (data: any) => {
+                                                try {
+                                                    await updateStudyLog(currentLog.id, {
+                                                        ...data
+                                                    });
+                                                    // Local state update for immediate feedback
+                                                    setCurrentLog({
+                                                        ...currentLog,
+                                                        ...data
+                                                    });
+                                                    setIsEditing(false);
+                                                } catch (error) {
+                                                    console.error('Failed to update study log:', error);
+                                                }
                                             }}
-                                            submitLabel={isEditingProblem ? "문제 정보 업데이트" : "기록 업데이트"}
+                                            onCancel={() => setIsEditing(false)}
+                                            submitLabel="기록 업데이트"
                                         />
                                     </div>
                                 ) : (
-                                    /* VIEW MODE */
+                                    /* VIEW MODE (Also visible when editing PROBLEM info) */
                                     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                         {/* Stats Grid */}
-                                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                                            <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
-                                                <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                                            <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50">
+                                                <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                                     <Clock className="w-3 h-3" /> Time
                                                 </p>
                                                 <p className="text-sm font-black text-base-800">{Math.round(currentLog.elapsedTime / 60000)}m</p>
                                             </div>
-                                            <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
-                                                <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                            <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50">
+                                                <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                                     <TrendingUp className="w-3 h-3" /> Difficulty
                                                 </p>
                                                 <p className={clsx(
@@ -294,25 +409,25 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                     {currentLog.perceivedDifficulty}
                                                 </p>
                                             </div>
-                                            <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
-                                                <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                            <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50">
+                                                <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                                     <BookOpen className="w-3 h-3" /> Method
                                                 </p>
                                                 <p className="text-sm font-black text-base-800">
                                                     {currentLog.solvingMethod === 'SELF' ? 'Self' : 'Ref'}
                                                 </p>
                                             </div>
-                                            <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
-                                                <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                                    <Archive className="w-3 h-3" /> Language
+                                            <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50">
+                                                <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                                    <Code2 className="w-3 h-3" /> Language
                                                 </p>
-                                                <p className="text-sm font-black text-base-800">
+                                                <p className="text-sm font-black text-base-800 truncate">
                                                     {currentLog.language || 'N/A'}
                                                 </p>
                                             </div>
-                                            <div className="bg-base-50 p-4 rounded-2xl border border-base-100/50">
-                                                <p className="text-[10px] font-black text-base-300 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                                    <Zap className="w-3 h-3 text-coral" /> Improve
+                                            <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50 col-span-2 sm:col-span-1">
+                                                <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
+                                                    <Zap className="w-3 h-3 text-amber-500" /> Improve
                                                 </p>
                                                 <p className={clsx(
                                                     "text-sm font-black",
@@ -388,12 +503,19 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
 
                             {/* Actions Footer */}
                             {!isEditing && !isEditingProblem && (
-                                <div className="p-6 bg-base-50/50 flex gap-3 border-t border-base-100 shrink-0">
-                                    <button onClick={handleDelete} className="cursor-pointer p-4 text-coral hover:bg-coral/10 rounded-2xl transition-all group" title="Delete record">
-                                        <Trash2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                                <div className="p-4 sm:p-6 bg-base-50/50 flex items-center gap-3 border-t border-base-100 shrink-0">
+                                    <button
+                                        onClick={handleDelete}
+                                        className="cursor-pointer p-3 text-coral hover:bg-coral/10 rounded-xl transition-all group flex items-center justify-center border border-base-200 hover:border-coral/20 bg-white"
+                                        title="Delete record"
+                                    >
+                                        <Trash2 className="w-4.5 h-4.5 group-hover:scale-110 transition-transform" />
                                     </button>
-                                    <button onClick={() => setIsEditing(true)} className="cursor-pointer flex-1 bg-misty-dark text-white py-4 rounded-2xl font-black text-sm hover:bg-misty-dark/90 transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95">
-                                        <Edit3 className="w-4 h-4" /> 이 기록 수정하기
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="cursor-pointer flex-1 bg-base-900 text-white py-3 rounded-xl font-black text-[13px] hover:bg-base-800 transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 tracking-tight"
+                                    >
+                                        <Edit3 className="w-4 h-4" /> 기록 수정하기
                                     </button>
                                 </div>
                             )}
@@ -457,6 +579,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
             )}
         </AnimatePresence>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default StudyLogDetailModal;

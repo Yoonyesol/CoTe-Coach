@@ -93,7 +93,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Problem Metadata (Edit Mode Only or Optional) */}
             {(mode === 'PROBLEM' || mode === 'ALL') && (
-                <div className="space-y-4 p-4 bg-base-50 rounded-2xl border border-base-100">
+                <div className="space-y-4 p-3 sm:p-5 bg-base-50/50 rounded-2xl border border-base-100">
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-base-400 uppercase tracking-widest px-1">문제 제목</label>
                         <input
@@ -101,10 +101,10 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             value={problemTitle}
                             onChange={(e) => setProblemTitle(e.target.value)}
                             placeholder="문제 제목"
-                            className="w-full px-4 py-3 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none"
+                            className="w-full px-4 py-3.5 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none shadow-sm"
                         />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-base-400 uppercase tracking-widest px-1">난이도</label>
                             <input
@@ -112,7 +112,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                                 value={difficulty}
                                 onChange={(e) => setDifficulty(e.target.value)}
                                 placeholder="난이도 (예: Gold 5)"
-                                className="w-full px-4 py-3 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none"
+                                className="w-full px-4 py-3.5 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none shadow-sm"
                             />
                         </div>
                         <div className="space-y-2">
@@ -122,7 +122,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 placeholder="https://..."
-                                className="w-full px-4 py-3 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none"
+                                className="w-full px-4 py-3.5 bg-white border-2 border-transparent focus:border-misty rounded-xl text-sm font-bold transition-all outline-none shadow-sm"
                             />
                         </div>
                     </div>
@@ -368,19 +368,19 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
             )}
 
             {/* Footer Buttons */}
-            <div className="pt-4 flex gap-3">
+            <div className="pt-4 flex items-center gap-3 shrink-0">
                 {onCancel && (
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="cursor-pointer px-6 py-4 text-base-400 font-black text-sm hover:text-base-600 transition-colors rounded-2xl hover:bg-base-100"
+                        className="cursor-pointer px-6 py-3.5 text-base-400 font-black text-sm hover:text-base-600 transition-colors rounded-xl hover:bg-base-100"
                     >
                         취소
                     </button>
                 )}
                 <button
                     type="submit"
-                    className="cursor-pointer flex-1 py-4 bg-base-900 text-white rounded-2xl text-sm font-black hover:bg-black transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
+                    className="cursor-pointer flex-1 py-3.5 bg-base-900 text-white rounded-xl text-[13px] font-black hover:bg-black transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
                 >
                     <Archive className="w-4 h-4" />
                     {submitLabel}

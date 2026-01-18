@@ -545,6 +545,8 @@ export const useUserStore = create<UserState>()(
                 if (updates.solvingMethod) dbUpdates.solving_method = updates.solvingMethod;
                 if (updates.isFinished !== undefined) dbUpdates.is_finished = updates.isFinished;
                 if (updates.language !== undefined) dbUpdates.language = updates.language;
+                if (updates.url !== undefined) dbUpdates.url = updates.url;
+                if (updates.platform) dbUpdates.platform = updates.platform;
 
                 const { error } = await supabase.from('study_logs').update(dbUpdates).eq('id', logId);
 

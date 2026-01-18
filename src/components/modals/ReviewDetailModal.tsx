@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Clock, CheckCircle2, Calendar, Zap, AlertCircle, ChevronLeft, ChevronRight, BarChart3, MessageSquare, BookOpen, History } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { clsx } from 'clsx';
@@ -43,16 +44,16 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
 
     const modalVariants = getModalVariants(isMobile);
 
-    return (
+    const modalContent = (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none text-left">
                     <motion.div
                         variants={backdropVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm cursor-pointer"
+                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm pointer-events-auto"
                         onClick={onClose}
                     />
                     <motion.div
@@ -60,7 +61,7 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full max-w-lg overflow-hidden shadow-2xl relative flex flex-col max-h-[80vh] sm:max-h-auto sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative flex flex-col h-screen md:h-auto md:max-h-[85vh] sm:rounded-3xl rounded-none pointer-events-auto"
                     >
                         {/* Header Decoration */}
                         <div className="absolute top-0 left-0 w-full h-2 bg-lavender" />
@@ -68,9 +69,10 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="absolute right-4 top-4 p-2 text-base-300 hover:text-base-800 hover:bg-base-50 rounded-xl transition-all z-10"
+                            className="absolute right-4 top-4 p-2.5 bg-base-100/80 hover:bg-base-100 rounded-full transition-all z-20 flex items-center justify-center shadow-sm"
+                            aria-label="Close"
                         >
-                            <X className="w-5 h-5" />
+                            <X className="w-5 h-5 text-base-600" />
                         </button>
 
                         <div className="p-8 pb-4 overflow-y-auto custom-scrollbar">
@@ -190,34 +192,34 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                             </div>
 
                             {/* Actions */}
-                            <div className="flex flex-col gap-3 pb-8">
+                            <div className="flex flex-col gap-2 pb-6">
                                 <button
                                     onClick={() => onStartReview(plan)}
                                     className={clsx(
-                                        "group relative w-full py-4 rounded-2xl font-black text-sm transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-3 overflow-hidden",
+                                        "group relative w-full py-3 rounded-xl font-black text-[13px] transition-all active:scale-[0.98] shadow-md flex items-center justify-center gap-2 overflow-hidden",
                                         isCurrentTiming
-                                            ? "bg-coral text-white border-b-4 border-coral-dark"
-                                            : "bg-base-900 text-white hover:bg-black border-b-4 border-black"
+                                            ? "bg-coral text-white border-b-2 border-coral-dark"
+                                            : "bg-base-900 text-white hover:bg-black border-b-2 border-black"
                                     )}
                                 >
                                     {isCurrentTiming ? (
                                         <>
-                                            <Zap className="w-5 h-5 animate-pulse" />
+                                            <Zap className="w-4 h-4 animate-pulse" />
                                             <span>풀이 진행 중 (타이머 정지)</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Clock className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-                                            <span>이 문제 지금 복습하기 (타이머 시작)</span>
+                                            <Clock className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                                            <span>이 문제 지금 복습하기</span>
                                         </>
                                     )}
                                 </button>
 
                                 <button
                                     onClick={() => onQuickLog(plan)}
-                                    className="w-full py-4 bg-white border-2 border-base-200 text-base-600 rounded-2xl font-black text-sm hover:bg-base-50 hover:border-base-300 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                    className="w-full py-3 bg-white border border-base-200 text-base-600 rounded-xl font-black text-[13px] hover:bg-base-50 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
                                 >
-                                    <CheckCircle2 className="w-5 h-5 text-sage-dark" />
+                                    <CheckCircle2 className="w-4 h-4 text-sage-dark" />
                                     이미 풀었습니다 (로그 작성)
                                 </button>
                             </div>
@@ -232,6 +234,8 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
             )}
         </AnimatePresence>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ReviewDetailModal;

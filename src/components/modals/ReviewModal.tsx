@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle2, Brain } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
@@ -64,18 +65,16 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
 
     const modalVariants = getModalVariants(isMobile);
 
-    if (!isOpen) return null;
-
-    return (
+    const modalContent = (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-0 md:p-4">
+                <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none">
                     <motion.div
                         variants={backdropVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm cursor-pointer"
+                        className="absolute inset-0 bg-base-900/60 backdrop-blur-sm pointer-events-auto"
                         onClick={onClose}
                     />
 
@@ -84,11 +83,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-t-[2rem] rounded-b-none md:rounded-b-2xl max-h-[80vh] md:h-auto flex flex-col"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-screen md:h-auto flex flex-col pointer-events-auto"
                     >
-
                         {/* Header */}
-                        <div className="bg-base-900 p-5 md:p-6 text-white flex justify-between items-center">
+                        <div className="bg-base-900 p-5 md:p-6 text-white flex justify-between items-center shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white/10 rounded-lg">
                                     <Brain className="w-5 h-5 text-misty" />
@@ -100,8 +98,12 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{problem.platform} • {problem.difficulty}</p>
                                 </div>
                             </div>
-                            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-                                <X className="w-5 h-5" />
+                            <button
+                                onClick={onClose}
+                                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center justify-center shadow-sm"
+                                aria-label="Close"
+                            >
+                                <X className="w-5 h-5 text-white" />
                             </button>
                         </div>
 
@@ -125,7 +127,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                         approach: '',
                                         reflection: '',
                                         concepts: [],
-                                        isFinished: true
+                                        isFinished: true,
+                                        language: 'Python'
                                     }}
                                     onSubmit={handleSubmit}
                                     submitLabel="복습 로그 제출하기"
@@ -137,6 +140,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
             )}
         </AnimatePresence>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ReviewModal;

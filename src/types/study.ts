@@ -46,6 +46,7 @@ export interface StudyLog {
     ratingContribution?: number;
     isFinished?: boolean; // 사용자가 직접 복습 완료(졸업)로 간주했는지 여부
     language?: string; // 추가된 필드: 사용 언어
+    url?: string; // 추가된 필드: 문제 링크
 }
 
 export interface ReviewPlan {
