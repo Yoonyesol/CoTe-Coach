@@ -169,7 +169,7 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                     >
 
                         {/* Header */}
-                        <div className="bg-base-900 px-4 py-3 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6">
+                        <div className="bg-base-900 px-4 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6">
                             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
                                 <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer sm:hidden">
                                     <ChevronLeft className="w-6 h-6" />

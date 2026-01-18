@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import {
     X, Trash2, Clock,
     BookOpen, Zap, MessageSquare,
-    Calendar, History, TrendingUp, Edit3, BarChart3, Save, Code2, Link, Edit2
+    Calendar, History, TrendingUp, Edit3, BarChart3, Save, Code2, Link, Edit2, ChevronLeft
 } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -233,14 +233,27 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         {/* LEFT PANEL: Detailed Content */}
                         <div className="flex-1 flex flex-col bg-white overflow-hidden">
                             {/* Header */}
-                            <div className="px-6 sm:px-8 py-4 pb-4 border-b border-base-50 bg-gradient-to-r from-misty-light/10 to-white relative pt-[env(safe-area-inset-top,24px)] sm:pt-8">
-                                <button
-                                    onClick={onClose}
-                                    className="absolute top-4 right-4 p-2.5 bg-base-100/50 hover:bg-base-100 rounded-full transition-all z-10 flex items-center justify-center"
-                                    aria-label="Close modal"
-                                >
-                                    <X className="w-5 h-5 text-base-500" />
+                            <div className="bg-base-900 px-4 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6 border-b border-white/10">
+                                <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+                                    <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer sm:hidden flex items-center justify-center">
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <div className="hidden sm:flex p-2 bg-white/10 rounded-lg shrink-0">
+                                        <BookOpen className="w-5 h-5 text-misty" />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h2 className="text-sm sm:text-lg font-black font-sans leading-tight truncate">학습 기록 상세</h2>
+                                        <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest font-sans truncate">
+                                            {currentLog?.problemTitle || 'Loading...'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button onClick={onClose} className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
+                                    <X className="w-5 h-5" />
                                 </button>
+                            </div>
+
+                            <div className="px-6 sm:px-8 py-4 overflow-y-auto custom-scrollbar flex-1">
 
                                 <div className="space-y-4 pr-8">
                                     {isEditingProblem ? (

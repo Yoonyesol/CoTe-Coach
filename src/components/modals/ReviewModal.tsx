@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, CheckCircle2, Brain } from 'lucide-react';
+import { X, CheckCircle2, Brain, ChevronLeft } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
 import { Platform } from '../../types/user';
@@ -102,24 +102,23 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
                     >
                         {/* Header */}
-                        <div className="bg-base-900 px-5 md:px-6 py-4 md:py-6 text-white flex justify-between items-center shrink-0 pt-[env(safe-area-inset-top,20px)] md:pt-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/10 rounded-lg">
+                        <div className="bg-base-900 px-4 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6">
+                            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+                                <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer sm:hidden">
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                                <div className="hidden sm:flex p-2 bg-white/10 rounded-lg shrink-0">
                                     <Brain className="w-5 h-5 text-misty" />
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-black font-sans leading-tight">
+                                <div className="min-w-0">
+                                    <h2 className="text-sm sm:text-lg font-black font-sans leading-tight truncate mb-0.5">
                                         {currentStage === 0 ? '학습 로그 작성' : `${currentStage}차 복습 로그 작성`}
                                     </h2>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">{problem.platform} • {problem.difficulty}</p>
+                                    <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest font-sans truncate">{problem.platform} • {problem.difficulty}</p>
                                 </div>
                             </div>
-                            <button
-                                onClick={onClose}
-                                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-full transition-all flex items-center justify-center shadow-sm"
-                                aria-label="Close"
-                            >
-                                <X className="w-5 h-5 text-white" />
+                            <button onClick={onClose} className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
