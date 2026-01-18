@@ -4,7 +4,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useSolvedAcUser } from '../../hooks/useSolvedAc';
 
-import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library, User } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, Trophy, Settings, LogOut, Link as LinkIcon, Briefcase, BookOpen, Library, User, CheckSquare } from 'lucide-react';
 import TierBadge from '../common/TierBadge';
 import BojTierBadge from '../common/BojTierBadge';
 import { clsx } from 'clsx';
@@ -15,8 +15,8 @@ import { AvatarAsset } from '../../types/avatar';
 
 export interface MainLayoutProps {
     children: React.ReactNode;
-    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS';
-    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS') => void;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
     isLoading?: boolean;
@@ -63,6 +63,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
         { id: 'HOME', icon: <LayoutDashboard className="w-6 h-6" />, label: '대시보드' },
         { id: 'JOURNAL', icon: <BookOpen className="w-6 h-6" />, label: '학습 일지' },
         { id: 'LIBRARY', icon: <Library className="w-6 h-6" />, label: '문제 보관함' },
+        { id: 'MY_PROBLEMS', icon: <CheckSquare className="w-6 h-6" />, label: '내 문제' },
         { id: 'STATS', icon: <BarChart3 className="w-6 h-6" />, label: '상세 통계' },
     ] as const;
 

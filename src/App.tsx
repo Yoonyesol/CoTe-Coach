@@ -28,6 +28,7 @@ const StatsView = lazy(() => import('./pages/StatsView'));
 const JournalView = lazy(() => import('./pages/JournalView'));
 const LibraryView = lazy(() => import('./pages/LibraryView'));
 const SettingsView = lazy(() => import('./pages/SettingsView'));
+const MyProblemsView = lazy(() => import('./pages/MyProblemsView'));
 
 import {
   Loader2
@@ -135,7 +136,7 @@ function App() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS'>(() => {
+  const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS'>(() => {
     if (typeof window === 'undefined') return 'HOME';
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
@@ -143,10 +144,11 @@ function App() {
     if (tab === 'JOURNAL') return 'JOURNAL';
     if (tab === 'LIBRARY') return 'LIBRARY';
     if (tab === 'SETTINGS') return 'SETTINGS';
+    if (tab === 'MY_PROBLEMS') return 'MY_PROBLEMS';
     return 'HOME';
   });
 
-  const handleTabChange = (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS') => {
+  const handleTabChange = (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS') => {
     setActiveTab(tab);
     const url = new URL(window.location.href);
     if (tab === 'HOME') {
@@ -165,6 +167,7 @@ function App() {
       else if (tab === 'JOURNAL') setActiveTab('JOURNAL');
       else if (tab === 'LIBRARY') setActiveTab('LIBRARY');
       else if (tab === 'SETTINGS') setActiveTab('SETTINGS');
+      else if (tab === 'MY_PROBLEMS') setActiveTab('MY_PROBLEMS');
       else setActiveTab('HOME');
     };
 
@@ -274,6 +277,11 @@ function App() {
               />
             ) : activeTab === 'LIBRARY' ? (
               <LibraryView onProblemClick={setEditingLog} />
+            ) : activeTab === 'MY_PROBLEMS' ? (
+              <MyProblemsView
+                onAddModalOpen={() => setIsAddModalOpen(true)}
+                onReviewOpen={handleReviewOpen}
+              />
             ) : activeTab === 'SETTINGS' ? (
               <SettingsView
                 onDeleteAccountOpen={() => setIsDeleteModalOpen(true)}

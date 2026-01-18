@@ -796,7 +796,6 @@ export const useUserStore = create<UserState>()(
                         elapsed_time: newLog.elapsedTime,
                         reflection: newLog.reflection,
                         approach: newLog.approach,
-                        concepts: newLog.concepts,
                         stage: newLog.stage,
                         rating_contribution: newLog.ratingContribution,
                         is_finished: logData.isFinished || false,
@@ -811,6 +810,21 @@ export const useUserStore = create<UserState>()(
                     // Update local log with real DB ID
                     newLog.id = dbLog.id;
 
+                    // 1-1. Auto-complete Daily Task if exists
+                    if (logData.isFinished) {
+                        try {
+                            await supabase
+                                .from('daily_tasks')
+                                .update({ status: 'completed' })
+                                .eq('user_id', session.user.id)
+                                .eq('problem_id', newLog.problemId)
+                                .eq('status', 'pending');
+                        } catch (err) {
+                            console.error('Failed to auto-complete daily task:', err);
+                        }
+                    }
+
+                    // 2. Update/Create Review Plan
                     await supabase.from('review_plans').upsert({
                         user_id: session.user.id,
                         problem_id: newLog.problemId,
@@ -830,6 +844,8 @@ export const useUserStore = create<UserState>()(
                     delete nextTimers[logData.problemId];
 
                     let nextPlans = [...s.reviewPlans];
+                    const existingPlan = s.reviewPlans.find(p => p.problemId === logData.problemId);
+
                     if (existingPlan) {
                         nextPlans = nextPlans.map(p => p.problemId === logData.problemId ? {
                             ...p,
@@ -852,9 +868,20 @@ export const useUserStore = create<UserState>()(
                         });
                     }
 
+                    // Update Daily Tasks Status if Finished
+                    let updatedDailyTasks = s.dailyTasks;
+                    if (logData.isFinished) {
+                        updatedDailyTasks = s.dailyTasks.map(t =>
+                            (t.problemId === logData.problemId && t.status === 'pending')
+                                ? { ...t, status: 'completed' as const }
+                                : t
+                        );
+                    }
+
                     return {
                         studyLogs: [newLog, ...s.studyLogs],
                         reviewPlans: nextPlans,
+                        dailyTasks: updatedDailyTasks,
                         timer: { ...s.timer, problemTimers: nextTimers },
                         points: s.points + earnedRating
                     };
@@ -1203,4 +1230,3 @@ export const useUserStore = create<UserState>()(
         }
     )
 );
-
