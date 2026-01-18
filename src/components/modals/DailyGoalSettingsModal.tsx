@@ -61,7 +61,7 @@ const DailyGoalSettingsModal: React.FC<DailyGoalSettingsModalProps> = ({ isOpen,
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card w-full max-w-sm bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-[2rem] rounded-t-[2rem] rounded-b-none sm:rounded-b-[2rem] flex flex-col"
+                        className="glass-card w-full max-w-sm bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl max-h-[80vh] sm:max-h-auto"
                     >
                         <div className="p-6 border-b border-base-50 flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -75,7 +75,7 @@ const DailyGoalSettingsModal: React.FC<DailyGoalSettingsModalProps> = ({ isOpen,
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-8">
+                        <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar flex-1">
                             <div className="space-y-6">
                                 <div className="text-center space-y-2">
                                     <p className="text-4xl font-black text-base-900">{localGoal}<span className="text-sm ml-1 text-base-400">문제</span></p>

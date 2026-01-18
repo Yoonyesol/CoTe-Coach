@@ -118,7 +118,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl"
+                        className="glass-card w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl max-h-[80vh] sm:max-h-auto"
                     >
                         {/* Header */}
                         <div className="flex justify-between items-center p-6 border-b border-base-100 shrink-0">
@@ -131,7 +131,7 @@ const DeleteAccountModal: React.FC<DeleteAccountModalProps> = ({ isOpen, onClose
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 space-y-6">
+                        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                             <AnimatePresence mode="wait">
                                 {step === 'FORM' ? (
                                     <motion.div

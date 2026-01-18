@@ -84,7 +84,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-xl overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-t-[2rem] rounded-b-none md:rounded-b-2xl h-[98vh] md:h-auto md:max-h-[90vh] flex flex-col"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-t-[2rem] rounded-b-none md:rounded-b-2xl max-h-[80vh] md:h-auto flex flex-col"
                     >
 
                         {/* Header */}

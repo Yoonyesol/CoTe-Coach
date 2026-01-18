@@ -53,7 +53,7 @@ const TierGuideModal: React.FC<TierGuideModalProps> = ({ isOpen, onClose }) => {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card w-full max-w-2xl bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[85vh] sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl"
+                        className="glass-card w-full max-w-2xl bg-white border-none shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[80vh] sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl rounded-b-none sm:rounded-b-2xl"
                     >
                         {/* Header */}
                         <div className="bg-gradient-to-r from-base-900 to-base-800 p-6 flex items-center justify-between sticky top-0 z-10">

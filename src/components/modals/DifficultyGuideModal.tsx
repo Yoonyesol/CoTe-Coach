@@ -37,7 +37,7 @@ const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onC
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] rounded-b-none sm:rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20"
+                        className="relative w-full max-w-lg bg-white sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl flex flex-col max-h-[80vh] sm:max-h-auto overflow-hidden border border-white/20"
                     >
                         {/* Header */}
                         <div className="bg-base-900 p-8 text-white relative">
@@ -59,7 +59,7 @@ const DifficultyGuideModal: React.FC<DifficultyGuideModalProps> = ({ isOpen, onC
                         </div>
 
                         {/* Content */}
-                        <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                        <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1">
 
                             {/* Intro */}
                             <p className="text-sm font-bold text-base-500 leading-relaxed font-sans">

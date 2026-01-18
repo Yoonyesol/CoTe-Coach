@@ -198,7 +198,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-t-3xl rounded-b-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-[98vh] md:h-auto md:max-h-[85vh]"
+                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-t-3xl rounded-b-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row max-h-[80vh] md:max-h-[85vh]"
                     >
                         {/* LEFT PANEL: Detailed Content */}
                         <div className="flex-1 flex flex-col bg-white overflow-hidden">

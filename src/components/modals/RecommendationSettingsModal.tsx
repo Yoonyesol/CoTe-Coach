@@ -101,7 +101,7 @@ const RecommendationSettingsModal: React.FC<RecommendationSettingsModalProps> = 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full max-w-lg bg-white sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+                        className="relative w-full max-w-lg bg-white sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl flex flex-col max-h-[80vh] sm:max-h-auto overflow-hidden"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-base-100 flex justify-between items-center bg-white sticky top-0 z-10">

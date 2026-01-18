@@ -149,7 +149,7 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col h-[90vh] sm:h-[700px] sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl border-none"
+                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[87vh] sm:h-[700px] sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl border-none"
                     >
 
                         {/* Header */}

@@ -120,7 +120,7 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, editGoal }) => {
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative bg-white sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl w-full max-w-lg mx-auto sm:mx-4 max-h-[90vh] overflow-y-auto"
+                        className="relative bg-white sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl shadow-2xl w-full max-w-lg mx-auto sm:mx-4 max-h-[80vh] sm:max-h-auto flex flex-col overflow-hidden"
                     >
                         {/* Header */}
                         <div className="sticky top-0 bg-white p-6 border-b border-base-100 flex justify-between items-center rounded-t-3xl">
@@ -141,7 +141,7 @@ const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, editGoal }) => {
                         </div>
 
                         {/* Body */}
-                        <div className="p-6 space-y-6">
+                        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
                             {/* Goal Name */}
                             <div className="space-y-2">
                                 <label className="text-xs font-black text-base-400 uppercase tracking-widest">
