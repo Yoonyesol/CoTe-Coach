@@ -86,7 +86,7 @@ export const useAuthStore = create<AuthState>((set) => ({
                     }
                 }
 
-                if (event === 'SIGNED_OUT') {
+                if (event === 'SIGNED_OUT' || (event as string) === 'TOKEN_REFRESH_REVOKED') {
                     set({ session: null, user: null, isLoading: false, initialized: true });
                 } else if (event !== 'SIGNED_IN') {
                     // Let signInWithPassword handle its own state to avoid race

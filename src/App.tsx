@@ -81,26 +81,48 @@ function App() {
 
     const syncData = async () => {
       setIsDataLoading(true);
-      // If user is logged in, prioritize Supabase data
-      if (user) {
-        await fetchUserData(user.id);
-        await fetchGoals(user.id);
-      } else {
-        // Fallback for guest mode: recalculate from local storage
-        refreshRating();
-      }
+      try {
+        // If user is logged in, prioritize Supabase data
+        if (user) {
+          await fetchUserData(user.id);
+          await fetchGoals(user.id);
+        } else {
+          // Fallback for guest mode: recalculate from local storage
+          refreshRating();
+        }
 
-      // Sync tier string with level
-      const currentState = useUserStore.getState();
-      const correctTier = currentState.calculateTier(currentState.level);
-      if (currentState.tier !== correctTier) {
-        useUserStore.setState({ tier: correctTier });
+        // Sync tier string with level
+        const currentState = useUserStore.getState();
+        const correctTier = currentState.calculateTier(currentState.level);
+        if (currentState.tier !== correctTier) {
+          useUserStore.setState({ tier: correctTier });
+        }
+      } catch (error: any) {
+        console.error("Data sync failed:", error);
+
+        // Smart Error Handling
+        const isAuthError =
+          error?.status === 401 ||
+          error?.status === 403 ||
+          error?.message?.includes('JWT') ||
+          error?.message?.includes('token');
+
+        if (isAuthError) {
+          useAuthStore.getState().signOut();
+        } else {
+          // Network or other transient error -> Just warn, don't logout
+          showAlert(
+            "데이터 동기화 실패",
+            "데이터를 불러오는 중 문제가 발생했습니다. (네트워크 연결을 확인해주세요)"
+          );
+        }
+      } finally {
+        setIsDataLoading(false);
       }
-      setIsDataLoading(false);
     };
 
     syncData();
-  }, [isHydrated, authInitialized, user, fetchUserData, refreshRating]);
+  }, [isHydrated, authInitialized, user, fetchUserData, refreshRating, showAlert]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
