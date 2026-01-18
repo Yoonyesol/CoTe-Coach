@@ -20,6 +20,22 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Back button support for mobile
+    useEffect(() => {
+        if (isOpen) {
+            window.history.pushState({ modal: 'review-detail' }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isOpen, onClose]);
+
     useLockBodyScroll(isOpen);
 
     // NEW: Log Navigation Logic
@@ -61,7 +77,7 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card w-full sm:w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-2xl rounded-none flex flex-col h-screen md:h-auto md:max-h-[90vh] pointer-events-auto"
+                        className="glass-card w-full sm:w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-2xl rounded-none flex flex-col h-[100dvh] md:h-auto md:max-h-[90vh] pointer-events-auto"
                     >
                         {/* Header Decoration */}
                         <div className="absolute top-0 left-0 w-full h-2 bg-lavender" />
@@ -69,13 +85,13 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                         {/* Close Button */}
                         <button
                             onClick={onClose}
-                            className="absolute right-4 top-4 p-2.5 bg-base-100/80 hover:bg-base-100 rounded-full transition-all z-20 flex items-center justify-center shadow-sm"
+                            className="absolute right-4 top-4 p-2.5 bg-base-100/80 hover:bg-base-100 rounded-full transition-all z-20 flex items-center justify-center shadow-sm mt-[env(safe-area-inset-top,0px)]"
                             aria-label="Close"
                         >
                             <X className="w-5 h-5 text-base-600" />
                         </button>
 
-                        <div className="p-8 pb-4 overflow-y-auto custom-scrollbar">
+                        <div className="p-8 pb-4 overflow-y-auto custom-scrollbar pt-[calc(32px+env(safe-area-inset-top,0px))] md:pt-8">
                             {/* Problem Identity */}
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="w-16 h-16 bg-lavender-light rounded-2xl flex items-center justify-center shadow-sm text-3xl flex-shrink-0">

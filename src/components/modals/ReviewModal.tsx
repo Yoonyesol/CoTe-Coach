@@ -22,11 +22,27 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
         checkMobile();
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    // Back button support for mobile
+    useEffect(() => {
+        if (isOpen) {
+            window.history.pushState({ modal: 'review' }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isOpen, onClose]);
 
     useLockBodyScroll(isOpen);
 
@@ -83,10 +99,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-screen md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
                     >
                         {/* Header */}
-                        <div className="bg-base-900 p-5 md:p-6 text-white flex justify-between items-center shrink-0">
+                        <div className="bg-base-900 px-5 md:px-6 py-4 md:py-6 text-white flex justify-between items-center shrink-0 pt-[env(safe-area-inset-top,20px)] md:pt-6">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white/10 rounded-lg">
                                     <Brain className="w-5 h-5 text-misty" />

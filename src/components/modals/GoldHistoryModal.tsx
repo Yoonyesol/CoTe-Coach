@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Coins, TrendingUp, TrendingDown, Calendar, History } from 'lucide-react';
 import { useUserStore } from '../../store/useUserStore';
@@ -28,6 +28,22 @@ const GoldHistoryModal: React.FC<GoldHistoryModalProps> = ({ isOpen, onClose }) 
     }, []);
 
     useLockBodyScroll(isOpen);
+
+    // Back button support for mobile
+    useEffect(() => {
+        if (isOpen) {
+            window.history.pushState({ modal: 'gold-history' }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isOpen, onClose]);
 
     const groupedHistory = useMemo(() => {
         const groups: Record<string, typeof goldHistory> = {};
@@ -62,10 +78,10 @@ const GoldHistoryModal: React.FC<GoldHistoryModalProps> = ({ isOpen, onClose }) 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full sm:max-w-lg bg-white shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[80vh] overflow-hidden sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl"
+                        className="relative w-full sm:max-w-lg bg-white shadow-2xl flex flex-col h-[100dvh] sm:max-h-[80vh] overflow-hidden sm:rounded-3xl rounded-none sm:rounded-b-3xl"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-base-100 flex items-center justify-between bg-gradient-to-r from-wheat-light/30 to-white">
+                        <div className="p-6 border-b border-base-100 flex items-center justify-between bg-gradient-to-r from-wheat-light/30 to-white pt-[env(safe-area-inset-top,24px)] shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-wheat rounded-2xl flex items-center justify-center shadow-lg shadow-wheat/20">
                                     <History className="w-5 h-5 text-wheat-dark" />

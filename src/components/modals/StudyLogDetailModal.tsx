@@ -37,6 +37,22 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
+    // Back button support for mobile
+    useEffect(() => {
+        if (isOpen) {
+            window.history.pushState({ modal: 'study-log-detail' }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isOpen, onClose]);
+
     useLockBodyScroll(isOpen);
 
 
@@ -212,12 +228,12 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-screen sm:h-auto md:max-h-[85vh] mb-0 pointer-events-auto"
+                        className="relative w-full md:max-w-4xl bg-white sm:rounded-[2rem] rounded-none shadow-2xl overflow-hidden border-none sm:border sm:border-base-100 flex flex-col md:flex-row h-[100dvh] sm:h-auto md:max-h-[85vh] mb-0 pointer-events-auto"
                     >
                         {/* LEFT PANEL: Detailed Content */}
                         <div className="flex-1 flex flex-col bg-white overflow-hidden">
                             {/* Header */}
-                            <div className="p-6 sm:p-8 pb-4 border-b border-base-50 bg-gradient-to-r from-misty-light/10 to-white relative">
+                            <div className="px-6 sm:px-8 py-4 pb-4 border-b border-base-50 bg-gradient-to-r from-misty-light/10 to-white relative pt-[env(safe-area-inset-top,24px)] sm:pt-8">
                                 <button
                                     onClick={onClose}
                                     className="absolute top-4 right-4 p-2.5 bg-base-100/50 hover:bg-base-100 rounded-full transition-all z-10 flex items-center justify-center"

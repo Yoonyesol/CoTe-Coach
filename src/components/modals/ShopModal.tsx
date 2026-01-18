@@ -78,6 +78,22 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
         if (initialCategory) setActiveCategory(initialCategory);
     }, [initialCategory]);
 
+    // Back button support for mobile
+    useEffect(() => {
+        if (isOpen) {
+            window.history.pushState({ modal: 'shop' }, '');
+
+            const handlePopState = () => {
+                onClose();
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => {
+                window.removeEventListener('popstate', handlePopState);
+            };
+        }
+    }, [isOpen, onClose]);
+
     useLockBodyScroll(isOpen);
 
     // Preload all avatar assets on mount to prevent flickering/delay
@@ -149,11 +165,11 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col h-full sm:h-[700px] sm:max-h-[87vh] sm:rounded-3xl rounded-none sm:rounded-b-3xl border-none"
+                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col h-[100dvh] sm:h-[700px] sm:max-h-[87vh] sm:rounded-3xl rounded-none sm:rounded-b-3xl border-none"
                     >
 
                         {/* Header */}
-                        <div className="bg-base-900 px-4 py-3 sm:p-6 text-white flex justify-between items-center shrink-0 h-[64px] sm:h-auto">
+                        <div className="bg-base-900 px-4 py-3 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6">
                             <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
                                 <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer sm:hidden">
                                     <ChevronLeft className="w-6 h-6" />
