@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import StatsView from '../pages/StatsView';
 import { useUserStore } from '../store/useUserStore';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const meta: Meta<typeof StatsView> = {
     title: 'Pages/StatsView',
