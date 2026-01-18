@@ -113,7 +113,7 @@ const DailyHistory: React.FC<DailyHistoryProps> = ({ onEditLog }) => {
                                             </span>
                                         )}
                                     </div>
-                                    <h4 className="text-sm md:text-base font-black text-base-900 group-hover:text-misty-dark transition-colors leading-snug">{log.problemId}</h4>
+                                    <h4 className="text-sm md:text-base font-black text-base-900 group-hover:text-misty-dark transition-colors leading-snug">{log.problemTitle || log.problemId}</h4>
                                 </div>
                             </div>
 

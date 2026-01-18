@@ -726,6 +726,7 @@ export const useUserStore = create<UserState>()(
 
             addStudyLog: async (logData) => {
                 const state = get();
+                const isFinished = logData.isFinished !== undefined ? logData.isFinished : (logData.problemId.startsWith('custom-') ? true : false);
                 const existingPlan = state.reviewPlans.find(p => p.problemId === logData.problemId);
 
                 // --- Smart Stage Logic ---
@@ -736,7 +737,7 @@ export const useUserStore = create<UserState>()(
                 if (!existingPlan) {
                     // 1. New Problem
                     nextStage = 0;
-                } else if (logData.isFinished) {
+                } else if (isFinished) {
                     // 2-a. Manual Finish (Graduation)
                     nextStage = existingPlan ? existingPlan.currentStage : 0;
                     // Will force status COMPLETED later
@@ -798,7 +799,7 @@ export const useUserStore = create<UserState>()(
                         approach: newLog.approach,
                         stage: newLog.stage,
                         rating_contribution: newLog.ratingContribution,
-                        is_finished: logData.isFinished || false,
+                        is_finished: isFinished,
                         language: logData.language || null
                     }).select().single();
 
@@ -811,7 +812,7 @@ export const useUserStore = create<UserState>()(
                     newLog.id = dbLog.id;
 
                     // 1-1. Auto-complete Daily Task if exists
-                    if (logData.isFinished) {
+                    if (isFinished) {
                         try {
                             await supabase
                                 .from('daily_tasks')
@@ -833,7 +834,7 @@ export const useUserStore = create<UserState>()(
                         difficulty: newLog.difficulty,
                         current_stage: nextStage,
                         next_review_at: nextReviewAt,
-                        status: (logData.isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE',
+                        status: (isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE',
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
                 }
@@ -852,7 +853,7 @@ export const useUserStore = create<UserState>()(
                             currentStage: nextStage,
                             nextReviewAt,
                             lastCompletedAt: newLog.completedAt,
-                            status: (logData.isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE'
+                            status: (isFinished || nextStage >= 5) ? 'COMPLETED' : 'ACTIVE'
                         } : p);
                     } else {
                         nextPlans.push({
@@ -870,9 +871,9 @@ export const useUserStore = create<UserState>()(
 
                     // Update Daily Tasks Status if Finished
                     let updatedDailyTasks = s.dailyTasks;
-                    if (logData.isFinished) {
+                    if (isFinished) {
                         updatedDailyTasks = s.dailyTasks.map(t =>
-                            (t.problemId === logData.problemId && t.status === 'pending')
+                            ((t.problemId === logData.problemId || t.problemTitle === logData.problemTitle) && t.status === 'pending')
                                 ? { ...t, status: 'completed' as const }
                                 : t
                         );

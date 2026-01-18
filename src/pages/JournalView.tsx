@@ -436,7 +436,7 @@ const JournalView: React.FC<JournalViewProps> = ({ onLogClick, onGoalClick, onRe
                                             <Trophy className="w-5 h-5 text-sage" />
                                         </div>
                                         <div className="space-y-1">
-                                            <p className="text-sm font-black text-base-700 leading-tight">{log.problemId}</p>
+                                            <p className="text-sm font-black text-base-700 leading-tight">{log.problemTitle || log.problemId}</p>
                                             <div className="flex items-center gap-3">
                                                 <span className="flex items-center gap-1 text-[10px] font-black text-base-400 uppercase">
                                                     <Clock className="w-3 h-3" />

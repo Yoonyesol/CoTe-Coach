@@ -7,7 +7,7 @@ import { clsx } from 'clsx';
 
 interface MyProblemsViewProps {
     onAddModalOpen: () => void;
-    onReviewOpen: (problem: { title: string, platform: string, difficulty: string }) => void;
+    onReviewOpen: (problem: { id?: string, title: string, platform: string, difficulty: string }) => void;
 }
 
 const MyProblemsView: React.FC<MyProblemsViewProps> = ({ onAddModalOpen, onReviewOpen }) => {
@@ -23,6 +23,7 @@ const MyProblemsView: React.FC<MyProblemsViewProps> = ({ onAddModalOpen, onRevie
 
     const handleCompleteTask = (task: any) => {
         onReviewOpen({
+            id: task.problemId,
             title: task.problemTitle,
             platform: task.site,
             difficulty: task.difficulty,

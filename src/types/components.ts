@@ -22,13 +22,13 @@ export interface ProblemCardProps {
     level: number;
     tags: string[];
     problemUrl: string;
-    onReview: (problem: { title: string; platform: string; difficulty: string }) => void;
+    onReview: (problem: { id?: string; title: string; platform: string; difficulty: string }) => void;
 }
 
 export interface MainLayoutProps {
     children: ReactNode;
-    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY';
-    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY') => void;
+    activeTab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS';
+    onTabChange: (tab: 'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS') => void;
     onAccountSettingsOpen: () => void;
     onTierClick?: () => void;
     isLoading?: boolean;

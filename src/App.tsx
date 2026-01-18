@@ -130,7 +130,7 @@ function App() {
   const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
-  const [selectedProblem, setSelectedProblem] = useState<{ title: string, platform: string, difficulty: string } | null>(null);
+  const [selectedProblem, setSelectedProblem] = useState<{ id?: string, title: string, platform: string, difficulty: string } | null>(null);
   const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
   const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -178,7 +178,7 @@ function App() {
   const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
 
-  const handleReviewOpen = (problem: { title: string, platform: string, difficulty: string }) => {
+  const handleReviewOpen = (problem: { id?: string, title: string, platform: string, difficulty: string }) => {
     setSelectedProblem(problem);
     setIsReviewModalOpen(true);
   };
@@ -211,6 +211,7 @@ function App() {
     }
     setIsReviewDetailModalOpen(false);
     handleReviewOpen({
+      id: plan.problemId,
       title: plan.problemTitle,
       platform: plan.platform,
       difficulty: plan.difficulty

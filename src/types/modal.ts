@@ -47,6 +47,7 @@ export interface StudyLogDetailModalProps extends CommonModalProps {
 
 export interface ReviewModalProps extends CommonModalProps {
     problem: {
+        id?: string;
         title: string;
         platform: string;
         difficulty: string;

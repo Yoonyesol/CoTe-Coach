@@ -15,7 +15,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     const { addReviewSession, getTotalElapsed, reviewPlans } = useUserStore();
     const { showAlert } = useModalStore();
 
-    const existingPlan = reviewPlans.find(p => p.problemId === problem.title);
+    const existingPlan = reviewPlans.find(p => p.problemId === (problem.id || problem.title));
     const currentStage = existingPlan ? existingPlan.currentStage + 1 : 0;
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -30,14 +30,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
     useLockBodyScroll(isOpen);
 
     // Initial values for the form
-    const elapsedTime = getTotalElapsed(problem.title);
+    const elapsedTime = getTotalElapsed(problem.id || problem.title);
     const initialMinutes = Math.floor(elapsedTime / 1000 / 60);
     const initialSeconds = Math.floor((elapsedTime / 1000) % 60);
 
     const handleSubmit = async (data: any) => {
         try {
-            await addReviewSession(problem.title, {
-                problemId: problem.title,
+            await addReviewSession(problem.id || problem.title, {
+                problemId: problem.id || problem.title,
                 problemTitle: problem.title,
                 platform: problem.platform as Platform,
                 difficulty: problem.difficulty,
@@ -125,7 +125,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                         approach: '',
                                         reflection: '',
                                         concepts: [],
-                                        isFinished: false
+                                        isFinished: true
                                     }}
                                     onSubmit={handleSubmit}
                                     submitLabel="복습 로그 제출하기"

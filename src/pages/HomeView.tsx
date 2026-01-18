@@ -26,7 +26,7 @@ interface HomeViewProps {
     onAddModalOpen: () => void;
     onGoalModalOpen: () => void;
     onRecommendationSettingsOpen: () => void;
-    onReviewOpen: (problem: { title: string, platform: string, difficulty: string }) => void;
+    onReviewOpen: (problem: { id?: string, title: string, platform: string, difficulty: string }) => void;
     onReviewDetailOpen: (plan: any) => void;
     onEditLog: (log: StudyLog) => void;
 }
@@ -216,6 +216,7 @@ const HomeView: React.FC<HomeViewProps> = ({
 
                 const handleCompleteTask = (task: DailyTask) => {
                     onReviewOpen({
+                        id: task.problemId,
                         title: task.problemTitle,
                         platform: task.site,
                         difficulty: task.difficulty,

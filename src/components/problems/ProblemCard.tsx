@@ -184,7 +184,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
 
           {!isCompleted && (
             <button
-              onClick={() => onReview({ title, platform, difficulty })}
+              onClick={() => onReview({ id: title, title, platform, difficulty })}
               className="w-12 shrink-0 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
               title="바로 완료 처리"
             >
@@ -196,7 +196,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
         {/* Review Submission Button: Only shown when time is recorded and not currently running */}
         {elapsed > 0 && !timer.isRunning && !isCompleted && (
           <button
-            onClick={() => onReview({ title, platform, difficulty })}
+            onClick={() => onReview({ id: title, title, platform, difficulty })}
             className="w-full py-2.5 bg-misty-light text-misty-dark border border-misty/30 rounded-xl text-[10px] md:text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2 cursor-pointer whitespace-nowrap"
           >
             <Brain className="w-4 h-4" />
