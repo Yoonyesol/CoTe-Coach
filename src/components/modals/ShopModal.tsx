@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShoppingBag, Check, Coins, Gift, Loader2 } from 'lucide-react';
+import { X, ShoppingBag, Check, Coins, Gift, Loader2, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
@@ -134,7 +134,7 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
+                <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-4">
                     <motion.div
                         variants={backdropVariants}
                         initial="hidden"
@@ -149,42 +149,46 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[87vh] sm:h-[700px] sm:rounded-3xl rounded-t-3xl rounded-b-none sm:rounded-b-3xl border-none"
+                        className="glass-card bg-white w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col h-full sm:h-[700px] sm:max-h-[87vh] sm:rounded-3xl rounded-none sm:rounded-b-3xl border-none"
                     >
 
                         {/* Header */}
-                        <div className="bg-base-900 p-6 text-white flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-white/10 rounded-lg">
+                        <div className="bg-base-900 px-4 py-3 sm:p-6 text-white flex justify-between items-center shrink-0 h-[64px] sm:h-auto">
+                            <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
+                                <button onClick={onClose} className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer sm:hidden">
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                                <div className="hidden sm:flex p-2 bg-white/10 rounded-lg shrink-0">
                                     <ShoppingBag className="w-5 h-5 text-wheat" />
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-black font-sans leading-tight">코테 부띠끄</h2>
-                                    <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-sans">Premium Shop</p>
+                                <div className="min-w-0">
+                                    <h2 className="text-sm sm:text-lg font-black font-sans leading-tight truncate">코테 부띠끄</h2>
+                                    <p className="text-[8px] sm:text-[10px] font-bold text-white/40 uppercase tracking-widest font-sans truncate">Premium Shop</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2 sm:gap-4">
+
+                            <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
                                 <button
                                     onClick={openRewardedAdModal}
                                     disabled={adCooldownMs > 0}
                                     className={clsx(
-                                        "px-3 sm:px-4 py-2 rounded-full flex items-center gap-2 border transition-all text-[10px] sm:text-xs font-black uppercase tracking-tight cursor-pointer",
+                                        "px-2 sm:px-4 py-1.5 sm:py-2 rounded-full flex items-center gap-1.5 border transition-all text-[8px] sm:text-xs font-black uppercase tracking-tight cursor-pointer",
                                         adCooldownMs > 0
                                             ? "bg-base-800 text-base-500 border-base-700 cursor-not-allowed opacity-50"
                                             : "bg-sage-dark text-white border-sage hover:bg-sage shadow-lg shadow-sage/20 animate-pulse"
                                     )}
                                 >
                                     {adCooldownMs > 0 ? (
-                                        <><Loader2 className="w-3 h-3 animate-spin" /> {formatCooldown(adCooldownMs)}</>
+                                        <><Loader2 className="w-2.5 h-2.5 animate-spin" /> {formatCooldown(adCooldownMs)}</>
                                     ) : (
-                                        <><Gift className="w-3.5 h-3.5" /> 무료 골드</>
+                                        <><Gift className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> 무료 골드</>
                                     )}
                                 </button>
-                                <div className="px-4 py-2 bg-white/10 rounded-full flex items-center gap-2 border border-white/10">
-                                    <Coins className="w-4 h-4 text-wheat" />
-                                    <span className="text-sm font-black text-wheat">{points.toLocaleString()}G</span>
+                                <div className="px-2 sm:px-4 py-1.5 sm:py-2 bg-white/10 rounded-full flex items-center gap-1.5 border border-white/10 shrink-0">
+                                    <Coins className="w-3 h-3 sm:w-4 sm:h-4 text-wheat" />
+                                    <span className="text-[10px] sm:text-sm font-black text-wheat">{points.toLocaleString()}G</span>
                                 </div>
-                                <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
+                                <button onClick={onClose} className="hidden sm:block p-2 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
@@ -272,19 +276,19 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                             {/* Right: Item List */}
                             <div className="w-full sm:w-[65%] flex flex-col overflow-hidden">
                                 {/* Categories */}
-                                <div className="flex border-b border-base-100 p-2 gap-2 bg-base-50/50 overflow-x-auto scrollbar-hide shrink-0">
+                                <div className="flex border-b border-base-100 p-1.5 sm:p-2 gap-1.5 sm:gap-2 bg-base-50/50 overflow-x-auto scrollbar-hide shrink-0">
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
                                             onClick={() => setActiveCategory(cat.id)}
                                             className={clsx(
-                                                "flex-1 py-3 px-2 rounded-xl text-[11px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap",
+                                                "flex-1 py-2 sm:py-3 px-1.5 sm:px-2 rounded-lg sm:rounded-xl text-[10px] sm:text-[11px] font-black transition-all flex items-center justify-center gap-1 sm:gap-1.5 cursor-pointer whitespace-nowrap",
                                                 activeCategory === cat.id
                                                     ? "bg-white text-base-900 shadow-md border border-base-100"
                                                     : "text-base-400 hover:bg-white/50"
                                             )}
                                         >
-                                            <span>{cat.emoji}</span>
+                                            <span className="text-xs sm:text-base">{cat.emoji}</span>
                                             {cat.label}
                                         </button>
                                     ))}
