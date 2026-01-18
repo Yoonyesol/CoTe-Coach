@@ -83,7 +83,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-screen md:h-auto flex flex-col pointer-events-auto"
+                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-screen md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
                     >
                         {/* Header */}
                         <div className="bg-base-900 p-5 md:p-6 text-white flex justify-between items-center shrink-0">

@@ -61,7 +61,7 @@ const ReviewDetailModal: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative flex flex-col h-screen md:h-auto md:max-h-[85vh] sm:rounded-3xl rounded-none pointer-events-auto"
+                        className="glass-card w-full sm:w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-2xl rounded-none flex flex-col h-screen md:h-auto md:max-h-[90vh] pointer-events-auto"
                     >
                         {/* Header Decoration */}
                         <div className="absolute top-0 left-0 w-full h-2 bg-lavender" />

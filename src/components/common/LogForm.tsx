@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb, Zap, Archive, X, Clock } from 'lucide-react';
+import { CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb, Zap, Archive, X, Clock, BarChart3 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LogFormProps {
@@ -133,70 +133,71 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                 <>
                     {/* Status & Difficulty Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Solve Status & Method Group */}
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Solve Status */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
-                                    <HelpCircle className="w-3 h-3" /> 해결 여부
-                                </label>
-                                <div className="flex bg-base-100 p-1 rounded-xl">
-                                    <button
-                                        type="button"
-                                        onClick={() => setResult('SUCCESS')}
-                                        className={clsx(
-                                            "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
-                                            result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-400"
-                                        )}
-                                    >
-                                        해결함
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setResult('FAIL')}
-                                        className={clsx(
-                                            "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all",
-                                            result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-400"
-                                        )}
-                                    >
-                                        못 끝냄
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Method Status */}
-                            <div className="space-y-3">
-                                <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
-                                    <BookOpen className="w-3 h-3" /> 해결 방식
-                                </label>
-                                <div className="flex bg-base-100 p-1 rounded-xl">
-                                    <button
-                                        type="button"
-                                        onClick={() => setSolvingMethod('SELF')}
-                                        className={clsx(
-                                            "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
-                                            solvingMethod === 'SELF' ? "bg-white text-misty-dark shadow-sm" : "text-base-400"
-                                        )}
-                                    >
-                                        <Lightbulb className="w-3 h-3" /> 스스로
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setSolvingMethod('REFERENCE')}
-                                        className={clsx(
-                                            "cursor-pointer flex-1 py-2 text-[11px] font-black rounded-lg transition-all flex items-center justify-center gap-1",
-                                            solvingMethod === 'REFERENCE' ? "bg-white text-amber-600 shadow-sm" : "text-base-400"
-                                        )}
-                                    >
-                                        <BookOpen className="w-3 h-3" /> 답지참고
-                                    </button>
-                                </div>
+                        {/* Solve Status */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                                <HelpCircle className="w-3 h-3" /> 해결 여부
+                            </label>
+                            <div className="flex bg-base-100 p-1 rounded-xl">
+                                <button
+                                    type="button"
+                                    onClick={() => setResult('SUCCESS')}
+                                    className={clsx(
+                                        "cursor-pointer flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap px-1",
+                                        result === 'SUCCESS' ? "bg-white text-base-900 shadow-sm" : "text-base-400"
+                                    )}
+                                >
+                                    해결함
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setResult('FAIL')}
+                                    className={clsx(
+                                        "cursor-pointer flex-1 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap px-1",
+                                        result === 'FAIL' ? "bg-white text-coral shadow-sm" : "text-base-400"
+                                    )}
+                                >
+                                    못 끝냄
+                                </button>
                             </div>
                         </div>
 
-                        {/* Perceived Difficulty */}
+                        {/* Method Status (Checkbox Style) */}
                         <div className="space-y-3">
-                            <label className="text-xs font-black text-base-700 uppercase tracking-widest">체감 난이도</label>
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                                <BookOpen className="w-3 h-3" /> 해결 방식
+                            </label>
+                            <label className={clsx(
+                                "flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-all border-2 h-[38px]",
+                                solvingMethod === 'REFERENCE'
+                                    ? "bg-amber-50 border-amber-200"
+                                    : "bg-white border-base-100 hover:border-base-200"
+                            )}>
+                                <div className={clsx(
+                                    "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0",
+                                    solvingMethod === 'REFERENCE' ? "bg-amber-500 border-amber-500" : "border-base-300"
+                                )}>
+                                    <input
+                                        type="checkbox"
+                                        checked={solvingMethod === 'REFERENCE'}
+                                        onChange={(e) => setSolvingMethod(e.target.checked ? 'REFERENCE' : 'SELF')}
+                                        className="hidden"
+                                    />
+                                    {solvingMethod === 'REFERENCE' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                </div>
+                                <span className={clsx(
+                                    "text-[10px] font-bold whitespace-nowrap",
+                                    solvingMethod === 'REFERENCE' ? "text-amber-700" : "text-base-500"
+                                )}>
+                                    답지/힌트 참고함
+                                </span>
+                            </label>
+                        </div>
+
+                        <div className="space-y-3">
+                            <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
+                                <BarChart3 className="w-3 h-3" /> 체감 난이도
+                            </label>
                             <div className="grid grid-cols-3 gap-3">
                                 {(['EASY', 'NORMAL', 'HARD'] as const).map((level) => (
                                     <button

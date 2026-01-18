@@ -48,7 +48,7 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
   const isCompleted = studyLogs.some(log => log.problemId === title);
 
   const formatTime = (ms: number) => {
-    if (ms === 0) return null;
+    if (ms === 0) return "0:00";
     const totalSeconds = Math.floor(ms / 1000);
     const m = Math.floor(totalSeconds / 60);
     const s = totalSeconds % 60;
@@ -70,16 +70,14 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
       const isAlreadyTracking = dailyTasks.some(t => t.problemId === title || t.problemTitle === title);
 
       if (!isAlreadyTracking) {
-        // Use utility for consistent local date string
         const dateString = getLocalDateString(new Date());
-
         addDailyTask({
           problemId: title,
           problemTitle: title,
-          site: platform as any, // Cast to any or import Platform type if strictness needed
+          site: platform as any,
           difficulty: difficulty,
           targetDate: dateString,
-          tags: [...tags, '__auto'] // Add internal tag to distinguish from manual custom tasks
+          tags: [...tags, '__auto']
         });
       }
     }
@@ -87,62 +85,59 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
     if (isCurrent && timer.isRunning) {
       stopTimer();
     } else {
-      const success = startTimer(title);
-      if (!success && typeof success === 'boolean') {
-        showAlert("오류", "타이머를 시작할 수 없습니다.");
-      }
+      startTimer(title);
     }
   };
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      whileHover={{ y: -5 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
       className={cn(
-        "glass-card p-6 border transition-all duration-300 hover:shadow-2xl flex flex-col justify-between h-full group font-sans",
-        style.border,
-        isCurrent && "ring-4 ring-misty shadow-2xl scale-[1.02]",
-        isOtherRunning && "opacity-60 saturate-50",
+        "glass-card p-6 bg-white border border-base-100 transition-all duration-300 hover:shadow-xl flex flex-col h-full group font-sans",
+        isCurrent && "ring-2 ring-misty shadow-xl",
+        isOtherRunning && "opacity-75 saturate-50",
         isCompleted && "opacity-80 grayscale-[0.3]"
       )}
     >
-      <div className="space-y-3 md:space-y-4">
+      <div className="space-y-4">
         {/* Card Header: Type Label */}
         <div className="flex justify-between items-center">
-          <div className={cn("flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-black",
+          <div className={cn(
+            "flex items-center gap-2 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider",
             isCompleted ? "bg-sage-light text-sage-dark" : style.bg,
             isCompleted ? "text-sage-dark" : style.textColor
           )}>
-            {isCompleted ? <CheckCircle className="w-3.5 h-3.5 md:w-4 md:h-4" /> : (isCurrent && timer.isRunning ? <Flame className="w-3.5 h-3.5 md:w-4 md:h-4 animate-pulse" /> : style.icon)}
+            {isCompleted ? <CheckCircle className="w-4 h-4" /> : (isCurrent && timer.isRunning ? <Flame className="w-4 h-4 animate-pulse" /> : style.icon)}
             <span className="truncate">{isCompleted ? '풀이 완료' : (isCurrent && timer.isRunning ? '풀이 중...' : style.label)}</span>
           </div>
-          <div className="flex items-center gap-1.5 md:gap-2">
-            {elapsed > 0 && (
-              <div className="flex items-center gap-1 px-1.5 py-0.5 bg-base-100 rounded-lg text-[9px] md:text-[10px] font-black text-base-500">
-                <TimerIcon className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                {formatTime(elapsed)}
-              </div>
-            )}
-            <span className="text-[10px] md:text-xs font-bold text-base-400">{platform}</span>
-          </div>
+          <span className="text-[10px] font-black text-base-400 uppercase tracking-widest">{platform}</span>
         </div>
 
-        {/* Card Body: Problem Info */}
-        <div className="space-y-1.5 md:space-y-2">
-          <div className="flex items-start justify-between gap-4">
-            <h3 className="text-lg md:text-xl font-black text-base-800 line-clamp-2 leading-tight group-hover:text-misty-dark transition-colors">
-              {title}
-            </h3>
-          </div>
-          <p className="text-xs md:text-sm font-bold text-base-500">{difficulty} (Lv.{level})</p>
+        {/* Problem Title */}
+        <div>
+          <a
+            href={isCompleted ? '#' : problemUrl}
+            target={isCompleted ? undefined : "_blank"}
+            rel="noopener noreferrer"
+            onClick={(e) => isCompleted && e.preventDefault()}
+            className={cn(
+              "inline-flex items-center gap-1.5 text-lg font-black text-base-900 leading-tight transition-colors hover:text-misty-dark",
+              isCompleted && "cursor-default hover:text-base-900"
+            )}
+          >
+            <span className="line-clamp-2">{title}</span>
+            {!isCompleted && <ExternalLink className="w-4 h-4 text-base-300 shrink-0" />}
+          </a>
+          <p className="text-xs font-bold text-base-400 mt-1">{difficulty} (Lv.{level})</p>
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5">
           {tags.map((tag, i) => (
-            <span key={i} className="px-2 py-0.5 bg-white/50 rounded-lg text-xs font-medium text-base-600 border border-white/50">
+            <span key={i} className="text-[10px] font-bold text-base-400 bg-base-50 px-2 py-0.5 rounded">
               #{tag}
             </span>
           ))}
@@ -150,59 +145,43 @@ const ProblemCard: React.FC<ProblemCardProps> = ({ type, title, platform, diffic
       </div>
 
       {/* Card Footer: Action */}
-      <div className="mt-auto pt-4 border-t border-white/30 flex flex-col gap-2">
-        {/* Row 1: Primary Action (Start/Stop) */}
-        <button
-          onClick={handleStart}
-          disabled={isOtherRunning || isCompleted}
-          className={cn(
-            "w-full py-3 px-3 rounded-xl text-xs md:text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-w-0",
-            isCurrent && timer.isRunning ? "bg-coral text-white shadow-md shadow-coral/20" : "bg-base-100 text-base-600 hover:bg-base-200",
-            (isOtherRunning || isCompleted) && "cursor-not-allowed opacity-50"
-          )}
-        >
-          {isCurrent && timer.isRunning ? <Pause className="w-4 h-4 shrink-0" /> : <Play className="w-4 h-4 shrink-0" />}
-          <span className="truncate">{isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '계속하기' : '풀이 시작')}</span>
-        </button>
-
-        {/* Row 2: Secondary Actions (Open Problem & Quick Complete) */}
-        <div className="flex items-stretch gap-2">
-          <a
-            href={isCompleted ? '#' : problemUrl}
-            target={isCompleted ? undefined : "_blank"}
-            rel="noopener noreferrer"
-            onClick={(e) => isCompleted && e.preventDefault()}
-            className={cn(
-              "flex-1 px-3 py-2.5 rounded-xl text-[11px] md:text-xs font-black transition-all active:scale-95 shadow-sm cursor-pointer min-w-0 flex items-center justify-center gap-1.5",
-              type === 'CHALLENGE' ? 'bg-base-900 text-white' : 'bg-white border border-base-200 text-base-800 hover:bg-base-50',
-              isCompleted && "opacity-50 cursor-not-allowed"
-            )}
-          >
-            <span className="truncate">{isCompleted ? '제출 완료' : '문제 열기'}</span>
-            {!isCompleted && <ExternalLink className="w-3.5 h-3.5 shrink-0" />}
-          </a>
-
-          {!isCompleted && (
-            <button
-              onClick={() => onReview({ id: title, title, platform, difficulty })}
-              className="w-12 shrink-0 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
-              title="바로 완료 처리"
-            >
-              <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
+      <div className="mt-auto pt-4 border-t border-base-50 flex flex-col gap-3">
+        <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center gap-1.5 font-bold text-base-400">
+            <TimerIcon className="w-3.5 h-3.5" />
+            <span>{elapsed > 0 ? `${formatTime(elapsed)} 소요됨` : '기록 없음'}</span>
+          </div>
+          {isCompleted && (
+            <span className="text-[10px] font-black text-sage-dark bg-sage-light px-1.5 py-0.5 rounded">PASSED</span>
           )}
         </div>
 
-        {/* Review Submission Button: Only shown when time is recorded and not currently running */}
-        {elapsed > 0 && !timer.isRunning && !isCompleted && (
+        <div className="flex gap-2">
+          {/* Start/Pause Timer */}
           <button
-            onClick={() => onReview({ id: title, title, platform, difficulty })}
-            className="w-full py-2.5 bg-misty-light text-misty-dark border border-misty/30 rounded-xl text-[10px] md:text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2 cursor-pointer whitespace-nowrap"
+            onClick={handleStart}
+            disabled={isOtherRunning || isCompleted}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 shadow-sm",
+              isCurrent && timer.isRunning ? "bg-base-900 text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
+              (isOtherRunning || isCompleted) && "opacity-50 grayscale cursor-not-allowed"
+            )}
           >
-            <Brain className="w-4 h-4" />
-            <span>로그 작성/기록 완료</span>
+            {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isCurrent && timer.isRunning ? '일시정지' : (elapsed > 0 ? '계속하기' : '시작')}
           </button>
-        )}
+
+          {/* Complete & Review */}
+          {!isCompleted && (
+            <button
+              onClick={() => onReview({ id: title, title, platform, difficulty })}
+              className="flex-[1.5] flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black bg-misty text-white hover:bg-misty-dark transition-all active:scale-95 shadow-md shadow-misty/20"
+            >
+              <Brain className="w-4 h-4" />
+              학습 완료 & 기록
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );

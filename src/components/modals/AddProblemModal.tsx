@@ -128,7 +128,7 @@ const AddProblemModal: React.FC<AddProblemModalProps> = ({ isOpen, onClose }) =>
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card w-full sm:w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-2xl rounded-none flex flex-col h-screen sm:h-auto pointer-events-auto"
+                        className="glass-card w-full sm:w-full max-w-md bg-white border-none shadow-2xl relative z-10 overflow-hidden sm:rounded-2xl rounded-none flex flex-col h-screen md:h-auto md:max-h-[90vh] pointer-events-auto"
                     >
                         <div className="flex justify-between items-center p-5 border-b border-base-100 shrink-0 bg-white sticky top-0 z-20">
                             <h2 className="text-lg font-black text-base-900 font-sans">문제 추가</h2>

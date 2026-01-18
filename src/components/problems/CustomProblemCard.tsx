@@ -1,11 +1,11 @@
-import React from 'react';
-import { ExternalLink, Zap, Play, Pause, Timer as TimerIcon, CheckCircle, Trash2, Edit3 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ExternalLink, Zap, Flame, Play, Pause, Timer as TimerIcon, CheckCircle, Trash2, Edit3, MoreVertical } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { DailyTask } from '../../types/study';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -19,21 +19,35 @@ interface CustomProblemCardProps {
 
 const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete, onEdit }) => {
     const { deleteDailyTask, timer, startTimer, stopTimer, getTotalElapsed } = useUserStore();
-    const { showAlert } = useModalStore();
+    const { showAlert, showConfirm } = useModalStore();
+
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const isCurrent = timer.currentProblemId === task.problemId;
     const isOtherRunning = timer.isRunning && !isCurrent;
     const elapsed = getTotalElapsed(task.problemId);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     const formatTime = (ms: number) => {
-        if (ms === 0) return null;
+        if (ms === 0) return "0:00";
         const totalSeconds = Math.floor(ms / 1000);
         const m = Math.floor(totalSeconds / 60);
         const s = totalSeconds % 60;
         return `${m}:${s.toString().padStart(2, '0')}`;
     };
 
-    const handleStart = () => {
+    const handleStart = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (isOtherRunning) {
             showAlert(
                 "타이머 중복",
@@ -50,150 +64,168 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
     };
 
     const handleDelete = async () => {
-        await deleteDailyTask(task.id);
+        showConfirm(
+            "문제 삭제",
+            "이 문제를 리스트에서 삭제하시겠습니까?",
+            async () => {
+                await deleteDailyTask(task.id);
+                setShowMenu(false);
+            }
+        );
     };
 
     const getPlatformLabel = (site: string) => {
         switch (site) {
             case 'BOJ': return '백준';
-            case 'PROG': return 'Programmers';
+            case 'PROG': return 'Prog';
             case 'LC': return 'LeetCode';
             case 'SWEA': return 'SWEA';
             default: return site;
         }
     };
 
+    const getPlatformColor = (site: string) => {
+        switch (site) {
+            case 'BOJ': return "text-blue-600 bg-blue-50";
+            case 'PROG': return "text-indigo-600 bg-indigo-50";
+            case 'LC': return "text-orange-600 bg-orange-50";
+            case 'SWEA': return "text-teal-600 bg-teal-50";
+            default: return "text-base-500 bg-base-50";
+        }
+    };
+
     return (
         <motion.div
+            layout
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            whileHover={{ y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -4 }}
             className={cn(
-                "glass-card p-6 border transition-all duration-300 hover:shadow-2xl flex flex-col justify-between h-full group font-sans",
-                "border-lavender",
-                isCurrent && "ring-4 ring-misty shadow-2xl scale-[1.02]",
-                isOtherRunning && "opacity-60 saturate-50"
+                "glass-card group relative p-5 bg-white border border-base-100 transition-all duration-300 hover:shadow-xl flex flex-col h-full font-sans overflow-visible",
+                isCurrent && "ring-2 ring-misty shadow-xl",
+                isOtherRunning && "opacity-75 saturate-50"
             )}
         >
-            <div className="space-y-4">
-                {/* Card Header: Type Label */}
-                <div className="flex justify-between items-center">
-                    <div className={cn(
-                        "flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black",
-                        isCurrent && timer.isRunning ? "bg-coral-light text-coral-dark" : "bg-lavender-light text-lavender-dark"
+            {/* Top Row: Badges & Menu */}
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex flex-wrap gap-1.5">
+                    <span className={cn(
+                        "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider flex items-center gap-1",
+                        isCurrent && timer.isRunning ? "bg-coral text-white animate-pulse" : "bg-lavender-light text-lavender-dark"
                     )}>
                         {isCurrent && timer.isRunning ? (
                             <>
-                                <Zap className="w-4 h-4 animate-pulse" />
-                                문제 풀이 중...
+                                <Flame className="w-3.5 h-3.5" /> Solving
                             </>
                         ) : (
                             <>
-                                <Zap className="w-4 h-4" />
-                                직접 추가
+                                <Zap className="w-3 h-3" /> Custom
                             </>
                         )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {elapsed > 0 && (
-                            <div className="flex items-center gap-1 px-2 py-0.5 bg-base-100 rounded-lg text-[10px] font-black text-base-500">
-                                <TimerIcon className="w-3 h-3" />
-                                {formatTime(elapsed)}
-                            </div>
+                    </span>
+                    <span className={cn(
+                        "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider",
+                        getPlatformColor(task.site)
+                    )}>
+                        {getPlatformLabel(task.site)}
+                    </span>
+                </div>
+
+                <div className="relative" ref={menuRef}>
+                    <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-1.5 text-base-300 hover:text-base-600 hover:bg-base-50 rounded-lg transition-all"
+                    >
+                        <MoreVertical className="w-4 h-4" />
+                    </button>
+
+                    <AnimatePresence>
+                        {showMenu && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                className="absolute right-0 mt-1 w-32 bg-white rounded-xl shadow-2xl border border-base-100 py-1.5 z-50 origin-top-right overflow-hidden"
+                            >
+                                <button
+                                    onClick={() => { onEdit?.(task); setShowMenu(false); }}
+                                    className="w-full px-3 py-2 text-left text-xs font-bold text-base-600 hover:bg-base-50 flex items-center gap-2"
+                                >
+                                    <Edit3 className="w-3.5 h-3.5" /> 수정하기
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="w-full px-3 py-2 text-left text-xs font-bold text-red-500 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                    <Trash2 className="w-3.5 h-3.5" /> 삭제하기
+                                </button>
+                            </motion.div>
                         )}
-                        <span className="text-xs font-bold text-base-400">{getPlatformLabel(task.site)}</span>
-                    </div>
+                    </AnimatePresence>
                 </div>
-
-                {/* Card Body: Problem Info */}
-                <div className="space-y-2">
-                    <h3 className="text-xl font-black text-base-800 line-clamp-2 leading-tight group-hover:text-lavender-dark transition-colors">
-                        {task.problemTitle}
-                    </h3>
-                    <p className="text-sm font-bold text-base-500">{task.difficulty}</p>
-                </div>
-
-                {/* Tags */}
-                {task.tags && task.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {task.tags.map((tag, i) => (
-                            <span key={i} className="px-2 py-0.5 bg-white/50 rounded-lg text-xs font-medium text-base-600 border border-white/50">
-                                #{tag}
-                            </span>
-                        ))}
-                    </div>
-                )}
             </div>
 
-            {/* Card Footer: Action */}
-            <div className="mt-auto pt-4 border-t border-white/30 flex flex-col gap-2">
-                {/* Row 1: Primary Action (Start/Stop) */}
-                <button
-                    onClick={handleStart}
-                    disabled={isOtherRunning}
+            {/* Problem Title */}
+            <div className="mb-4">
+                <a
+                    href={task.url || '#'}
+                    target={task.url ? "_blank" : "_self"}
+                    rel="noopener noreferrer"
                     className={cn(
-                        "w-full py-3 px-3 rounded-xl text-xs md:text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer min-w-0",
-                        isCurrent && timer.isRunning ? "bg-coral text-white shadow-md shadow-coral/20" : "bg-base-100 text-base-600 hover:bg-base-200",
-                        isOtherRunning && "cursor-not-allowed opacity-50"
+                        "inline-flex items-center gap-1.5 text-lg font-black text-base-900 leading-tight transition-colors hover:text-misty-dark",
+                        !task.url && "cursor-default"
                     )}
                 >
-                    {isCurrent && timer.isRunning ? <Pause className="w-4 h-4 shrink-0" /> : <Play className="w-4 h-4 shrink-0" />}
-                    <span className="truncate">{isCurrent && timer.isRunning ? '중단' : (elapsed > 0 ? '계속하기' : '풀이 시작')}</span>
-                </button>
+                    <span className="line-clamp-2">{task.problemTitle}</span>
+                    {task.url && <ExternalLink className="w-4 h-4 text-base-300 shrink-0" />}
+                </a>
+                <p className="text-xs font-bold text-base-400 mt-1">{task.difficulty}</p>
+            </div>
 
-                {/* Row 2: Secondary & Utility Actions */}
-                <div className="flex items-stretch gap-2">
-                    {task.url ? (
-                        <a
-                            href={task.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-[11px] md:text-xs font-black transition-all active:scale-95 shadow-sm cursor-pointer flex items-center justify-center gap-1.5 bg-white border border-base-200 text-base-800 hover:bg-base-50"
-                        >
-                            <span className="truncate">문제 열기</span>
-                            <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                        </a>
-                    ) : (
-                        <div className="flex-1 text-[10px] font-bold text-base-300 flex items-center px-1">URL 없음</div>
-                    )}
+            {/* Tags */}
+            {task.tags && task.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-6">
+                    {task.tags.filter(t => t !== '__auto').map((tag, i) => (
+                        <span key={i} className="text-[10px] font-bold text-base-400 bg-base-50 px-2 py-0.5 rounded">
+                            #{tag}
+                        </span>
+                    ))}
+                </div>
+            )}
 
-                    <div className="flex gap-2 shrink-0">
-                        <button
-                            onClick={() => onEdit?.(task)}
-                            className="w-11 h-11 flex items-center justify-center bg-base-50 text-base-400 rounded-xl hover:bg-misty-light hover:text-misty-dark transition-all cursor-pointer group"
-                            title="정보 수정"
-                        >
-                            <Edit3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        </button>
-                        <button
-                            onClick={() => onComplete(task)}
-                            className="w-11 h-11 flex items-center justify-center bg-sage-light text-sage-dark border border-sage/30 rounded-xl hover:bg-sage hover:text-white transition-all active:scale-95 shadow-sm cursor-pointer group"
-                            title="완료 처리"
-                        >
-                            <CheckCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        </button>
-
-                        <button
-                            onClick={handleDelete}
-                            className="w-11 h-11 flex items-center justify-center bg-base-50 text-base-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all cursor-pointer group"
-                            title="삭제"
-                        >
-                            <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        </button>
+            {/* Bottom Section: Time & Actions */}
+            <div className="mt-auto pt-4 border-t border-base-50 flex flex-col gap-3">
+                <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 font-bold text-base-400">
+                        <TimerIcon className="w-3.5 h-3.5" />
+                        <span>{formatTime(elapsed)} 소요됨</span>
                     </div>
                 </div>
 
-                {/* Review Submission Button: Only shown when time is recorded and not currently running */}
-                {elapsed > 0 && !timer.isRunning && (
+                <div className="flex gap-2">
+                    {/* Start/Pause Timer */}
+                    <button
+                        onClick={handleStart}
+                        disabled={isOtherRunning}
+                        className={cn(
+                            "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 shadow-sm",
+                            isCurrent && timer.isRunning ? "bg-base-900 text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
+                            isOtherRunning && "opacity-50 grayscale cursor-not-allowed"
+                        )}
+                    >
+                        {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        {isCurrent && timer.isRunning ? '일시정지' : (elapsed > 0 ? '계속하기' : '시작')}
+                    </button>
+
+                    {/* Complete & Review */}
                     <button
                         onClick={() => onComplete(task)}
-                        className="w-full py-2.5 bg-misty-light text-misty-dark border-2 border-misty/30 rounded-xl text-xs font-black hover:bg-misty hover:text-white transition-all flex items-center justify-center gap-2 animate-in slide-in-from-top-2 cursor-pointer"
+                        className="flex-[1.5] flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black bg-misty text-white hover:bg-misty-dark transition-all active:scale-95 shadow-md shadow-misty/20"
                     >
                         <CheckCircle className="w-4 h-4" />
-                        복습 로그 작성하고 기록 완료하기
+                        로그 작성 및 완료
                     </button>
-                )}
+                </div>
             </div>
         </motion.div>
     );
