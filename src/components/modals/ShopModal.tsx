@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ShoppingBag, Check, Coins } from 'lucide-react';
+import { X, ShoppingBag, Check, Coins, Gift, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '../../store/useUserStore';
 import { useModalStore } from '../../store/useModalStore';
@@ -37,11 +37,34 @@ const ItemIcon: React.FC<{ item: ShopItem; asset?: any }> = ({ item, asset }) =>
 };
 
 const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialCategory }) => {
-    const { points, inventory, equippedItems, buyItem, toggleEquip } = useUserStore();
-    const { showAlert } = useModalStore();
+    const { points, inventory, equippedItems, buyItem, toggleEquip, lastAdWatchTime } = useUserStore();
+    const { showAlert, openRewardedAdModal } = useModalStore();
     const [activeCategory, setActiveCategory] = useState<'ACCESSORY' | 'CLOTHES' | 'FURNITURE' | 'DECO' | 'WALLPAPER' | 'INVENTORY'>(initialCategory || 'ACCESSORY');
     const [previewItemId, setPreviewItemId] = useState<string | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [adCooldownMs, setAdCooldownMs] = useState<number>(0);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const checkCooldown = () => {
+            if (!lastAdWatchTime) {
+                setAdCooldownMs(0);
+                return;
+            }
+            const diff = Date.now() - new Date(lastAdWatchTime).getTime();
+            const remaining = 30 * 60 * 1000 - diff;
+            setAdCooldownMs(remaining > 0 ? remaining : 0);
+        };
+        checkCooldown();
+        const interval = setInterval(checkCooldown, 1000);
+        return () => clearInterval(interval);
+    }, [isOpen, lastAdWatchTime]);
+
+    const formatCooldown = (ms: number) => {
+        const mins = Math.floor(ms / 60000);
+        const secs = Math.floor((ms % 60000) / 1000);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 640);
@@ -140,7 +163,23 @@ const ShopModal: React.FC<ExtendedShopModalProps> = ({ isOpen, onClose, initialC
                                     <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-sans">Premium Shop</p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 sm:gap-4">
+                                <button
+                                    onClick={openRewardedAdModal}
+                                    disabled={adCooldownMs > 0}
+                                    className={clsx(
+                                        "px-3 sm:px-4 py-2 rounded-full flex items-center gap-2 border transition-all text-[10px] sm:text-xs font-black uppercase tracking-tight cursor-pointer",
+                                        adCooldownMs > 0
+                                            ? "bg-base-800 text-base-500 border-base-700 cursor-not-allowed opacity-50"
+                                            : "bg-sage-dark text-white border-sage hover:bg-sage shadow-lg shadow-sage/20 animate-pulse"
+                                    )}
+                                >
+                                    {adCooldownMs > 0 ? (
+                                        <><Loader2 className="w-3 h-3 animate-spin" /> {formatCooldown(adCooldownMs)}</>
+                                    ) : (
+                                        <><Gift className="w-3.5 h-3.5" /> 무료 골드</>
+                                    )}
+                                </button>
                                 <div className="px-4 py-2 bg-white/10 rounded-full flex items-center gap-2 border border-white/10">
                                     <Coins className="w-4 h-4 text-wheat" />
                                     <span className="text-sm font-black text-wheat">{points.toLocaleString()}G</span>

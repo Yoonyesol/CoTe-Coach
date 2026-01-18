@@ -37,6 +37,7 @@ export interface UserState {
     dailyTasks: DailyTask[];
     reviewPlans: ReviewPlan[];
     studyGoals: StudyGoal[];
+    lastAdWatchTime: string | null;
 
     // Actions
     addXp: (amount: number) => void;
@@ -113,4 +114,5 @@ export interface UserState {
     refreshRating: () => Promise<void>;
     refreshRecommendations: () => Promise<void>;
     getStreak: () => number;
+    watchAdAndEarnGold: () => Promise<void>;
 }

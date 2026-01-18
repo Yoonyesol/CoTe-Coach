@@ -41,6 +41,7 @@ export const useUserStore = create<UserState>()(
             dailyTasks: [],
             reviewPlans: [],
             studyGoals: [],
+            lastAdWatchTime: null,
 
             addXp: (amount) => {
                 const newLog: Omit<StudyLog, 'id' | 'completedAt'> = {
@@ -1141,6 +1142,16 @@ export const useUserStore = create<UserState>()(
                 }
 
                 return streak;
+            },
+
+            watchAdAndEarnGold: async () => {
+                const now = new Date().toISOString();
+                set(state => ({
+                    points: state.points + 100,
+                    lastAdWatchTime: now
+                }));
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) await get().saveProfile(user.id);
             },
 
             buyItem: (item) => {

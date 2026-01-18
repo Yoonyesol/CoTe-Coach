@@ -20,6 +20,7 @@ import { useAuthStore } from './store/useAuthStore'
 import DeleteAccountModal from './components/modals/DeleteAccountModal'
 import ContactModal from './components/modals/ContactModal'
 import ShopModal from './components/modals/ShopModal'
+import RewardedAdModal from './components/modals/RewardedAdModal'
 
 // Lazy Load Page Components
 const LandingView = lazy(() => import('./pages/LandingView'));
@@ -51,7 +52,9 @@ function App() {
     closeShop,
     isRecommendationSettingsOpen,
     openRecommendationSettings,
-    closeRecommendationSettings
+    closeRecommendationSettings,
+    isRewardedAdModalOpen,
+    closeRewardedAdModal
   } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
 
@@ -360,8 +363,12 @@ function App() {
         onClose={closeShop}
         initialCategory={shopInitialCategory}
       />
+      <RewardedAdModal
+        isOpen={isRewardedAdModalOpen}
+        onClose={closeRewardedAdModal}
+      />
     </>
   );
 }
 
-export default App
+export default App;
