@@ -27,9 +27,21 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
         }
     }, [timer.isRunning]);
 
-    // 브라우저 탭 타이틀 동기화 (렌더링 시점에 계산된 시간을 사용)
-    const currentProblem = timer.currentProblemId;
-    const currentTime = currentProblem ? getTotalElapsed(currentProblem) : 0;
+    // 브라우저 탭 타이틀 동기화
+    const currentProblemId = timer.currentProblemId;
+    const currentTime = currentProblemId ? getTotalElapsed(currentProblemId) : 0;
+
+    // Resolve readable title
+    const resolvedTitle = (() => {
+        if (!currentProblemId) return null;
+        const task = dailyTasks.find(t => t.problemId === currentProblemId);
+        if (task) return task.problemTitle;
+        const plan = reviewPlans.find(p => p.problemId === currentProblemId);
+        if (plan) return plan.problemTitle;
+        const log = studyLogs.find(l => l.problemId === currentProblemId);
+        if (log) return log.problemTitle;
+        return currentProblemId;
+    })();
 
     useEffect(() => {
         if (timer.isRunning && currentTime > 0) {
@@ -55,18 +67,18 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
     };
 
     const handleComplete = () => {
-        if (!currentProblem) return;
+        if (!currentProblemId) return;
 
         stopTimer();
         setIsExpanded(false);
 
         // Find problem details to open the log modal correctly
-        const task = dailyTasks.find(t => t.problemTitle === currentProblem);
-        const plan = reviewPlans.find(p => p.problemTitle === currentProblem);
-        const log = studyLogs.find(l => l.problemTitle === currentProblem);
+        const task = dailyTasks.find(t => t.problemId === currentProblemId);
+        const plan = reviewPlans.find(p => p.problemId === currentProblemId);
+        const log = studyLogs.find(l => l.problemId === currentProblemId);
 
         const problemData = {
-            title: currentProblem,
+            title: resolvedTitle || currentProblemId,
             platform: task?.site || plan?.platform || log?.platform || 'BOJ' as any,
             difficulty: task?.difficulty || plan?.difficulty || log?.difficulty || '미정'
         };
@@ -74,7 +86,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
         onComplete?.(problemData);
     };
 
-    if (!currentProblem) return null;
+    if (!currentProblemId) return null;
 
     const time = formatTime(currentTime);
 
@@ -94,7 +106,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
                                 {timer.isRunning ? 'Focus Mode Active' : 'Paused'}
                             </div>
                             <h2 className="text-xl md:text-2xl font-black leading-tight max-w-md mx-auto line-clamp-2 px-4">
-                                {currentProblem}
+                                {resolvedTitle}
                             </h2>
                             <div className="mt-8 flex items-baseline gap-2">
                                 <span className="text-7xl md:text-8xl font-black tracking-tighter tabular-nums">{time.main}</span>
@@ -105,7 +117,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
 
                     <div className="p-8 md:p-12 flex justify-center gap-4 md:gap-8 items-center bg-white flex-1 md:flex-none">
                         <button
-                            onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
+                            onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblemId)}
                             className={clsx(
                                 "w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center transition-all active:scale-90 shadow-xl shrink-0",
                                 timer.isRunning ? "bg-base-100 text-base-400" : "bg-base-900 text-white"
@@ -193,7 +205,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
                         </button>
 
                         <button
-                            onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblem)}
+                            onClick={timer.isRunning ? stopTimer : () => startTimer(currentProblemId)}
                             className={clsx(
                                 "w-9 h-9 md:w-12 md:h-12 rounded-full flex items-center justify-center transition-all active:scale-95 shadow-lg cursor-pointer shrink-0",
                                 timer.isRunning ? "bg-coral text-white" : "bg-white text-base-900 hover:bg-base-50"
@@ -205,7 +217,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
                         <div className="cursor-pointer group flex items-center gap-3 md:gap-4 active:cursor-grabbing" onClick={() => setIsExpanded(true)}>
                             <div className="flex flex-col">
                                 <span className="text-[9px] md:text-[10px] font-black text-white/40 uppercase tracking-widest leading-none mb-0.5 md:mb-1 group-hover:text-misty transition-colors max-w-[100px] md:max-w-[120px] truncate">
-                                    {currentProblem}
+                                    {resolvedTitle}
                                 </span>
                                 <span className="text-xl md:text-3xl font-black tracking-tighter leading-none tabular-nums">
                                     {time.main}
