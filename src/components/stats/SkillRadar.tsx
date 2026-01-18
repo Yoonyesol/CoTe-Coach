@@ -17,9 +17,11 @@ const SkillRadar: React.FC<SkillRadarProps> = ({ studyLogs }) => {
     const radarData = useMemo(() => {
         const counts: Record<string, number> = {};
         studyLogs.forEach(log => {
-            log.concepts.forEach(concept => {
-                counts[concept] = (counts[concept] || 0) + 1;
-            });
+            if (log.concepts && Array.isArray(log.concepts)) {
+                log.concepts.forEach(concept => {
+                    counts[concept] = (counts[concept] || 0) + 1;
+                });
+            }
         });
 
         const sorted = Object.entries(counts)

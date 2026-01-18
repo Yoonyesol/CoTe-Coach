@@ -15,6 +15,7 @@ import SuccessRateBar from '../components/stats/SuccessRateBar';
 import SolvingTimeChart from '../components/stats/SolvingTimeChart';
 import MaturityChart from '../components/stats/MaturityChart';
 import ReviewDefenseRate from '../components/stats/ReviewDefenseRate';
+import StatsEmptyState from '../components/stats/StatsEmptyState';
 
 type TabType = 'GROWTH' | 'PATTERN' | 'EFFICIENCY' | 'RETENTION';
 
@@ -56,38 +57,44 @@ const StatsView: React.FC = () => {
 
             {/* Tab Content */}
             <div className="min-h-[500px]">
-                {activeTab === 'GROWTH' && (
-                    <div className="flex flex-col gap-6 animate-in zoom-in-95 fade-in duration-500">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[320px]">
-                            <LearningHeatmap studyLogs={studyLogs} />
-                            <LevelUpCard />
-                        </div>
-                        <XPChart studyLogs={studyLogs} bojRating={bojRating} />
-                    </div>
-                )}
+                {studyLogs.length === 0 ? (
+                    <StatsEmptyState />
+                ) : (
+                    <>
+                        {activeTab === 'GROWTH' && (
+                            <div className="flex flex-col gap-6 animate-in zoom-in-95 fade-in duration-500">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[320px]">
+                                    <LearningHeatmap studyLogs={studyLogs} />
+                                    <LevelUpCard />
+                                </div>
+                                <XPChart studyLogs={studyLogs} bojRating={bojRating} />
+                            </div>
+                        )}
 
-                {activeTab === 'PATTERN' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
-                        <SkillRadar studyLogs={studyLogs} />
-                        <PlatformDonut studyLogs={studyLogs} />
-                        <div className="lg:col-span-2">
-                            <SuccessRateBar studyLogs={studyLogs} />
-                        </div>
-                    </div>
-                )}
+                        {activeTab === 'PATTERN' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
+                                <SkillRadar studyLogs={studyLogs} />
+                                <PlatformDonut studyLogs={studyLogs} />
+                                <div className="lg:col-span-2">
+                                    <SuccessRateBar studyLogs={studyLogs} />
+                                </div>
+                            </div>
+                        )}
 
-                {activeTab === 'EFFICIENCY' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
-                        <ActivityBar studyLogs={studyLogs} />
-                        <SolvingTimeChart studyLogs={studyLogs} />
-                    </div>
-                )}
+                        {activeTab === 'EFFICIENCY' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
+                                <ActivityBar studyLogs={studyLogs} />
+                                <SolvingTimeChart studyLogs={studyLogs} />
+                            </div>
+                        )}
 
-                {activeTab === 'RETENTION' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
-                        <MaturityChart />
-                        <ReviewDefenseRate />
-                    </div>
+                        {activeTab === 'RETENTION' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in zoom-in-95 fade-in duration-500">
+                                <MaturityChart />
+                                <ReviewDefenseRate />
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

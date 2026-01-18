@@ -21,7 +21,7 @@ const MaturityChart: React.FC = () => {
     const data = useMemo(() => {
         const counts = [0, 0, 0, 0, 0, 0]; // Stage 0 to 5+
 
-        reviewPlans.forEach(plan => {
+        (reviewPlans || []).forEach(plan => {
             const stage = Math.min(plan.currentStage, 5);
             counts[stage]++;
         });
