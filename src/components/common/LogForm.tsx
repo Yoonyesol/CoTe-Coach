@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Lightbulb, Zap, Archive, X, Clock, BarChart3 } from 'lucide-react';
+import { CheckCircle2, MessageSquare, Brain, HelpCircle, BookOpen, Zap, Archive, X, Clock, BarChart3 } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface LogFormProps {
