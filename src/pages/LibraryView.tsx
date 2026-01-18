@@ -3,6 +3,7 @@ import {
     Search, TrendingDown, Calendar, ChevronRight
 } from 'lucide-react';
 import { useUserStore } from '../store/useUserStore';
+import { useAuthStore } from '../store/useAuthStore';
 import { StudyLog } from '../types/study';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
@@ -35,6 +36,7 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
         libraryPage,
         libraryTotalSize
     } = useUserStore();
+    const { user } = useAuthStore();
 
     // Note: searchTerm is local input state. filters.query is the actual filter applied to backend.
     const [searchTerm, setSearchTerm] = useState('');
@@ -57,40 +59,37 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
 
     useEffect(() => {
         const load = async () => {
+            if (!user) return;
+
             setIsLoading(true);
-            const { data: { user } } = await import('../lib/supabase').then(m => m.supabase.auth.getUser());
-            if (user) {
-                const backendSort = sortBy === 'DIFFICULTY' ? 'DIFFICULTY' : 'RECENT';
+            const backendSort = sortBy === 'DIFFICULTY' ? 'DIFFICULTY' : 'RECENT';
 
-                const queryFilters: any = {};
-                if (filters.platform) queryFilters.platform = filters.platform;
-                if (filters.stage !== '') queryFilters.stage = parseInt(filters.stage);
-                if (filters.query) queryFilters.query = filters.query; // Pass query
+            const queryFilters: any = {};
+            if (filters.platform) queryFilters.platform = filters.platform;
+            if (filters.stage !== '') queryFilters.stage = parseInt(filters.stage);
+            if (filters.query) queryFilters.query = filters.query;
 
-                if (filters.year) {
-                    const year = parseInt(filters.year);
-                    if (filters.month) {
-                        // Specific Month
-                        const month = parseInt(filters.month);
-                        const start = new Date(year, month - 1, 1).toISOString();
-                        const end = new Date(year, month, 0, 23, 59, 59).toISOString();
-                        queryFilters.startDate = start;
-                        queryFilters.endDate = end;
-                    } else {
-                        // Full Year
-                        const start = new Date(year, 0, 1).toISOString();
-                        const end = new Date(year, 11, 31, 23, 59, 59).toISOString();
-                        queryFilters.startDate = start;
-                        queryFilters.endDate = end;
-                    }
+            if (filters.year) {
+                const year = parseInt(filters.year);
+                if (filters.month) {
+                    const month = parseInt(filters.month);
+                    const start = new Date(year, month - 1, 1).toISOString();
+                    const end = new Date(year, month, 0, 23, 59, 59).toISOString();
+                    queryFilters.startDate = start;
+                    queryFilters.endDate = end;
+                } else {
+                    const start = new Date(year, 0, 1).toISOString();
+                    const end = new Date(year, 11, 31, 23, 59, 59).toISOString();
+                    queryFilters.startDate = start;
+                    queryFilters.endDate = end;
                 }
-
-                await fetchLibraryPage(user.id, libraryPage, PAGE_SIZE, backendSort, queryFilters);
             }
+
+            await fetchLibraryPage(user.id, libraryPage, PAGE_SIZE, backendSort, queryFilters);
             setIsLoading(false);
         };
         load();
-    }, [libraryPage, sortBy, filters.platform, filters.stage, filters.year, filters.month, filters.query]);
+    }, [user?.id, libraryPage, sortBy, filters.platform, filters.stage, filters.year, filters.month, filters.query, fetchLibraryPage]);
 
     // Handle Page Change
     const handlePageChange = (newPage: number) => {
