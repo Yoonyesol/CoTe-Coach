@@ -46,9 +46,12 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
     useEffect(() => {
         if (timer.isRunning && currentTime > 0) {
             const totalSeconds = Math.floor(currentTime / 1000);
-            const m = Math.floor(totalSeconds / 60);
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds / 60) % 60);
             const s = totalSeconds % 60;
-            const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            const timeStr = h > 0
+                ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+                : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             document.title = `(${timeStr}) CoTe Coach`;
         } else {
             document.title = 'CoTe Coach';
@@ -57,11 +60,14 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
 
     const formatTime = (ms: number) => {
         const totalSeconds = Math.floor(ms / 1000);
-        const m = Math.floor(totalSeconds / 60);
+        const h = Math.floor(totalSeconds / 3600);
+        const m = Math.floor((totalSeconds / 60) % 60);
         const s = totalSeconds % 60;
         const msPart = Math.floor((ms % 1000) / 10);
         return {
-            main: `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`,
+            main: h > 0
+                ? `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+                : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`,
             ms: msPart.toString().padStart(2, '0')
         };
     };

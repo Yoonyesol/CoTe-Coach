@@ -347,7 +347,10 @@ const ProblemLibrary: React.FC<ProblemLibraryProps> = ({ onProblemClick }) => {
                                         </div>
                                         <div className="text-center border-x border-base-50">
                                             <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Best</p>
-                                            <p className="text-xs font-black text-sage-dark">{Math.round(problem.bestTime / 60000)}분</p>
+                                            <p className="text-xs font-black text-sage-dark">
+                                                {problem.bestTime >= 3600000 && `${Math.floor(problem.bestTime / 3600000)}h `}
+                                                {Math.floor((problem.bestTime / 60000) % 60)}분
+                                            </p>
                                         </div>
                                         <div className="text-center">
                                             <p className="text-[8px] font-black text-base-300 uppercase tracking-widest mb-0.5">Improve</p>

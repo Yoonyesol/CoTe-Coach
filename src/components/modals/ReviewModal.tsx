@@ -48,7 +48,8 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
 
     // Initial values for the form
     const elapsedTime = getTotalElapsed(problem.id || problem.title);
-    const initialMinutes = Math.floor(elapsedTime / 1000 / 60);
+    const initialHours = Math.floor(elapsedTime / 1000 / 3600);
+    const initialMinutes = Math.floor((elapsedTime / 1000 / 60) % 60);
     const initialSeconds = Math.floor((elapsedTime / 1000) % 60);
 
     const handleSubmit = async (data: any) => {
@@ -99,7 +100,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="glass-card bg-white w-full md:max-w-lg overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
+                        className="glass-card bg-white w-full md:max-w-xl overflow-hidden shadow-2xl relative z-10 md:rounded-2xl rounded-none h-[100dvh] md:h-auto md:max-h-[90vh] flex flex-col pointer-events-auto"
                     >
                         {/* Header */}
                         <div className="bg-base-900 px-4 sm:p-6 text-white flex justify-between items-center shrink-0 h-[calc(64px+env(safe-area-inset-top,0px))] sm:h-auto pt-[env(safe-area-inset-top,12px)] sm:pt-6">
@@ -137,6 +138,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                                         result: 'SUCCESS',
                                         solvingMethod: 'SELF',
                                         perceivedDifficulty: 'NORMAL',
+                                        elapsedHours: initialHours,
                                         elapsedMinutes: initialMinutes,
                                         elapsedSeconds: initialSeconds,
                                         approach: '',

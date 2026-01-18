@@ -388,7 +388,8 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 result: currentLog.result,
                                                 solvingMethod: currentLog.solvingMethod,
                                                 perceivedDifficulty: currentLog.perceivedDifficulty,
-                                                elapsedMinutes: Math.floor(currentLog.elapsedTime / 60000),
+                                                elapsedHours: Math.floor(currentLog.elapsedTime / 3600000),
+                                                elapsedMinutes: Math.floor((currentLog.elapsedTime / 60000) % 60),
                                                 elapsedSeconds: Math.floor((currentLog.elapsedTime / 1000) % 60),
                                                 approach: currentLog.approach,
                                                 reflection: currentLog.reflection,
@@ -424,7 +425,10 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                                                 <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
                                                     <Clock className="w-3 h-3" /> Time
                                                 </p>
-                                                <p className="text-sm font-black text-base-800">{Math.round(currentLog.elapsedTime / 60000)}m</p>
+                                                <p className="text-sm font-black text-base-800">
+                                                    {currentLog.elapsedTime >= 3600000 && `${Math.floor(currentLog.elapsedTime / 3600000)}h `}
+                                                    {Math.floor((currentLog.elapsedTime / 60000) % 60)}m
+                                                </p>
                                             </div>
                                             <div className="bg-base-50 p-3 sm:p-4 rounded-2xl border border-base-100/50">
                                                 <p className="text-[10px] font-black text-base-400 uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
@@ -599,7 +603,7 @@ const StudyLogDetailModal: React.FC<StudyLogDetailModalProps> = ({ log: initialL
                             </div>
                             <div className="p-4 md:p-6 bg-white/50 border-t border-base-100">
                                 <p className="text-[10px] font-bold text-base-300 leading-tight">
-                                    전체 해결 {historyLogs.length}회 • 평균 시간 {Math.round((stats?.avgTime || 0) / 60000)}분
+                                    전체 해결 {historyLogs.length}회 • 평균 시간 {((stats?.avgTime || 0) >= 3600000) && `${Math.floor((stats?.avgTime || 0) / 3600000)}h `}{Math.round(((stats?.avgTime || 0) / 60000) % 60)}분
                                 </p>
                             </div>
                         </div>

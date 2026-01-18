@@ -10,6 +10,7 @@ interface LogFormProps {
         result: 'SUCCESS' | 'FAIL';
         solvingMethod: 'SELF' | 'REFERENCE';
         perceivedDifficulty: 'EASY' | 'NORMAL' | 'HARD';
+        elapsedHours: number;
         elapsedMinutes: number;
         elapsedSeconds: number;
         approach: string;
@@ -51,6 +52,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
     const [isFinished, setIsFinished] = useState(initialValues?.isFinished || false);
     const [language, setLanguage] = useState(initialValues?.language || 'C++');
 
+    const [manualHours, setManualHours] = useState<number>(initialValues?.elapsedHours || 0);
     const [manualMinutes, setManualMinutes] = useState<number>(initialValues?.elapsedMinutes || 0);
     const [manualSeconds, setManualSeconds] = useState<number>(initialValues?.elapsedSeconds || 0);
 
@@ -72,7 +74,7 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const finalElapsedTime = (manualMinutes * 60 * 1000) + (manualSeconds * 1000);
+        const finalElapsedTime = (manualHours * 60 * 60 * 1000) + (manualMinutes * 60 * 1000) + (manualSeconds * 1000);
         onSubmit({
             problemTitle,
             difficulty,
@@ -263,22 +265,31 @@ const LogForm: React.FC<LogFormProps> = ({ initialValues, onSubmit, onCancel, su
                             <label className="text-xs font-black text-base-700 uppercase tracking-widest flex items-center gap-1">
                                 <Clock className="w-3 h-3" /> 소요 시간
                             </label>
-                            <div className="p-3 bg-base-50 rounded-2xl border-2 border-dashed border-base-100 flex items-center justify-center gap-4">
-                                <div className="flex items-center gap-2">
+                            <div className="p-3 bg-base-50 rounded-2xl border-2 border-dashed border-base-100 flex items-center justify-center gap-2">
+                                <div className="flex items-center gap-1.5">
+                                    <input
+                                        type="number"
+                                        value={manualHours}
+                                        onChange={(e) => setManualHours(Math.max(0, parseInt(e.target.value) || 0))}
+                                        className="w-8 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
+                                    />
+                                    <span className="text-[10px] font-black text-base-400 uppercase">Hr</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
                                     <input
                                         type="number"
                                         value={manualMinutes}
                                         onChange={(e) => setManualMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-                                        className="w-12 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
+                                        className="w-8 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
                                     />
                                     <span className="text-[10px] font-black text-base-400 uppercase">Min</span>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1.5">
                                     <input
                                         type="number"
                                         value={manualSeconds}
                                         onChange={(e) => setManualSeconds(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-                                        className="w-12 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
+                                        className="w-8 text-center bg-transparent font-black text-sm outline-none border-b-2 border-base-200 focus:border-misty"
                                     />
                                     <span className="text-[10px] font-black text-base-400 uppercase">Sec</span>
                                 </div>
