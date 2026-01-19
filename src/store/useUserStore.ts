@@ -861,6 +861,11 @@ export const useUserStore = create<UserState>()(
                     ratingContribution: earnedRating
                 };
 
+                // Determine if gold should be awarded (only for the first SUCCESSFUL solve, or ALWAYS for Point Boosts)
+                const isAlreadySolved = state.studyLogs.some(l => l.problemId === logData.problemId && l.result === 'SUCCESS');
+                const isPointBoost = logData.problemId.includes('Point Boost');
+                const shouldAwardGold = isPointBoost || (!isAlreadySolved && logData.result === 'SUCCESS');
+
                 // DB Sync (Pessimistic: Check DB First)
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session?.user) {
@@ -918,14 +923,16 @@ export const useUserStore = create<UserState>()(
                         last_completed_at: newLog.completedAt
                     }, { onConflict: 'user_id,problem_id' });
 
-                    // 3. Log Gold History
-                    await supabase.from('gold_history').insert({
-                        user_id: session.user.id,
-                        amount: earnedRating,
-                        balance_after: get().points + earnedRating,
-                        type: 'EARN',
-                        reason: `문제 해결: ${newLog.problemTitle}`
-                    });
+                    // 3. Log Gold History (Only if first time success)
+                    if (shouldAwardGold) {
+                        await supabase.from('gold_history').insert({
+                            user_id: session.user.id,
+                            amount: earnedRating,
+                            balance_after: get().points + earnedRating,
+                            type: 'EARN',
+                            reason: `문제 해결: ${newLog.problemTitle}`
+                        });
+                    }
                 }
 
                 // Update Local State (Only if DB sync succeeded)
@@ -973,7 +980,7 @@ export const useUserStore = create<UserState>()(
                         reviewPlans: nextPlans,
                         dailyTasks: updatedDailyTasks,
                         timer: { ...s.timer, problemTimers: nextTimers },
-                        points: s.points + earnedRating
+                        points: shouldAwardGold ? s.points + earnedRating : s.points
                     };
                 });
 
@@ -982,6 +989,7 @@ export const useUserStore = create<UserState>()(
                 if (session?.user) {
                     await get().saveProfile(session.user.id);
                 }
+
             },
 
             refreshRating: async () => {

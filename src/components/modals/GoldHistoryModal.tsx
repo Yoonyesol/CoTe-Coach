@@ -17,7 +17,7 @@ interface GoldHistoryModalProps {
 }
 
 const GoldHistoryModal: React.FC<GoldHistoryModalProps> = ({ isOpen, onClose }) => {
-    const { goldHistory, points } = useUserStore();
+    const { goldHistory, points, nickname, tier, bojHandle } = useUserStore();
     const [isMobile, setIsMobile] = React.useState(false);
 
     React.useEffect(() => {
@@ -78,45 +78,55 @@ const GoldHistoryModal: React.FC<GoldHistoryModalProps> = ({ isOpen, onClose }) 
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="relative w-full sm:max-w-lg bg-white shadow-2xl flex flex-col h-[100dvh] sm:max-h-[80vh] overflow-hidden sm:rounded-3xl rounded-none sm:rounded-b-3xl"
+                        className="glass-card relative w-full sm:max-w-lg bg-white shadow-2xl flex flex-col max-h-[85dvh] sm:max-h-[80vh] overflow-hidden sm:rounded-[2.5rem] rounded-t-[2.5rem] rounded-b-none sm:rounded-b-[2.5rem] border-none"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-base-100 flex items-center justify-between bg-gradient-to-r from-wheat-light/30 to-white pt-[env(safe-area-inset-top,24px)] shrink-0">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-wheat rounded-2xl flex items-center justify-center shadow-lg shadow-wheat/20">
-                                    <History className="w-5 h-5 text-wheat-dark" />
+                        <div className="bg-gradient-to-r from-base-900 via-base-800 to-base-900 p-6 pt-[calc(env(safe-area-inset-top,24px)+24px)] sm:pt-6 flex items-center justify-between shrink-0 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-wheat/5 rounded-full -mr-16 -mt-16 blur-2xl" />
+                            <div className="relative z-10 flex items-center gap-4">
+                                <div className="w-12 h-12 bg-wheat rounded-2xl flex items-center justify-center shadow-lg shadow-wheat/20 group relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-wheat-dark/20 to-transparent" />
+                                    <Coins className="w-6 h-6 text-wheat-dark relative z-10" />
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-black text-base-800">지갑 내역</h2>
-                                    <p className="text-[10px] font-bold text-base-400 uppercase tracking-tight">Gold Transaction History</p>
+                                <div className="space-y-0.5">
+                                    <h2 className="text-xl font-black text-white tracking-tight">골드 내역</h2>
+                                    <p className="text-wheat/40 text-[10px] font-black uppercase tracking-[0.3em]">Royal Treasury History</p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-base-100 transition-colors"
+                                className="relative z-10 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-white/80 hover:text-white border border-white/10"
                             >
-                                <X className="w-5 h-5 text-base-400" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
                         {/* Current Balance Card */}
-                        <div className="px-6 pt-6 mb-2">
-                            <div className="bg-base-900 rounded-2xl p-6 text-white shadow-xl shadow-base-900/10 relative overflow-hidden group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
-                                <div className="relative z-10 flex justify-between items-center">
-                                    <div>
-                                        <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-1">Current Balance</p>
-                                        <div className="flex items-center gap-2">
-                                            <Coins className="w-6 h-6 text-wheat" />
-                                            <span className="text-3xl font-black">{points.toLocaleString()}</span>
-                                            <span className="text-sm font-bold text-white/60">G</span>
+                        <div className="px-6 pt-6 mb-2 shrink-0">
+                            <div className="bg-gradient-to-br from-base-900 to-black rounded-[2rem] p-8 text-white shadow-2xl shadow-base-900/40 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-wheat/5 rounded-full -mr-32 -mt-32 blur-3xl transition-transform group-hover:scale-110" />
+                                <div className="absolute bottom-0 left-0 w-48 h-48 bg-wheat/5 rounded-full -ml-24 -mb-24 blur-3xl" />
+
+                                <div className="relative z-10">
+                                    <div className="flex justify-between items-start mb-8">
+                                        <div>
+                                            <p className="text-[10px] font-black text-wheat/40 uppercase tracking-[0.2em] mb-2">Current Balance</p>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-4xl font-black text-wheat">{points.toLocaleString()}</span>
+                                                <span className="text-sm font-black text-wheat/60 uppercase">Gold</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-12 h-8 bg-gradient-to-br from-wheat/20 to-wheat/5 rounded-lg border border-wheat/20 backdrop-blur-sm flex items-center justify-center">
+                                            <div className="w-6 h-4 bg-wheat/10 rounded-sm italic text-[8px] font-bold text-wheat/40 flex items-center justify-center">COACH</div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-[10px] font-black bg-white/10 px-2 py-1 rounded-md mb-2 uppercase tracking-wide">Royal Wallet</div>
-                                        <div className="flex gap-1 justify-end">
-                                            {[1, 2, 3].map(i => <div key={i} className="w-1.5 h-1.5 rounded-full bg-wheat/30" />)}
+
+                                    <div className="flex justify-between items-end">
+                                        <div className="space-y-1">
+                                            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">{nickname || bojHandle || 'Anonymous User'}</p>
+                                            <p className="text-xs font-bold text-wheat/60 tracking-wider uppercase">{tier}</p>
                                         </div>
+                                        <Coins className="w-8 h-8 text-wheat opacity-20" />
                                     </div>
                                 </div>
                             </div>
