@@ -70,6 +70,10 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose, problem }) =
                 language: data.language
             });
 
+            // Clear the timer for this problem after successful logging
+            const { resetTimer } = useUserStore.getState();
+            await resetTimer(problem.id || problem.title);
+
             setIsSubmitted(true);
             setTimeout(() => {
                 onClose();

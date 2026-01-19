@@ -75,10 +75,7 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
     const handleComplete = () => {
         if (!currentProblemId) return;
 
-        stopTimer();
-        setIsExpanded(false);
-
-        // Find problem details to open the log modal correctly
+        // Save current data before resetting
         const task = dailyTasks.find(t => t.problemId === currentProblemId);
         const plan = reviewPlans.find(p => p.problemId === currentProblemId);
         const log = studyLogs.find(l => l.problemId === currentProblemId);
@@ -89,6 +86,19 @@ const Stopwatch: React.FC<StopwatchProps> = ({ onComplete }) => {
             difficulty: task?.difficulty || plan?.difficulty || log?.difficulty || '미정'
         };
 
+        // stopTimer is called inside onComplete? No, let's call it here.
+        // Actually, we want the timer to DISAPPEAR. resetTimer(id) clears everything.
+        // But we need the elapsed time for the form.
+        // The form gets time via getTotalElapsed(problem.id).
+        // If we reset here, getTotalElapsed will return 0.
+        // So we MUST NOT reset here, but in the modal AFTER submission.
+        // To make it 'disappear' from the bottom right, we just need to set isHidden or stop it.
+        // The user said: "타이머에서 완료 누르면 해당 타이머가 사라지게 해줘"
+        // This means it should no longer be the 'active' problem.
+
+        stopTimer();
+        setIsExpanded(false);
+        setIsHidden(true); // Hide from bottom right
         onComplete?.(problemData);
     };
 
