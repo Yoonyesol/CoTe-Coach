@@ -896,8 +896,8 @@ export const useUserStore = create<UserState>()(
                     // Update local log with real DB ID
                     newLog.id = dbLog.id;
 
-                    // 1-1. Auto-complete Daily Task if exists
-                    if (isFinished) {
+                    // 1-1. Auto-complete Daily Task if exists (Success or Manual Finish)
+                    if (isFinished || logData.result === 'SUCCESS') {
                         try {
                             await supabase
                                 .from('daily_tasks')
@@ -965,9 +965,9 @@ export const useUserStore = create<UserState>()(
                         });
                     }
 
-                    // Update Daily Tasks Status if Finished
+                    // Update Daily Tasks Status if Finished or Solved
                     let updatedDailyTasks = s.dailyTasks;
-                    if (isFinished) {
+                    if (isFinished || logData.result === 'SUCCESS') {
                         updatedDailyTasks = s.dailyTasks.map(t =>
                             ((t.problemId === logData.problemId || t.problemTitle === logData.problemTitle) && t.status === 'pending')
                                 ? { ...t, status: 'completed' as const }

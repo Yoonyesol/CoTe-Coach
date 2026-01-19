@@ -18,7 +18,7 @@ interface CustomProblemCardProps {
 }
 
 const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete, onEdit }) => {
-    const { deleteDailyTask, timer, startTimer, stopTimer, getTotalElapsed } = useUserStore();
+    const { deleteDailyTask, timer, startTimer, stopTimer, getTotalElapsed, studyLogs } = useUserStore();
     const { showAlert, showConfirm } = useModalStore();
 
     const [showMenu, setShowMenu] = useState(false);
@@ -26,6 +26,11 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
 
     const isCurrent = timer.currentProblemId === task.problemId;
     const isOtherRunning = timer.isRunning && !isCurrent;
+    const isAlreadySolved = studyLogs.some(l =>
+        (l.problemId === task.problemId || l.problemTitle === task.problemTitle) &&
+        l.result === 'SUCCESS'
+    );
+    const isCompleted = task.status === 'completed' || isAlreadySolved;
     const elapsed = getTotalElapsed(task.problemId);
 
     useEffect(() => {
@@ -103,7 +108,7 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
             className={cn(
                 "glass-card group relative p-5 bg-white border border-base-100 transition-all duration-300 hover:shadow-xl flex flex-col h-full font-sans overflow-visible",
                 isCurrent && "ring-2 ring-misty shadow-xl",
-                isOtherRunning && "opacity-75 saturate-50"
+                (isOtherRunning || isCompleted) && "opacity-75 saturate-50"
             )}
         >
             {/* Top Row: Badges & Menu */}
@@ -111,9 +116,14 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
                 <div className="flex flex-wrap gap-1.5">
                     <span className={cn(
                         "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider flex items-center gap-1",
-                        isCurrent && timer.isRunning ? "bg-coral text-white animate-pulse" : "bg-lavender-light text-lavender-dark"
+                        isCompleted ? "bg-sage-light text-sage-dark" :
+                            isCurrent && timer.isRunning ? "bg-coral text-white animate-pulse" : "bg-lavender-light text-lavender-dark"
                     )}>
-                        {isCurrent && timer.isRunning ? (
+                        {isCompleted ? (
+                            <>
+                                <CheckCircle className="w-3.5 h-3.5" /> Solved
+                            </>
+                        ) : isCurrent && timer.isRunning ? (
                             <>
                                 <Flame className="w-3.5 h-3.5" /> Solving
                             </>
@@ -173,7 +183,7 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
                     rel="noopener noreferrer"
                     className={cn(
                         "inline-flex items-center gap-1.5 text-lg font-black text-base-900 leading-tight transition-colors hover:text-misty-dark",
-                        !task.url && "cursor-default"
+                        (!task.url || isCompleted) && "cursor-default text-base-400"
                     )}
                 >
                     <span className="line-clamp-2">{task.problemTitle}</span>
@@ -206,24 +216,39 @@ const CustomProblemCard: React.FC<CustomProblemCardProps> = ({ task, onComplete,
                     {/* Start/Pause Timer */}
                     <button
                         onClick={handleStart}
-                        disabled={isOtherRunning}
+                        disabled={isOtherRunning || isCompleted}
                         className={cn(
                             "flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 shadow-sm",
                             isCurrent && timer.isRunning ? "bg-base-900 text-white" : "bg-base-100 text-base-600 hover:bg-base-200",
-                            isOtherRunning && "opacity-50 grayscale cursor-not-allowed"
+                            (isOtherRunning || isCompleted) && "opacity-50 grayscale cursor-not-allowed"
                         )}
                     >
-                        {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                        {isCurrent && timer.isRunning ? '일시정지' : (elapsed > 0 ? '계속하기' : '시작')}
+                        {isCompleted ? (
+                            <>
+                                <CheckCircle className="w-4 h-4" />
+                                완료됨
+                            </>
+                        ) : (
+                            <>
+                                {isCurrent && timer.isRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                                {isCurrent && timer.isRunning ? '일시정지' : (elapsed > 0 ? '계속하기' : '시작')}
+                            </>
+                        )}
                     </button>
 
                     {/* Complete & Review */}
                     <button
                         onClick={() => onComplete(task)}
-                        className="flex-[1.5] flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black bg-misty text-white hover:bg-misty-dark transition-all active:scale-95 shadow-md shadow-misty/20"
+                        disabled={isCompleted}
+                        className={cn(
+                            "flex-[1.5] flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-misty/20",
+                            isCompleted
+                                ? "bg-base-100 text-base-400 cursor-not-allowed"
+                                : "bg-misty text-white hover:bg-misty-dark"
+                        )}
                     >
                         <CheckCircle className="w-4 h-4" />
-                        로그 작성 및 완료
+                        {isCompleted ? '기록 제출됨' : '로그 작성 및 완료'}
                     </button>
                 </div>
             </div>
