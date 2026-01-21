@@ -67,6 +67,9 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
     initialize: async () => {
+        const { initialized } = (useAuthStore.getState() as any);
+        if (initialized) return;
+
         try {
             // Register session change listener
             supabase.auth.onAuthStateChange(async (event, session) => {
@@ -88,31 +91,58 @@ export const useAuthStore = create<AuthState>((set) => ({
 
                 if (event === 'SIGNED_OUT' || (event as string) === 'TOKEN_REFRESH_REVOKED') {
                     set({ session: null, user: null, isLoading: false, initialized: true });
-                } else if (event !== 'SIGNED_IN') {
-                    // Let signInWithPassword handle its own state to avoid race
+                } else {
+                    // We handle INITIAL_SESSION, TOKEN_REFRESHED, and SIGNED_IN here.
+                    // Even if SIGNED_IN is handled in signInWithPassword, updating here 
+                    // ensures consistency if session recovery triggers a SIGNED_IN event.
                     set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
                 }
             });
 
-            // Initial check
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                set({ isLoading: true });
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('deleted_at')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (profile?.deleted_at) {
-                    await supabase.auth.signOut();
-                    set({ session: null, user: null, isLoading: false, initialized: true });
-                    return;
+            // Register window focus/visibility listener for session recovery
+            const handleVisibilityChange = async () => {
+                if (document.visibilityState === 'visible') {
+                    // Non-blocking background check
+                    supabase.auth.getSession().then(({ data: { session: refreshedSession } }) => {
+                        set({ session: refreshedSession, user: refreshedSession?.user ?? null });
+                    });
                 }
+            };
+            window.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // Initial check with Safety Timeout
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Auth timeout')), 8000)
+            );
+
+            try {
+                const { data: { session } } = await Promise.race([
+                    supabase.auth.getSession(),
+                    timeoutPromise
+                ]) as any;
+
+                if (session?.user) {
+                    set({ isLoading: true });
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('deleted_at')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (profile?.deleted_at) {
+                        await supabase.auth.signOut();
+                        set({ session: null, user: null, isLoading: false, initialized: true });
+                        return;
+                    }
+                }
+                set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
+            } catch (error) {
+                console.warn('[Auth] Initialization check failed or timed out:', error);
+                // Fallback to null session to unblock UI
+                set({ session: null, user: null, isLoading: false, initialized: true });
             }
-            set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
         } catch (error) {
-            console.error('[Auth] Initialization error:', error);
+            console.error('[Auth] Initialization fatal error:', error);
             set({ isLoading: false, initialized: true });
         }
     },
