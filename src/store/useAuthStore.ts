@@ -121,21 +121,24 @@ export const useAuthStore = create<AuthState>((set) => ({
                     timeoutPromise
                 ]) as any;
 
+                // 1. Unblock UI immediately with session info
+                set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
+
+                // 2. Background Security Check (Non-blocking)
                 if (session?.user) {
-                    set({ isLoading: true });
-                    const { data: profile } = await supabase
+                    supabase
                         .from('profiles')
                         .select('deleted_at')
                         .eq('id', session.user.id)
-                        .single();
-
-                    if (profile?.deleted_at) {
-                        await supabase.auth.signOut();
-                        set({ session: null, user: null, isLoading: false, initialized: true });
-                        return;
-                    }
+                        .single()
+                        .then(({ data: profile }) => {
+                            if (profile?.deleted_at) {
+                                supabase.auth.signOut();
+                                set({ session: null, user: null });
+                                console.warn('[Auth] Redirecting deleted account to login');
+                            }
+                        });
                 }
-                set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
             } catch (error) {
                 console.warn('[Auth] Initialization check failed or timed out:', error);
                 // Fallback to null session to unblock UI
