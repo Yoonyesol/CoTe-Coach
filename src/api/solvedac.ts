@@ -9,19 +9,33 @@ const solvedAcApi = axios.create({
 // Add interceptor ONLY for production to use CORS proxy
 if (import.meta.env.PROD) {
   solvedAcApi.interceptors.request.use((config) => {
-    // 1. Get the full URL including parameters
     const fullUrl = axios.getUri(config);
 
-    // 2. Clear original parameters and base so axios doesn't append them again
+    // Clear original config so it doesn't conflict with proxy
     config.params = {};
     config.baseURL = undefined;
 
-    // 3. Set the final proxy URL
-    // Use corsproxy.io as the prefix
-    config.url = `https://corsproxy.io/?url=${encodeURIComponent(fullUrl)}`;
+    // Format for corsproxy.io: https://corsproxy.io/?<encoded_url>
+    // Note: Some environments prefer the "?" prefix directly followed by the url
+    config.url = `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
 
     return config;
+  }, (error) => {
+    console.error('[Solved.ac API] Request Interceptor Error:', error);
+    return Promise.reject(error);
   });
+
+  solvedAcApi.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      console.error('[Solved.ac API] Fetch Failed:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        message: error.message
+      });
+      return Promise.reject(error);
+    }
+  );
 }
 
 import { SolvedAcUser } from '../types/user';
