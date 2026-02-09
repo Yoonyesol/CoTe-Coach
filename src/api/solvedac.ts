@@ -15,9 +15,9 @@ if (import.meta.env.PROD) {
     config.params = {};
     config.baseURL = undefined;
 
-    // Format for corsproxy.io: https://corsproxy.io/?<encoded_url>
-    // Note: Some environments prefer the "?" prefix directly followed by the url
-    config.url = `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
+    // Switch to allorigins.win/raw which is often more reliable for 403/Forbidden issues
+    // Format: https://api.allorigins.win/raw?url=<encoded_url>
+    config.url = `https://api.allorigins.win/raw?url=${encodeURIComponent(fullUrl)}`;
 
     return config;
   }, (error) => {
