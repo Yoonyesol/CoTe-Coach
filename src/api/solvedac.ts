@@ -16,9 +16,9 @@ if (import.meta.env.PROD) {
     config.params = {};
     config.baseURL = undefined;
 
-    // 3. Set the final proxy URL with the fully encoded target URL
+    // 3. Set the final proxy URL
     // Use corsproxy.io as the prefix
-    config.url = `https://corsproxy.io/?${encodeURIComponent(fullUrl)}`;
+    config.url = `https://corsproxy.io/?url=${encodeURIComponent(fullUrl)}`;
 
     return config;
   });
