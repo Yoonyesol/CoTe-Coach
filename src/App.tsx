@@ -130,7 +130,7 @@ function App() {
     };
 
     syncData();
-  }, [isHydrated, authInitialized, user, fetchUserData, refreshRating, showAlert]);
+  }, [isHydrated, authInitialized, user?.id, fetchUserData, refreshRating, showAlert]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
