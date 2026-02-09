@@ -345,6 +345,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, activeTab, onTabChang
                                             <p className="text-xs font-black text-misty-dark">
                                                 {(() => {
                                                     const lv = solvedAcData?.tier || 0;
+                                                    if (lv === 0) return 'Data N/A';
                                                     const tiers = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Ruby'];
                                                     const tierIdx = Math.floor((lv - 1) / 5);
                                                     const subTier = 5 - ((lv - 1) % 5);
