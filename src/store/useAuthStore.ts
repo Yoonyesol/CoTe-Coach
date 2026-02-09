@@ -112,7 +112,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
             // Initial check with Safety Timeout
             const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Auth timeout')), 8000)
+                setTimeout(() => reject(new Error('Auth timeout')), 4000)
             );
 
             try {
