@@ -111,7 +111,6 @@ export const useAuthStore = create<AuthState>((set) => ({
             window.addEventListener('visibilitychange', handleVisibilityChange);
 
             // Initial check with Safety Timeout
-            console.log('[Auth] ✅ 세션 확인 시작 (timeout: 4s)');
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Auth timeout')), 4000)
             );
@@ -123,7 +122,6 @@ export const useAuthStore = create<AuthState>((set) => ({
                 ]) as any;
 
                 // 1. Unblock UI immediately with session info
-                console.log('[Auth] ✅ 세션 확인 완료:', { hasSession: !!session, userId: session?.user?.id });
                 set({ session, user: session?.user ?? null, isLoading: false, initialized: true });
 
                 // 2. Background Security Check (Non-blocking)
@@ -137,12 +135,10 @@ export const useAuthStore = create<AuthState>((set) => ({
                             if (profile?.deleted_at) {
                                 supabase.auth.signOut();
                                 set({ session: null, user: null });
-                                console.warn('[Auth] Redirecting deleted account to login');
                             }
                         });
                 }
             } catch (error) {
-                console.warn('[Auth] ❌ 초기화 실패 또는 타임아웃:', error);
                 // Fallback to null session to unblock UI
                 set({ session: null, user: null, isLoading: false, initialized: true });
             }

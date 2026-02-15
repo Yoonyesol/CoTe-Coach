@@ -21,8 +21,6 @@ async function prodFetch<T>(path: string, params: Record<string, any> = {}): Pro
   ).toString();
   const fullPath = `${path}${queryString ? '?' + queryString : ''}`;
 
-  console.log('[Solved.ac] prodFetch 호출:', fullPath);
-
   const response = await fetch(
     `${SUPABASE_PROXY_URL}?path=${encodeURIComponent(fullPath)}`,
     {
@@ -39,7 +37,6 @@ async function prodFetch<T>(path: string, params: Record<string, any> = {}): Pro
   }
 
   const data = await response.json() as T;
-  console.log('[Solved.ac] prodFetch 성공');
   return data;
 }
 
@@ -47,7 +44,6 @@ async function prodFetch<T>(path: string, params: Record<string, any> = {}): Pro
  * 사용자 정보 가져오기
  */
 export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> => {
-  console.log('[Solved.ac] fetchSolvedAcUser 호출:', { handle, env: import.meta.env.MODE });
   try {
     if (import.meta.env.PROD) {
       return await prodFetch<SolvedAcUser>('/user/show', { handle });
@@ -67,7 +63,6 @@ export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> =
  * 문제 검색 (쿼리 기반)
  */
 export const searchSolvedAcProblems = async (query: string, page: number = 1): Promise<{ count: number; items: SolvedAcProblem[] }> => {
-  console.log('[Solved.ac] searchSolvedAcProblems 호출:', { query, page, env: import.meta.env.MODE });
   try {
     if (import.meta.env.PROD) {
       return await prodFetch<{ count: number; items: SolvedAcProblem[] }>('/search/problem', {

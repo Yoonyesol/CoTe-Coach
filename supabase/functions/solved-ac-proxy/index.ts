@@ -28,7 +28,6 @@ Deno.serve(async (req) => {
 
         // Build the target URL: solved.ac API + path (which includes query params)
         const targetUrl = `${SOLVED_AC_API}${targetPath}`;
-        console.log(`[solved-ac-proxy] Fetching: ${targetUrl}`);
 
         const response = await fetch(targetUrl, {
             headers: {

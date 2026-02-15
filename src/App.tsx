@@ -66,16 +66,13 @@ function App() {
   const [isDataLoading, setIsDataLoading] = useState(false);
 
   useEffect(() => {
-    console.log('[App] 🚀 initialize() 호출');
     initialize();
 
     // Check for hydration status
     const checkHydration = () => {
       if (useUserStore.persist.hasHydrated()) {
-        console.log('[App] ✅ Hydration 완료 (즉시)');
         setIsHydrated(true);
       } else {
-        console.log('[App] ⏳ Hydration 대기 중...');
         const unsub = useUserStore.persist.onFinishHydration(() => {
           console.log('[App] ✅ Hydration 완료 (콜백)');
           setIsHydrated(true);
@@ -89,16 +86,13 @@ function App() {
 
   // 1. Initial Data Sync: Local Storage Hydration & Supabase Fetch
   useEffect(() => {
-    console.log('[App] 📊 syncData 체크:', { isHydrated, authInitialized, userId: user?.id });
     if (!isHydrated || !authInitialized) return;
 
     const syncData = async () => {
-      console.log('[App] 🔄 syncData 시작, user:', user?.id || 'guest');
       setIsDataLoading(true);
       try {
         // If user is logged in, prioritize Supabase data
         if (user) {
-          console.log('[App] 📥 fetchUserData 시작...');
           await fetchUserData(user.id);
           await fetchGoals(user.id);
         } else {
@@ -234,10 +228,7 @@ function App() {
     });
   };
 
-  console.log('[App] 🎨 렌더링 분기:', { isAuthLoading, user: !!user, isDataLoading });
-
   if (isAuthLoading) {
-    console.log('[App] ⏳ 인증 로딩 중 → 스피너 표시');
     return (
       <div className="min-h-screen bg-base-900 flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-coral animate-spin" />
@@ -246,7 +237,6 @@ function App() {
   }
 
   if (!user) {
-    console.log('[App] 👤 비로그인 → 랜딩 페이지 표시');
     return (
       <Suspense fallback={
         <div className="min-h-screen bg-base-900 flex items-center justify-center">
