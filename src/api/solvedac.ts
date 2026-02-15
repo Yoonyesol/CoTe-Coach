@@ -45,22 +45,44 @@ import { SolvedAcProblem } from '../types/problem';
  * 사용자 정보 가져오기
  */
 export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> => {
-  const { data } = await solvedAcApi.get('/user/show', {
-    params: { handle }
-  });
-  return data;
+  console.log('[Solved.ac] fetchSolvedAcUser 호출:', { handle, env: import.meta.env.MODE });
+  try {
+    const { data } = await solvedAcApi.get('/user/show', {
+      params: { handle }
+    });
+    console.log('[Solved.ac] fetchSolvedAcUser 성공:', data);
+    return data;
+  } catch (error: any) {
+    console.error('[Solved.ac] fetchSolvedAcUser 실패:', {
+      status: error.response?.status,
+      message: error.message,
+      url: error.config?.url
+    });
+    throw error;
+  }
 };
 
 /**
  * 문제 검색 (쿼리 기반)
  */
 export const searchSolvedAcProblems = async (query: string, page: number = 1): Promise<{ count: number; items: SolvedAcProblem[] }> => {
-  const { data } = await solvedAcApi.get('/search/problem', {
-    params: {
-      query,
-      page,
-      _t: Date.now() // Cache busting parameter
-    }
-  });
-  return data;
+  console.log('[Solved.ac] searchSolvedAcProblems 호출:', { query, page, env: import.meta.env.MODE });
+  try {
+    const { data } = await solvedAcApi.get('/search/problem', {
+      params: {
+        query,
+        page,
+        _t: Date.now()
+      }
+    });
+    console.log('[Solved.ac] searchSolvedAcProblems 성공:', { count: data.count });
+    return data;
+  } catch (error: any) {
+    console.error('[Solved.ac] searchSolvedAcProblems 실패:', {
+      status: error.response?.status,
+      message: error.message,
+      url: error.config?.url
+    });
+    throw error;
+  }
 };
