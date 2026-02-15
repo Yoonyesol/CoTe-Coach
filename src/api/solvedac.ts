@@ -2,37 +2,39 @@ import axios from 'axios';
 import { SolvedAcUser } from '../types/user';
 import { SolvedAcProblem } from '../types/problem';
 
-const SOLVED_AC_API = 'https://solved.ac/api/v3';
+// Supabase Edge Function URL for production CORS proxy
+const SUPABASE_PROXY_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/solved-ac-proxy`;
 
-// Create a dedicated axios instance for Solved.ac (DEV only)
+// Axios instance for local development (Vite proxy)
 const solvedAcApi = axios.create({
   baseURL: '/api/v3'
 });
 
 /**
- * Production에서 CORS 우회를 위한 fetch 래퍼
- * allorigins.win/get은 응답을 { contents: "..." } JSON으로 감싸서
- * Access-Control-Allow-Origin 헤더를 정상적으로 반환
+ * Production 전용: Supabase Edge Function을 통한 CORS 우회
+ * - 서버→서버 통신이므로 CORS 제한 없음
+ * - Edge Function이 응답에 CORS 헤더를 추가하여 브라우저에 전달
  */
 async function prodFetch<T>(path: string, params: Record<string, any> = {}): Promise<T> {
   const queryString = new URLSearchParams(
     Object.entries(params).map(([k, v]) => [k, String(v)])
   ).toString();
-  const targetUrl = `${SOLVED_AC_API}${path}${queryString ? '?' + queryString : ''}`;
+  const fullPath = `${path}${queryString ? '?' + queryString : ''}`;
 
-  console.log('[Solved.ac] prodFetch 호출:', targetUrl);
+  console.log('[Solved.ac] prodFetch 호출:', fullPath);
 
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-  const response = await fetch(proxyUrl);
+  const response = await fetch(
+    `${SUPABASE_PROXY_URL}?path=${encodeURIComponent(fullPath)}`
+  );
 
   if (!response.ok) {
-    throw new Error(`Proxy request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text();
+    console.error('[Solved.ac] prodFetch 실패:', { status: response.status, body: errorText });
+    throw new Error(`Proxy request failed: ${response.status}`);
   }
 
-  const json = await response.json();
-  // allorigins /get endpoint wraps result in { contents: "raw response string" }
-  const data = JSON.parse(json.contents) as T;
-  console.log('[Solved.ac] prodFetch 성공:', data);
+  const data = await response.json() as T;
+  console.log('[Solved.ac] prodFetch 성공');
   return data;
 }
 
@@ -46,7 +48,6 @@ export const fetchSolvedAcUser = async (handle: string): Promise<SolvedAcUser> =
       return await prodFetch<SolvedAcUser>('/user/show', { handle });
     }
     const { data } = await solvedAcApi.get('/user/show', { params: { handle } });
-    console.log('[Solved.ac] fetchSolvedAcUser 성공:', data);
     return data;
   } catch (error: any) {
     console.error('[Solved.ac] fetchSolvedAcUser 실패:', {
@@ -73,7 +74,6 @@ export const searchSolvedAcProblems = async (query: string, page: number = 1): P
     const { data } = await solvedAcApi.get('/search/problem', {
       params: { query, page, _t: Date.now() }
     });
-    console.log('[Solved.ac] searchSolvedAcProblems 성공:', { count: data.count });
     return data;
   } catch (error: any) {
     console.error('[Solved.ac] searchSolvedAcProblems 실패:', {
