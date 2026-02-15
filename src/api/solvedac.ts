@@ -24,7 +24,12 @@ async function prodFetch<T>(path: string, params: Record<string, any> = {}): Pro
   console.log('[Solved.ac] prodFetch 호출:', fullPath);
 
   const response = await fetch(
-    `${SUPABASE_PROXY_URL}?path=${encodeURIComponent(fullPath)}`
+    `${SUPABASE_PROXY_URL}?path=${encodeURIComponent(fullPath)}`,
+    {
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+      }
+    }
   );
 
   if (!response.ok) {
