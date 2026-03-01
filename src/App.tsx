@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import { motion } from 'framer-motion';
 import AddProblemModal from './components/modals/AddProblemModal'
@@ -64,6 +64,7 @@ function App() {
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(false);
+  const isDataLoadingRef = useRef(false);
 
   useEffect(() => {
     initialize();
@@ -90,6 +91,22 @@ function App() {
 
     const syncData = async () => {
       setIsDataLoading(true);
+      isDataLoadingRef.current = true;
+
+      // Safety timeout for data synchronization (4 seconds)
+      // Uses ref instead of state to avoid stale closure issue
+      const dataTimeout = setTimeout(() => {
+        if (isDataLoadingRef.current) {
+          console.warn('[App] Data sync timed out, unblocking UI');
+          isDataLoadingRef.current = false;
+          setIsDataLoading(false);
+          showAlert(
+            "동기화 지연",
+            "서버 상태가 원활하지 않아 데이터 동기화가 지연되고 있습니다. 캐시된 데이터를 표시합니다."
+          );
+        }
+      }, 4000);
+
       try {
         // If user is logged in, prioritize Supabase data
         if (user) {
@@ -126,6 +143,8 @@ function App() {
           );
         }
       } finally {
+        clearTimeout(dataTimeout);
+        isDataLoadingRef.current = false;
         setIsDataLoading(false);
       }
     };
