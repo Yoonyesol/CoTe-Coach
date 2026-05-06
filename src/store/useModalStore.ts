@@ -3,6 +3,11 @@ import { create } from 'zustand';
 import { ModalState } from '../types/modal';
 
 export const useModalStore = create<ModalState>((set) => ({
+    activeGlobalModal: null,
+    globalModalProps: {},
+    openGlobalModal: (type, props) => set({ activeGlobalModal: type, globalModalProps: props || {} }),
+    closeGlobalModal: () => set({ activeGlobalModal: null, globalModalProps: {} }),
+    
     isOpen: false,
     options: null,
     isShopOpen: false,

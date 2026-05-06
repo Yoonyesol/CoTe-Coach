@@ -1,28 +1,19 @@
 import { useState, useEffect, useRef, Suspense, lazy } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import { motion } from 'framer-motion';
-import AddProblemModal from './components/modals/AddProblemModal'
-import AccountSettingsModal from './components/modals/AccountSettingsModal'
 
-import TierGuideModal from './components/modals/TierGuideModal'
-import ReviewModal from './components/modals/ReviewModal'
-import ReviewDetailModal from './components/modals/ReviewDetailModal'
 import Stopwatch from './components/common/Stopwatch'
-import StudyLogDetailModal from './components/modals/StudyLogDetailModal'
 import RecommendationSettingsModal from './components/modals/RecommendationSettingsModal'
 import GlobalModal from './components/modals/GlobalModal'
-import GoalModal from './components/modals/GoalModal'
-import DailyGoalSettingsModal from './components/modals/DailyGoalSettingsModal'
+import GlobalModalRenderer from './components/modals/GlobalModalRenderer'
+
 import { useUserStore } from './store/useUserStore'
 import { useModalStore } from './store/useModalStore'
 import { useAuthStore } from './store/useAuthStore'
-import DeleteAccountModal from './components/modals/DeleteAccountModal'
-import ContactModal from './components/modals/ContactModal'
+
 import ShopModal from './components/modals/ShopModal'
 import RewardedAdModal from './components/modals/RewardedAdModal'
-import EditTaskModal from './components/modals/EditTaskModal'
 import GoldHistoryModal from './components/modals/GoldHistoryModal'
-import { StudyLog, DailyTask } from './types/study'
 
 // Lazy Load Page Components
 const LandingView = lazy(() => import('./pages/LandingView'));
@@ -58,7 +49,9 @@ function App() {
     isRewardedAdModalOpen,
     closeRewardedAdModal,
     isGoldHistoryOpen,
-    closeGoldHistory
+    closeGoldHistory,
+    openGlobalModal,
+    closeGlobalModal
   } = useModalStore();
   const { user, initialize, isLoading: isAuthLoading, initialized: authInitialized } = useAuthStore();
 
@@ -152,18 +145,7 @@ function App() {
     syncData();
   }, [isHydrated, authInitialized, user?.id, fetchUserData, refreshRating, showAlert]);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
-  const [isTierGuideModalOpen, setIsTierGuideModalOpen] = useState(false);
-  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [isReviewDetailModalOpen, setIsReviewDetailModalOpen] = useState(false);
-  const [selectedProblem, setSelectedProblem] = useState<{ id?: string, title: string, platform: string, difficulty: string } | null>(null);
-  const [selectedReviewPlan, setSelectedReviewPlan] = useState<any>(null);
-  const [isDailyGoalModalOpen, setIsDailyGoalModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<DailyTask | null>(null);
-  const [isEditTaskModalOpen, setIsEditTaskModalOpen] = useState(false);
+
 
   const [activeTab, setActiveTab] = useState<'HOME' | 'STATS' | 'JOURNAL' | 'LIBRARY' | 'SETTINGS' | 'MY_PROBLEMS'>(() => {
     if (typeof window === 'undefined') return 'HOME';
@@ -204,17 +186,20 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const [editingLog, setEditingLog] = useState<StudyLog | null>(null);
-  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-
   const handleReviewOpen = (problem: { id?: string, title: string, platform: string, difficulty: string }) => {
-    setSelectedProblem(problem);
-    setIsReviewModalOpen(true);
+    openGlobalModal('REVIEW', { problem });
   };
 
   const handleReviewDetailOpen = (plan: any) => {
-    setSelectedReviewPlan(plan);
-    setIsReviewDetailModalOpen(true);
+    openGlobalModal('REVIEW_DETAIL', {
+      plan,
+      onStartReview: handleStartReview,
+      onQuickLog: handleQuickLog,
+      onViewFullDetail: (log: any) => {
+        closeGlobalModal();
+        openGlobalModal('STUDY_LOG_DETAIL', { log });
+      }
+    });
   };
 
   const handleStartReview = (plan: any) => {
@@ -230,7 +215,7 @@ function App() {
       }
       startTimer(plan.problemTitle);
     }
-    setIsReviewDetailModalOpen(false);
+    closeGlobalModal();
   };
 
   const handleQuickLog = (plan: any) => {
@@ -238,7 +223,7 @@ function App() {
     if (timer.currentProblemId === plan.problemTitle && timer.isRunning) {
       stopTimer();
     }
-    setIsReviewDetailModalOpen(false);
+    closeGlobalModal();
     handleReviewOpen({
       id: plan.problemId,
       title: plan.problemTitle,
@@ -272,8 +257,8 @@ function App() {
       <MainLayout
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        onAccountSettingsOpen={() => setIsAccountModalOpen(true)}
-        onTierClick={() => setIsTierGuideModalOpen(true)}
+        onAccountSettingsOpen={() => openGlobalModal('ACCOUNT_SETTINGS')}
+        onTierClick={() => openGlobalModal('TIER_GUIDE')}
         isLoading={isDataLoading}
       >
         <motion.div
@@ -291,39 +276,33 @@ function App() {
             {activeTab === 'HOME' ? (
               <HomeView
                 isLoading={isDataLoading}
-                onDailyGoalOpen={() => setIsDailyGoalModalOpen(true)}
-                onAddModalOpen={() => setIsAddModalOpen(true)}
-                onGoalModalOpen={() => setIsGoalModalOpen(true)}
+                onDailyGoalOpen={() => openGlobalModal('DAILY_GOAL')}
+                onAddModalOpen={() => openGlobalModal('ADD_PROBLEM')}
+                onGoalModalOpen={() => openGlobalModal('GOAL', { editGoal: getActiveGoal() })}
                 onRecommendationSettingsOpen={openRecommendationSettings}
                 onReviewOpen={handleReviewOpen}
                 onReviewDetailOpen={handleReviewDetailOpen}
-                onEditLog={setEditingLog}
-                onEditTask={(task) => {
-                  setEditingTask(task);
-                  setIsEditTaskModalOpen(true);
-                }}
+                onEditLog={(log) => openGlobalModal('STUDY_LOG_DETAIL', { log })}
+                onEditTask={(task) => openGlobalModal('EDIT_TASK', { task })}
               />
             ) : activeTab === 'JOURNAL' ? (
               <JournalView
-                onLogClick={setEditingLog}
-                onGoalClick={() => setIsGoalModalOpen(true)}
+                onLogClick={(log) => openGlobalModal('STUDY_LOG_DETAIL', { log })}
+                onGoalClick={() => openGlobalModal('GOAL', { editGoal: getActiveGoal() })}
                 onReviewPlanClick={handleReviewDetailOpen}
               />
             ) : activeTab === 'LIBRARY' ? (
-              <LibraryView onProblemClick={setEditingLog} />
+              <LibraryView onProblemClick={(log) => openGlobalModal('STUDY_LOG_DETAIL', { log })} />
             ) : activeTab === 'MY_PROBLEMS' ? (
               <MyProblemsView
-                onAddModalOpen={() => setIsAddModalOpen(true)}
+                onAddModalOpen={() => openGlobalModal('ADD_PROBLEM')}
                 onReviewOpen={handleReviewOpen}
-                onEditTask={(task) => {
-                  setEditingTask(task);
-                  setIsEditTaskModalOpen(true);
-                }}
+                onEditTask={(task) => openGlobalModal('EDIT_TASK', { task })}
               />
             ) : activeTab === 'SETTINGS' ? (
               <SettingsView
-                onDeleteAccountOpen={() => setIsDeleteModalOpen(true)}
-                onContactOpen={() => setIsContactModalOpen(true)}
+                onDeleteAccountOpen={() => openGlobalModal('DELETE_ACCOUNT')}
+                onContactOpen={() => openGlobalModal('CONTACT')}
               />
             ) : (
               <StatsView />
@@ -332,66 +311,17 @@ function App() {
         </motion.div>
       </MainLayout>
 
-      {/* Global Modals & Overlays (Outside for true 100% viewport coverage) */}
-      <AddProblemModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} />
-      <AccountSettingsModal isOpen={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
+      <GlobalModalRenderer />
 
-      <TierGuideModal
-        isOpen={isTierGuideModalOpen}
-        onClose={() => setIsTierGuideModalOpen(false)}
-      />
-      {selectedProblem && (
-        <ReviewModal
-          key={`${selectedProblem.title}-${isReviewModalOpen}`}
-          isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
-          problem={selectedProblem}
-        />
-      )}
-      {editingLog && (
-        <StudyLogDetailModal
-          log={editingLog}
-          isOpen={!!editingLog}
-          onClose={() => setEditingLog(null)}
-        />
-      )}
+      {/* Global Modals & Overlays (Outside for true 100% viewport coverage) */}
       <Stopwatch onComplete={handleReviewOpen} />
+
       <RecommendationSettingsModal
         isOpen={isRecommendationSettingsOpen}
         onClose={closeRecommendationSettings}
       />
 
-      <ReviewDetailModal
-        isOpen={isReviewDetailModalOpen}
-        onClose={() => setIsReviewDetailModalOpen(false)}
-        plan={selectedReviewPlan}
-        onStartReview={handleStartReview}
-        onQuickLog={handleQuickLog}
-        onViewFullDetail={(log) => {
-          setIsReviewDetailModalOpen(false);
-          setEditingLog(log);
-        }}
-      />
-
-      <DailyGoalSettingsModal
-        isOpen={isDailyGoalModalOpen}
-        onClose={() => setIsDailyGoalModalOpen(false)}
-      />
-
       <GlobalModal />
-      <GoalModal
-        isOpen={isGoalModalOpen}
-        onClose={() => setIsGoalModalOpen(false)}
-        editGoal={getActiveGoal()}
-      />
-      <DeleteAccountModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
-      <ContactModal
-        isOpen={isContactModalOpen}
-        onClose={() => setIsContactModalOpen(false)}
-      />
       <ShopModal
         isOpen={isShopOpen}
         onClose={closeShop}
@@ -401,18 +331,6 @@ function App() {
         isOpen={isRewardedAdModalOpen}
         onClose={closeRewardedAdModal}
       />
-
-      {editingTask && (
-        <EditTaskModal
-          isOpen={isEditTaskModalOpen}
-          onClose={() => {
-            setIsEditTaskModalOpen(false);
-            setEditingTask(null);
-          }}
-          task={editingTask}
-        />
-      )}
-
       <GoldHistoryModal
         isOpen={isGoldHistoryOpen}
         onClose={closeGoldHistory}

@@ -1,5 +1,19 @@
 import { StudyLog } from './study';
 
+export type GlobalModalType = 
+    | 'ADD_PROBLEM' 
+    | 'ACCOUNT_SETTINGS' 
+    | 'TIER_GUIDE' 
+    | 'REVIEW' 
+    | 'REVIEW_DETAIL' 
+    | 'DAILY_GOAL' 
+    | 'DELETE_ACCOUNT' 
+    | 'CONTACT' 
+    | 'EDIT_TASK' 
+    | 'STUDY_LOG_DETAIL' 
+    | 'GOAL' 
+    | null;
+
 export interface ModalOptions {
     title?: string;
     message: string;
@@ -11,6 +25,11 @@ export interface ModalOptions {
 }
 
 export interface ModalState {
+    activeGlobalModal: GlobalModalType;
+    globalModalProps: any;
+    openGlobalModal: (type: GlobalModalType, props?: any) => void;
+    closeGlobalModal: () => void;
+    
     isOpen: boolean; // Alert/Confirm modal
     options: ModalOptions | null;
     isShopOpen: boolean;
